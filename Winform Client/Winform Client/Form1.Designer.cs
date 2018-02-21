@@ -34,6 +34,7 @@
             this.textBox_ClientName = new System.Windows.Forms.TextBox();
             this.listBox_ClientList = new System.Windows.Forms.ListBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
+            this.textBox2 = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // buttonSend
@@ -48,7 +49,7 @@
             // 
             // textBox_Input
             // 
-            this.textBox_Input.Location = new System.Drawing.Point(41, 323);
+            this.textBox_Input.Location = new System.Drawing.Point(435, 302);
             this.textBox_Input.Name = "textBox_Input";
             this.textBox_Input.Size = new System.Drawing.Size(384, 20);
             this.textBox_Input.TabIndex = 2;
@@ -64,7 +65,7 @@
             // 
             // textBox_ClientName
             // 
-            this.textBox_ClientName.Location = new System.Drawing.Point(41, 16);
+            this.textBox_ClientName.Location = new System.Drawing.Point(564, 16);
             this.textBox_ClientName.Name = "textBox_ClientName";
             this.textBox_ClientName.ReadOnly = true;
             this.textBox_ClientName.Size = new System.Drawing.Size(100, 20);
@@ -82,17 +83,26 @@
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(245, 16);
+            this.textBox1.Location = new System.Drawing.Point(736, 16);
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(78, 20);
             this.textBox1.TabIndex = 6;
             this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
+            // 
+            // textBox2
+            // 
+            this.textBox2.Location = new System.Drawing.Point(22, 52);
+            this.textBox2.Multiline = true;
+            this.textBox2.Name = "textBox2";
+            this.textBox2.Size = new System.Drawing.Size(384, 225);
+            this.textBox2.TabIndex = 7;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(912, 503);
+            this.Controls.Add(this.textBox2);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.listBox_ClientList);
             this.Controls.Add(this.textBox_ClientName);
@@ -114,6 +124,7 @@
         private System.Windows.Forms.TextBox textBox_ClientName;
         private System.Windows.Forms.ListBox listBox_ClientList;
         private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox textBox2;
     }
 }
 

@@ -14,28 +14,29 @@ namespace MUD
             this.name = name;
         }
 
-        public String north
+        public String North
         {
             get { return exits[0]; }
             set { exits[0] = value; }
         }
 
-        public String south
+        public String South
         {
             get { return exits[1]; }
             set { exits[1] = value; }
         }
 
-        public String east
+        public String East
         {
             get { return exits[2]; }
             set { exits[2] = value; }
         }
-        public String west
+        public String West
         {
             get { return exits[3]; }
             set { exits[3] = value; }
         }
+
 
 
         public String name = "";

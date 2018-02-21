@@ -25,13 +25,9 @@ namespace Winform_Client
 
         List<String> currentClientList = new List<String>();
 
-        
-
         static void clientProcess(Object o)
         {            
             Form1 form = (Form1)o;
-
-            form.
 
             while ((form.bConnected == false) && (form.bQuit == false))
             {
@@ -122,6 +118,13 @@ namespace Winform_Client
                                     }
                                     break;
 
+                                case DungeonResponse.ID:
+                                    {
+                                        DungeonResponse dSponse = (DungeonResponse)m;
+                                        form.AddText(dSponse.response);
+                                    }
+                                    break;
+
                                 default:
                                     break;
                             }
@@ -164,6 +167,7 @@ namespace Winform_Client
         }
 
         private delegate void SetClientNameDelegate(String s);
+
         private void SetClientName(String s)
         {
             if (this.InvokeRequired)
@@ -189,6 +193,7 @@ namespace Winform_Client
                 listBox_ClientList.DataSource = null;
                 currentClientList.Clear();
                 currentClientList.Add("All");
+                currentClientList.Add("Dung");
 
                 foreach (String s in clientList.clientList)
                 {
@@ -201,11 +206,20 @@ namespace Winform_Client
 
         private void buttonSend_Click(object sender, EventArgs e)
         {
-            if( (textBox_Input.Text.Length > 0) && (clientSocket != null))
+            if ( (textBox_Input.Text.Length > 0) && (clientSocket != null))
             {                
                 try
                 {
-                    if (listBox_ClientList.SelectedIndex == 0)
+                    if (listBox_ClientList.SelectedIndex == 1)
+                    {
+                        DungeonCommand dungMsg = new DungeonCommand();
+                        dungMsg.command = textBox_Input.Text;
+                        MemoryStream outStream = dungMsg.WriteData();
+                        clientSocket.Send(outStream.GetBuffer());
+
+                    }
+
+                    else if (listBox_ClientList.SelectedIndex == 0)
                     {
                         PublicChatMsg publicMsg = new PublicChatMsg();
 
@@ -213,7 +227,7 @@ namespace Winform_Client
                         MemoryStream outStream = publicMsg.WriteData();
                         clientSocket.Send(outStream.GetBuffer());                
                     }
-                    else
+                    else if (listBox_ClientList.SelectedIndex > 1)
                     {
                         PrivateChatMsg privateMsg = new PrivateChatMsg();
 

@@ -19,41 +19,41 @@ namespace MUD
 
             {
                 var room = new Room("Room 0", "You are standing in the entrance hall\nAll adventures start here");
-                room.north = "Room 1";
+                room.North = "Room 1";
                 roomMap.Add(room.name, room);
             }
 
             {
                 var room = new Room("Room 1", "You are in room 1");
-                room.south = "Room 0";
-                room.west = "Room 3";
-                room.east = "Room 2";
+                room.South = "Room 0";
+                room.West = "Room 3";
+                room.East = "Room 2";
                 roomMap.Add(room.name, room);
             }
 
             {
                 var room = new Room("Room 2", "You are in room 2");
-                room.north = "Room 4";
+                room.North = "Room 4";
                 roomMap.Add(room.name, room);
             }
 
             {
                 var room = new Room("Room 3", "You are in room 3");
-                room.east = "Room 1";
+                room.East = "Room 1";
                 roomMap.Add(room.name, room);
             }
 
             {
                 var room = new Room("Room 4", "You are in room 4");
-                room.south = "Room 2";
-                room.west = "Room 5";
+                room.South = "Room 2";
+                room.West = "Room 5";
                 roomMap.Add(room.name, room);
             }
 
             {
                 var room = new Room("Room 5", "You are in room 5");
-                room.south = "Room 1";
-                room.east = "Room 4";
+                room.South = "Room 1";
+                room.East = "Room 4";
                 roomMap.Add(room.name, room);
             }
 
@@ -110,27 +110,27 @@ namespace MUD
 
                 case "go":
                     // is arg[1] sensible?
-                    if ((input[1].ToLower() == "north") && (currentRoom.north != null))
+                    if ((input[1].ToLower() == "north") && (currentRoom.North != null))
                     {
-                        currentRoom = roomMap[currentRoom.north];
+                        currentRoom = roomMap[currentRoom.North];
                     }
                     else
                     {
-                        if ((input[1].ToLower() == "south") && (currentRoom.south != null))
+                        if ((input[1].ToLower() == "south") && (currentRoom.South != null))
                         {
-                            currentRoom = roomMap[currentRoom.south];
+                            currentRoom = roomMap[currentRoom.South];
                         }
                         else
                         {
-                            if ((input[1].ToLower() == "east") && (currentRoom.east != null))
+                            if ((input[1].ToLower() == "east") && (currentRoom.East != null))
                             {
-                                currentRoom = roomMap[currentRoom.east];
+                                currentRoom = roomMap[currentRoom.East];
                             }
                             else
                             {
-                                if ((input[1].ToLower() == "west") && (currentRoom.west != null))
+                                if ((input[1].ToLower() == "west") && (currentRoom.West != null))
                                 {
-                                    currentRoom = roomMap[currentRoom.west];
+                                    currentRoom = roomMap[currentRoom.West];
                                 }
                                 else
                                 {

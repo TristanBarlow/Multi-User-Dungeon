@@ -32,18 +32,21 @@ namespace Server
         {
             ClientListMsg clientListMsg = new ClientListMsg();
 
-            lock (clientDictionary)
+            if (clientDictionary.Count() > 0)
             {
-                foreach (KeyValuePair<String, Socket> s in clientDictionary)
+                lock (clientDictionary)
                 {
-                    clientListMsg.clientList.Add(s.Key);
-                }
+                    foreach (KeyValuePair<String, Socket> s in clientDictionary)
+                    {
+                        clientListMsg.clientList.Add(s.Key);
+                    }
 
-                MemoryStream outStream = clientListMsg.WriteData();
+                    MemoryStream outStream = clientListMsg.WriteData();
 
-                foreach (KeyValuePair<String, Socket> s in clientDictionary)
-                {
-                    s.Value.Send(outStream.GetBuffer());
+                    foreach (KeyValuePair<String, Socket> s in clientDictionary)
+                    {
+                        s.Value.Send(outStream.GetBuffer());
+                    }
                 }
             }
         }
@@ -89,14 +92,25 @@ namespace Server
             }
         }
 
-        static void SendDungeonLocation(Socket s, int senderID)
+        static void SendDungeonResponse(Socket s, String response)
         {
+            DungeonResponse msg = new DungeonResponse();
+            msg.response = response;
+            MemoryStream outStream = msg.WriteData();
 
+            try
+            {
+                s.Send(outStream.GetBuffer());
+            }
+            catch (System.Exception)
+            {
+
+            }
         }
 
-        static void recievedDungeonCommand(int userID, String command)
+        static void updateDungeon(String user, String command)
         {
-
+            //do something
         }
 
         static Socket GetSocketFromName(String name)
@@ -192,6 +206,14 @@ namespace Server
 
                                         formattedMsg = "<" + GetNameFromSocket(chatClient) + "> --> <" +privateMsg.destination+"> " + privateMsg.msg;
                                         SendPrivateMessage(chatClient, "", formattedMsg);
+                                    }
+                                    break;
+                                case DungeonCommand.ID:
+                                    {
+                                        /// do command
+                                        updateDungeon(GetNameFromSocket(chatClient), "dfsfd" );
+
+                                        SendDungeonResponse(chatClient, temp);
                                     }
                                     break;
 

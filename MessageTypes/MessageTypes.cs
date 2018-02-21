@@ -12,6 +12,7 @@ namespace MessageTypes
         public int mID;
 
         public abstract MemoryStream WriteData();
+
         public abstract void ReadData(BinaryReader read);
 
         public static Msg DecodeStream(BinaryReader read)
@@ -38,6 +39,14 @@ namespace MessageTypes
                 case ClientNameMsg.ID:
                     m = new ClientNameMsg();
                     break;
+
+                case DungeonCommand.ID:
+                    m = new DungeonCommand();
+                    break;
+
+                case DungeonResponse.ID:
+                    m = new DungeonResponse();
+                    break; 
 
                 default:
                     throw (new Exception());
@@ -86,6 +95,7 @@ namespace MessageTypes
         public String destination;
 
         public PrivateChatMsg() { mID = ID; }
+
         public override MemoryStream WriteData()
         {
             MemoryStream stream = new MemoryStream();
@@ -98,6 +108,7 @@ namespace MessageTypes
 
             return stream;
         }
+
         public override void ReadData(BinaryReader read)
         {
             msg = read.ReadString();
@@ -172,4 +183,66 @@ namespace MessageTypes
             name = read.ReadString();
         }
     };
+
+    public class DungeonCommand : Msg
+    {
+        public const int ID = 5;
+
+        public String command;
+
+        public String getCommand()
+       {
+            return command;
+        }
+
+
+        public DungeonCommand() { mID = ID; }
+
+        public override MemoryStream WriteData()
+        {
+            MemoryStream stream = new MemoryStream();
+            BinaryWriter write = new BinaryWriter(stream);
+            write.Write(ID);
+            write.Write(command);
+
+            write.Close();
+
+            return stream;
+        }
+
+        public override void ReadData(BinaryReader read)
+        {
+            command = read.ReadString();
+        }
+    }
+
+    public class DungeonResponse : Msg
+    {
+        public const int ID = 6;
+
+        public String response;
+
+
+
+        public DungeonResponse() { mID = ID; }
+
+        public override MemoryStream WriteData()
+        {
+            MemoryStream stream = new MemoryStream();
+            BinaryWriter write = new BinaryWriter(stream);
+            write.Write(ID);
+            write.Write(response);
+
+            Console.Write("fdsfd");
+
+            write.Close();
+            return stream;
+        }
+
+
+        public override void ReadData(BinaryReader read)
+        {
+            response = read.ReadString();
+        }
+    }
 }
