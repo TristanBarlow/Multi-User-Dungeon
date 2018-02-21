@@ -89,6 +89,16 @@ namespace Server
             }
         }
 
+        static void SendDungeonLocation(Socket s, int senderID)
+        {
+
+        }
+
+        static void recievedDungeonCommand(int userID, String command)
+        {
+
+        }
+
         static Socket GetSocketFromName(String name)
         {
             lock (clientDictionary)

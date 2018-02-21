@@ -1,6 +1,8 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.16
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Winform Client", "Winform Client\Winform Client.csproj", "{6637090E-521F-4436-8C7E-A0211F43E4D6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageTypes", "..\MessageTypes\MessageTypes.csproj", "{BD7690FC-BB78-4A6E-A06B-01CCA47942EB}"
@@ -30,13 +32,18 @@ Global
 		{BD7690FC-BB78-4A6E-A06B-01CCA47942EB}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
 		{BD7690FC-BB78-4A6E-A06B-01CCA47942EB}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
 		{BD7690FC-BB78-4A6E-A06B-01CCA47942EB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{BD7690FC-BB78-4A6E-A06B-01CCA47942EB}.Debug|x86.Build.0 = Debug|Any CPU
 		{BD7690FC-BB78-4A6E-A06B-01CCA47942EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD7690FC-BB78-4A6E-A06B-01CCA47942EB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BD7690FC-BB78-4A6E-A06B-01CCA47942EB}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{BD7690FC-BB78-4A6E-A06B-01CCA47942EB}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{BD7690FC-BB78-4A6E-A06B-01CCA47942EB}.Release|x86.ActiveCfg = Release|Any CPU
+		{BD7690FC-BB78-4A6E-A06B-01CCA47942EB}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D3CFD276-21D2-49F1-9B9B-DB90EA2A06C6}
 	EndGlobalSection
 EndGlobal

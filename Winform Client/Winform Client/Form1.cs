@@ -18,24 +18,27 @@ namespace Winform_Client
 {
     public partial class Form1 : Form
     {
-        Socket client;
+        Socket clientSocket;
         private Thread myThread;
         bool bQuit = false;
         bool bConnected = false;
 
         List<String> currentClientList = new List<String>();
 
+        
 
         static void clientProcess(Object o)
         {            
             Form1 form = (Form1)o;
 
+            form.
+
             while ((form.bConnected == false) && (form.bQuit == false))
             {
                 try
                 {
-                    form.client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                    form.client.Connect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8500));
+                    form.clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                    form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8500));
                     form.bConnected = true;
                     form.AddText("Connected to server");
 
@@ -49,7 +52,7 @@ namespace Winform_Client
                         if (form.IsDisposed == true)
                         {
                             form.bQuit = true;
-                            form.client.Close();
+                            form.clientSocket.Close();
                         }
                     }                    
 
@@ -74,7 +77,7 @@ namespace Winform_Client
                     byte[] buffer = new byte[4096];
                     int result;
 
-                    result = form.client.Receive(buffer);
+                    result = form.clientSocket.Receive(buffer);
 
                     if (result > 0)
                     {
@@ -174,6 +177,7 @@ namespace Winform_Client
         }
 
         private delegate void SetClientListDelegate(ClientListMsg clientList);
+
         private void SetClientList(ClientListMsg clientList)
         {
             if (this.InvokeRequired)
@@ -197,7 +201,7 @@ namespace Winform_Client
 
         private void buttonSend_Click(object sender, EventArgs e)
         {
-            if( (textBox_Input.Text.Length > 0) && (client != null))
+            if( (textBox_Input.Text.Length > 0) && (clientSocket != null))
             {                
                 try
                 {
@@ -207,7 +211,7 @@ namespace Winform_Client
 
                         publicMsg.msg = textBox_Input.Text;
                         MemoryStream outStream = publicMsg.WriteData();
-                        client.Send(outStream.GetBuffer());                
+                        clientSocket.Send(outStream.GetBuffer());                
                     }
                     else
                     {
@@ -216,7 +220,7 @@ namespace Winform_Client
                         privateMsg.msg = textBox_Input.Text;
                         privateMsg.destination = currentClientList[listBox_ClientList.SelectedIndex];
                         MemoryStream outStream = privateMsg.WriteData();
-                        client.Send(outStream.GetBuffer());                
+                        clientSocket.Send(outStream.GetBuffer());                
                     }
                     
                 }
@@ -249,6 +253,11 @@ namespace Winform_Client
         }
 
         private void textBox_Input_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
         {
 
         }

@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Client.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -77,8 +78,11 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\MessageTypes\MessageTypes.csproj">
-      <Project>{BD7690FC-BB78-4A6E-A06B-01CCA47942EB}</Project>
+      <Project>{bd7690fc-bb78-4a6e-a06b-01cca47942eb}</Project>
       <Name>MessageTypes</Name>
     </ProjectReference>
   </ItemGroup>

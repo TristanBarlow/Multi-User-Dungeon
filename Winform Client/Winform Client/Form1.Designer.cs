@@ -38,7 +38,7 @@
             // 
             // buttonSend
             // 
-            this.buttonSend.Location = new System.Drawing.Point(430, 319);
+            this.buttonSend.Location = new System.Drawing.Point(825, 299);
             this.buttonSend.Name = "buttonSend";
             this.buttonSend.Size = new System.Drawing.Size(75, 23);
             this.buttonSend.TabIndex = 0;
@@ -48,7 +48,7 @@
             // 
             // textBox_Input
             // 
-            this.textBox_Input.Location = new System.Drawing.Point(32, 319);
+            this.textBox_Input.Location = new System.Drawing.Point(41, 323);
             this.textBox_Input.Name = "textBox_Input";
             this.textBox_Input.Size = new System.Drawing.Size(384, 20);
             this.textBox_Input.TabIndex = 2;
@@ -56,10 +56,10 @@
             // 
             // textBox_Output
             // 
-            this.textBox_Output.Location = new System.Drawing.Point(32, 52);
+            this.textBox_Output.Location = new System.Drawing.Point(430, 52);
             this.textBox_Output.Multiline = true;
             this.textBox_Output.Name = "textBox_Output";
-            this.textBox_Output.Size = new System.Drawing.Size(384, 235);
+            this.textBox_Output.Size = new System.Drawing.Size(384, 225);
             this.textBox_Output.TabIndex = 3;
             // 
             // textBox_ClientName
@@ -74,7 +74,7 @@
             // listBox_ClientList
             // 
             this.listBox_ClientList.FormattingEnabled = true;
-            this.listBox_ClientList.Location = new System.Drawing.Point(430, 57);
+            this.listBox_ClientList.Location = new System.Drawing.Point(829, 52);
             this.listBox_ClientList.Name = "listBox_ClientList";
             this.listBox_ClientList.Size = new System.Drawing.Size(71, 225);
             this.listBox_ClientList.TabIndex = 5;
@@ -82,16 +82,17 @@
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(507, 57);
+            this.textBox1.Location = new System.Drawing.Point(245, 16);
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(78, 20);
             this.textBox1.TabIndex = 6;
+            this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(597, 414);
+            this.ClientSize = new System.Drawing.Size(912, 503);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.listBox_ClientList);
             this.Controls.Add(this.textBox_ClientName);
