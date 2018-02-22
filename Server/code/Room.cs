@@ -71,6 +71,10 @@ namespace Dungeon
                     {
                         returnString += Room.exitNames[i] + " ";
                     }
+                    else
+                    {
+                        returnString += U.newLineS(" ");
+                    }
                 }
                 returnString += U.newLineS("//");
             }
@@ -81,7 +85,7 @@ namespace Dungeon
 
             returnString += U.newLineS("Players In room : ");
 
-            if (users.Count() != 1)
+            if (users.Count() > 1)
             {
                 foreach (Player iter in users)
                 {

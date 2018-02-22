@@ -13,6 +13,7 @@ using System.Threading;
 using System.IO;
 
 using MessageTypes;
+using Utilities;
 
 namespace Winform_Client
 {
@@ -22,6 +23,7 @@ namespace Winform_Client
         private Thread myThread;
         bool bQuit = false;
         bool bConnected = false;
+        bool spam = false;
 
         List<String> currentClientList = new List<String>();
 
@@ -56,7 +58,7 @@ namespace Winform_Client
                 }
                 catch (System.Exception)
                 {
-                    form.AddText("No server!");
+                    form.AddText(U.newLineS("No server!"));
                     Thread.Sleep(1000);
                 }               
             }
@@ -135,7 +137,8 @@ namespace Winform_Client
                 catch (Exception)
                 {
                     form.bConnected = false;
-                    Console.WriteLine("Lost server!");
+                    Console.WriteLine(U.newLineS("Lost server!"));
+                    
                 }
 
             }
@@ -161,7 +164,7 @@ namespace Winform_Client
             }
             else
             {
-                textBox_Output.AppendText(s);
+                textBox_Output.AppendText(U.newLineS(s));
             }
         }
 
@@ -173,7 +176,17 @@ namespace Winform_Client
             }
             else
             {
-                TextboxDungeon.AppendText(s);
+                TextboxDungeon.AppendText(U.newLineS(s));
+            }
+        }
+
+        private void StressTest()
+        {
+
+            while (spam)
+            {
+                sendDungeonMessage("look");
+                Thread.Sleep(100);
             }
         }
 
@@ -217,6 +230,13 @@ namespace Winform_Client
 
         private void buttonSend_Click(object sender, EventArgs e)
         {
+            if (spam)
+            {
+                Thread stressThread = new Thread(StressTest);
+                stressThread.Start();
+            }
+
+
             if ( (textBox_Input.Text.Length > 0) && (clientSocket != null))
             {                
                 try

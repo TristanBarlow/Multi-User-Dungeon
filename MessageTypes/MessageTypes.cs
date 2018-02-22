@@ -205,6 +205,8 @@ namespace MessageTypes
             write.Write(ID);
             write.Write(command);
 
+            Console.Write(command);
+
             write.Close();
 
             return stream;
@@ -233,7 +235,7 @@ namespace MessageTypes
             write.Write(ID);
             write.Write(response);
 
-            Console.Write("fdsfd");
+            Console.Write("sending: " + response);
 
             write.Close();
             return stream;
