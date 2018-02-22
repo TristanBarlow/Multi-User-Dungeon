@@ -158,9 +158,15 @@ namespace Server
 
             Console.WriteLine("client receive thread for " + GetNameFromSocket(chatClient));
 
-            dungeonHandle.addPlayer(GetNameFromSocket(chatClient));
+            lock (dungeonHandle)
+            {
+                dungeonHandle.addPlayer(GetNameFromSocket(chatClient));
+                /// do command
+                SendDungeonResponse(chatClient, dungeonHandle.playerAction("look", GetNameFromSocket(chatClient) ));
+            }
 
             SendClientList();
+            
 
             while (bQuit == false)
             {
@@ -218,7 +224,7 @@ namespace Server
                                         lock (dungeonHandle)
                                         {
                                             /// do command
-                                            temp = dungeonHandle.playerAction(GetNameFromSocket(chatClient), dungMsg.command);
+                                            temp = dungeonHandle.playerAction(dungMsg.command,GetNameFromSocket(chatClient));
                                         }
                                         ///add to a q in the dungeon handler
 

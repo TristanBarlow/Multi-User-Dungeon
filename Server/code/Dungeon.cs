@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+
 using Utilities;
+using PlayerN;
 
 namespace Dungeon
 {
@@ -62,11 +64,20 @@ namespace Dungeon
 
         public void newClient(String clientName)
         {
-            Player newPLayer = new Player(clientName, roomMap["Room 0"]);
+            Room defaultRoom = roomMap["Room 0"];
+            Player newPLayer = new Player(clientName, defaultRoom);
+            defaultRoom.addPlayer(newPLayer);
             playerDictionary.Add(clientName, newPLayer);
         }
 
-        public String playerAction(String PlayerName, String action)
+        private void movePlayer(Player p, Room newRoom)
+        {
+            p.currentRoom.removePlayer(p);
+            newRoom.addPlayer(p);
+            p.currentRoom = newRoom;
+        }
+
+        public String playerAction(String action, String PlayerName)
         {
             String returnString = "";
 
@@ -125,25 +136,27 @@ namespace Dungeon
                     // is arg[1] sensible?
                     if ((input[1].ToLower() == "north") && (player.currentRoom.North != null))
                     {
-                        player.currentRoom = roomMap[player.currentRoom.North];
+                       movePlayer(player, roomMap[player.currentRoom.North]);
                     }
                     else
                     {
                         if ((input[1].ToLower() == "south") && (player.currentRoom.South != null))
                         {
-                            player.currentRoom = roomMap[player.currentRoom.South];
+                            movePlayer(player, roomMap[player.currentRoom.South]);
                         }
                         else
                         {
                             if ((input[1].ToLower() == "east") && (player.currentRoom.East != null))
                             {
-                                player.currentRoom = roomMap[player.currentRoom.East];
+                                movePlayer(player, roomMap[player.currentRoom.East]);
                             }
                             else
                             {
                                 if ((input[1].ToLower() == "west") && (player.currentRoom.West != null))
                                 {
-                                    player.currentRoom = roomMap[player.currentRoom.West];
+                                   
+                                    movePlayer(player, roomMap[player.currentRoom.West]);
+                                    
                                 }
                                 else
                                 {

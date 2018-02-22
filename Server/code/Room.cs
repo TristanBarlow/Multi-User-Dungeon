@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using MessageTypes;
 using Utilities;
+using PlayerN;
 
 namespace Dungeon
 {
@@ -14,6 +15,7 @@ namespace Dungeon
         public Room()
         {
             graffitiList = new List<string>();
+            users = new List<Player>();
         }
 
         public Room(String name, String desc)
@@ -21,6 +23,7 @@ namespace Dungeon
             this.desc = desc;
             this.name = name;
             graffitiList = new List<string>();
+            users = new List<Player>();
         }
 
         public String North
@@ -46,10 +49,12 @@ namespace Dungeon
             set { exits[3] = value; }
         }
 
-        public void addGraf(String graff)
-        {
-            graffitiList.Add(graff);
-        }
+        public void addGraf(String graff){ graffitiList.Add(graff);}
+
+        public void addPlayer(Player p) { users.Add(p); }
+
+        public void removePlayer(Player p) { users.Remove(p);}
+        
 
         public String getDescription()
         {
@@ -73,6 +78,23 @@ namespace Dungeon
             {
                 returnString = "no exits oh no";
             }
+
+            returnString += U.newLineS("Players In room : ");
+
+            if (users.Count() != 1)
+            {
+                foreach (Player iter in users)
+                {
+                    returnString += iter.getPlayerName() + "  ";
+                }
+                
+            }
+            else
+            {
+                returnString +=U.newLineS("You are alone") ;
+            }
+
+            returnString += U.newLineS("//");
 
             returnString += U.newLineS("Graffiti: ");
             if (graffitiList.Count() != 0)
@@ -111,7 +133,7 @@ namespace Dungeon
         public String name = "";
         private String desc = "";
         public String[] exits = new String[4];
-        public String[] users;
+        public List <Player> users;
         public List<String> graffitiList;
         public static String[] exitNames = { "NORTH", "SOUTH", "EAST", "WEST" };
 
