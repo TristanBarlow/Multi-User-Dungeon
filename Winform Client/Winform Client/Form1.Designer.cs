@@ -34,7 +34,7 @@
             this.textBox_ClientName = new System.Windows.Forms.TextBox();
             this.listBox_ClientList = new System.Windows.Forms.ListBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
-            this.textBox2 = new System.Windows.Forms.TextBox();
+            this.TextboxDungeon = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // buttonSend
@@ -89,20 +89,21 @@
             this.textBox1.TabIndex = 6;
             this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
-            // textBox2
+            // TextboxDungeon
             // 
-            this.textBox2.Location = new System.Drawing.Point(22, 52);
-            this.textBox2.Multiline = true;
-            this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(384, 225);
-            this.textBox2.TabIndex = 7;
+            this.TextboxDungeon.Location = new System.Drawing.Point(22, 52);
+            this.TextboxDungeon.Multiline = true;
+            this.TextboxDungeon.Name = "TextboxDungeon";
+            this.TextboxDungeon.Size = new System.Drawing.Size(384, 225);
+            this.TextboxDungeon.TabIndex = 7;
+            this.TextboxDungeon.TextChanged += new System.EventHandler(this.textBox2_TextChanged);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(912, 503);
-            this.Controls.Add(this.textBox2);
+            this.Controls.Add(this.TextboxDungeon);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.listBox_ClientList);
             this.Controls.Add(this.textBox_ClientName);
@@ -124,7 +125,7 @@
         private System.Windows.Forms.TextBox textBox_ClientName;
         private System.Windows.Forms.ListBox listBox_ClientList;
         private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.TextBox textBox2;
+        private System.Windows.Forms.TextBox TextboxDungeon;
     }
 }
 

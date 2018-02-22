@@ -9,7 +9,8 @@ using System.Threading;
 using System.IO;
 
 using MessageTypes;
-
+using DungeonHandler;
+using Dungeon;
 
 namespace Server
 {
@@ -17,6 +18,9 @@ namespace Server
     {
         static Dictionary<String,Socket> clientDictionary = new Dictionary<String,Socket>();
         static int clientID = 1;
+
+        static DungeonS dungeon;
+        static DungeonHandlerS dungeonHandle;
 
         static void SendClientName(Socket s, String clientName)
         {
@@ -108,9 +112,12 @@ namespace Server
             }
         }
 
-        static void updateDungeon(String user, String command)
+       static  private String updateDungeon(String user, String command)
         {
-            //do something
+            lock (dungeonHandle)
+            {
+                return dungeonHandle.playerAction(command, user);
+            }
         }
 
         static Socket GetSocketFromName(String name)
@@ -158,6 +165,8 @@ namespace Server
             Socket chatClient = (Socket)o;
 
             Console.WriteLine("client receive thread for " + GetNameFromSocket(chatClient));
+
+            dungeonHandle.addPlayer(GetNameFromSocket(chatClient));
 
             SendClientList();
 
@@ -210,8 +219,12 @@ namespace Server
                                     break;
                                 case DungeonCommand.ID:
                                     {
+                                        DungeonCommand dungMsg = (DungeonCommand)m;
+
                                         /// do command
-                                        updateDungeon(GetNameFromSocket(chatClient), "dfsfd" );
+                                        String temp = updateDungeon(GetNameFromSocket(chatClient), dungMsg.command);
+
+                                        ///add to a q in the dungeon handler
 
                                         SendDungeonResponse(chatClient, temp);
                                     }
@@ -248,6 +261,10 @@ namespace Server
             bool bQuit = false;
 
             Console.WriteLine("Server");
+
+            dungeon = new DungeonS();
+            dungeon.Init();
+            dungeonHandle = new DungeonHandlerS(ref dungeon);
 
             while (!bQuit)
             {

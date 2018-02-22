@@ -2,19 +2,21 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading;
+using System.Threading; 
 
-namespace MUD
+namespace Dungeon
 {
-    public class Dungeon
+    public class DungeonS
     {        
         Dictionary<String, Room> roomMap;
 
-        Room currentRoom;
+        //Player, Location
+        Dictionary<String, Player> playerDictionary;
 
         public void Init()
         {
             roomMap = new Dictionary<string, Room>();
+            playerDictionary = new Dictionary<String, Player>();
 
             {
                 var room = new Room("Room 0", "You are standing in the entrance hall\nAll adventures start here");
@@ -55,44 +57,53 @@ namespace MUD
                 room.East = "Room 4";
                 roomMap.Add(room.name, room);
             }
-
-            currentRoom = roomMap["Room 0"];
         }
 
-        public void Process()
+        public void newClient(String clientName)
         {
+            Player newPLayer = new Player(clientName, roomMap["Room 0"]);
+            playerDictionary.Add(clientName, newPLayer);
+        }
 
-            Console.WriteLine(currentRoom.desc);
-            Console.WriteLine("Exits");
-            for (var i = 0; i < currentRoom.exits.Length; i++)
+        private String newLineS(String s)
+        {
+            String newline = "\r\n";
+            String finalString = s + newline;
+            return finalString;
+        }
+
+        public String playerAction(String action, String PlayerName)
+        {
+            String returnString = "";
+
+            Player player;
+
+            var input = action.Split(' ');
+
+            if (playerDictionary.ContainsKey(PlayerName))
             {
-                if (currentRoom.exits[i] != null)
-                {
-                    Console.Write(Room.exitNames[i] + " ");
-                }
+                player = playerDictionary[PlayerName];
             }
-
-            Console.Write("\n> ");
-
-            var key = Console.ReadLine();
-
-            var input = key.Split(' ');
+            else
+            {
+                returnString = newLineS("Not in list you fucked up");
+                return returnString;
+            }
 
             switch (input[0].ToLower())
             {
                 case "help":
                     Console.Clear();
-                    Console.WriteLine("\nCommands are ....");
-                    Console.WriteLine("help - for this screen");
-                    Console.WriteLine("look - to look around");
-                    Console.WriteLine("go [north | south | east | west]  - to travel between locations");
-                    Console.WriteLine("\nPress any key to continue");
-                    Console.ReadKey(true);
+                    returnString = newLineS("Commands are ....")+
+                                   newLineS("help - for this screen")+
+                                   newLineS("look - to look around")+
+                                   newLineS("go [north | south | east | west]  - to travel between locations")+
+                                   newLineS("Press any key to continue");
                     break;
 
                 case "look":
                     //loop straight back
-                    Console.Clear();
+                    returnString = newLineS("you look around");
                     Thread.Sleep(1000);
                     break;
 
@@ -109,48 +120,56 @@ namespace MUD
 
                 case "go":
                     // is arg[1] sensible?
-                    if ((input[1].ToLower() == "north") && (currentRoom.North != null))
+                    if ((input[1].ToLower() == "north") && (player.currentRoom.North != null))
                     {
-                        currentRoom = roomMap[currentRoom.North];
+                        player.currentRoom = roomMap[player.currentRoom.North];
                     }
                     else
                     {
-                        if ((input[1].ToLower() == "south") && (currentRoom.South != null))
+                        if ((input[1].ToLower() == "south") && (player.currentRoom.South != null))
                         {
-                            currentRoom = roomMap[currentRoom.South];
+                            player.currentRoom = roomMap[player.currentRoom.South];
                         }
                         else
                         {
-                            if ((input[1].ToLower() == "east") && (currentRoom.East != null))
+                            if ((input[1].ToLower() == "east") && (player.currentRoom.East != null))
                             {
-                                currentRoom = roomMap[currentRoom.East];
+                                player.currentRoom = roomMap[player.currentRoom.East];
                             }
                             else
                             {
-                                if ((input[1].ToLower() == "west") && (currentRoom.West != null))
+                                if ((input[1].ToLower() == "west") && (player.currentRoom.West != null))
                                 {
-                                    currentRoom = roomMap[currentRoom.West];
+                                    player.currentRoom = roomMap[player.currentRoom.West];
                                 }
                                 else
                                 {
                                     //handle error
-                                    Console.WriteLine("\nERROR");
-                                    Console.WriteLine("\nCan not go "+ input[1]+ " from here");
-                                    Console.WriteLine("\nPress any key to continue");
-                                    Console.ReadKey(true);
+                                   returnString = newLineS("\nERROR")+
+                                                  newLineS("\nCan not go " + input[1] + " from here")+
+                                                  newLineS("\nPress any key to continue");
                                 }
                             }
                         }
                     }
+                    returnString = newLineS(player.currentRoom.desc);
                     break;
 
                 default:
                     //handle error
-                    Console.WriteLine("\nERROR");
-                    Console.WriteLine("\nCan not " + key);
-                    Console.WriteLine("\nPress any key to continue");
-                    Console.ReadKey(true);
+                    returnString = newLineS("\nERROR")+
+                                   newLineS("\nCan not " + input)+
+                                   newLineS("\nPress any key to continue");
                     break;
+            }
+            if (returnString != "")
+            {
+                return returnString;
+            }
+            else
+            {
+                returnString = newLineS("welp");
+                return returnString;
             }
 
         }

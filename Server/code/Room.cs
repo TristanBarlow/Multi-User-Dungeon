@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MUD
+namespace Dungeon
 {
     public class Room
     {
@@ -42,7 +42,9 @@ namespace MUD
         public String name = "";
         public String desc = "";
         public String[] exits = new String[4];
+        public String[] users;
         public static String[] exitNames = { "NORTH", "SOUTH", "EAST", "WEST" };
+
     }
 
 }

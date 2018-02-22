@@ -121,7 +121,7 @@ namespace Winform_Client
                                 case DungeonResponse.ID:
                                     {
                                         DungeonResponse dSponse = (DungeonResponse)m;
-                                        form.AddText(dSponse.response);
+                                        form.AddDungeonText(dSponse.response);
                                     }
                                     break;
 
@@ -163,6 +163,19 @@ namespace Winform_Client
             {
                 textBox_Output.Text += s;
                 textBox_Output.Text += Environment.NewLine;
+            }
+        }
+
+        private void AddDungeonText(String s)
+        {
+            if (TextboxDungeon.InvokeRequired)
+            {
+                Invoke(new AddTextDelegate(AddDungeonText), new object[] { s });
+            }
+            else
+            {
+               TextboxDungeon.Text += s;
+               TextboxDungeon.Text += Environment.NewLine;
             }
         }
 
@@ -272,6 +285,11 @@ namespace Winform_Client
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBox2_TextChanged(object sender, EventArgs e)
         {
 
         }
