@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading; 
+using System.Threading;
+using Utilities;
 
 namespace Dungeon
 {
@@ -25,7 +26,7 @@ namespace Dungeon
             }
 
             {
-                var room = new Room("Room 1", "You are in room 1");
+                var room = new Room("Room 1", "this the best room you have ever been in");
                 room.South = "Room 0";
                 room.West = "Room 3";
                 room.East = "Room 2";
@@ -33,26 +34,26 @@ namespace Dungeon
             }
 
             {
-                var room = new Room("Room 2", "You are in room 2");
+                var room = new Room("Room 2", "this room is even better!");
                 room.North = "Room 4";
                 roomMap.Add(room.name, room);
             }
 
             {
-                var room = new Room("Room 3", "You are in room 3");
+                var room = new Room("Room 3", "omg how");
                 room.East = "Room 1";
                 roomMap.Add(room.name, room);
             }
 
             {
-                var room = new Room("Room 4", "You are in room 4");
+                var room = new Room("Room 4", "buy battle screens");
                 room.South = "Room 2";
                 room.West = "Room 5";
                 roomMap.Add(room.name, room);
             }
 
             {
-                var room = new Room("Room 5", "You are in room 5");
+                var room = new Room("Room 5", "this story is so good");
                 room.South = "Room 1";
                 room.East = "Room 4";
                 roomMap.Add(room.name, room);
@@ -65,20 +66,14 @@ namespace Dungeon
             playerDictionary.Add(clientName, newPLayer);
         }
 
-        private String newLineS(String s)
-        {
-            String newline = "\r\n";
-            String finalString = s + newline;
-            return finalString;
-        }
-
-        public String playerAction(String action, String PlayerName)
+        public String playerAction(String PlayerName, String action)
         {
             String returnString = "";
 
             Player player;
 
             var input = action.Split(' ');
+           
 
             if (playerDictionary.ContainsKey(PlayerName))
             {
@@ -86,7 +81,7 @@ namespace Dungeon
             }
             else
             {
-                returnString = newLineS("Not in list you fucked up");
+                returnString = U.newLineS("Not in list you fucked up");
                 return returnString;
             }
 
@@ -94,17 +89,18 @@ namespace Dungeon
             {
                 case "help":
                     Console.Clear();
-                    returnString = newLineS("Commands are ....")+
-                                   newLineS("help - for this screen")+
-                                   newLineS("look - to look around")+
-                                   newLineS("go [north | south | east | west]  - to travel between locations")+
-                                   newLineS("Press any key to continue");
+                    returnString = U.newLineS("Commands are ....")+
+                                   U.newLineS("help - for this screen")+
+                                   U.newLineS("look - to look around")+
+                                   U.newLineS("go [north | south | east | west]  - to travel between locations")+
+                                   U.newLineS("graf [mesage] to add grafiti to your current room")+
+                                   U.newLineS("Press any key to continue");
                     break;
 
                 case "look":
                     //loop straight back
-                    returnString = newLineS("you look around");
-                    Thread.Sleep(1000);
+                    returnString = U.newLineS("you look around") +
+                                   U.newLineS(player.currentRoom.getDescription());
                     break;
 
                 case "say":
@@ -116,6 +112,13 @@ namespace Dungeon
 
                     Thread.Sleep(1000);
                     Console.Clear();
+                    break;
+
+                case "graf":
+                    int index = action.IndexOf(' ');
+                    String second = action.Substring(index + 1);
+                    player.currentRoom.addGraf(second);
+                    returnString = U.newLineS("You added a graffiti");
                     break;
 
                 case "go":
@@ -145,21 +148,21 @@ namespace Dungeon
                                 else
                                 {
                                     //handle error
-                                   returnString = newLineS("\nERROR")+
-                                                  newLineS("\nCan not go " + input[1] + " from here")+
-                                                  newLineS("\nPress any key to continue");
+                                   returnString = U.newLineS("\nERROR")+
+                                                  U.newLineS("\nCan not go " + input[1] + " from here")+
+                                                  U.newLineS("\nPress any key to continue");
                                 }
                             }
                         }
                     }
-                    returnString = newLineS(player.currentRoom.desc);
+                    returnString = U.newLineS(player.currentRoom.getDescription());
                     break;
 
                 default:
                     //handle error
-                    returnString = newLineS("\nERROR")+
-                                   newLineS("\nCan not " + input)+
-                                   newLineS("\nPress any key to continue");
+                    returnString = U.newLineS("\nERROR")+
+                                   U.newLineS("\nCan not " + input)+
+                                   U.newLineS("\nPress any key to continue");
                     break;
             }
             if (returnString != "")
@@ -168,7 +171,7 @@ namespace Dungeon
             }
             else
             {
-                returnString = newLineS("welp");
+                returnString = U.newLineS("welp");
                 return returnString;
             }
 

@@ -161,8 +161,7 @@ namespace Winform_Client
             }
             else
             {
-                textBox_Output.Text += s;
-                textBox_Output.Text += Environment.NewLine;
+                textBox_Output.AppendText(s);
             }
         }
 
@@ -174,8 +173,7 @@ namespace Winform_Client
             }
             else
             {
-               TextboxDungeon.Text += s;
-               TextboxDungeon.Text += Environment.NewLine;
+                TextboxDungeon.AppendText(s);
             }
         }
 
@@ -225,11 +223,7 @@ namespace Winform_Client
                 {
                     if (listBox_ClientList.SelectedIndex == 1)
                     {
-                        DungeonCommand dungMsg = new DungeonCommand();
-                        dungMsg.command = textBox_Input.Text;
-                        MemoryStream outStream = dungMsg.WriteData();
-                        clientSocket.Send(outStream.GetBuffer());
-
+                        sendDungeonMessage(textBox_Input.Text);
                     }
 
                     else if (listBox_ClientList.SelectedIndex == 0)
@@ -269,6 +263,14 @@ namespace Winform_Client
             }
         }
 
+        private void sendDungeonMessage(String Message)
+        {
+            DungeonCommand dungMsg = new DungeonCommand();
+            dungMsg.command = Message;
+            MemoryStream outStream = dungMsg.WriteData();
+            clientSocket.Send(outStream.GetBuffer());
+        }
+        
         private void listBox_ClientList_SelectedIndexChanged(object sender, EventArgs e)
         {
 
@@ -292,6 +294,60 @@ namespace Winform_Client
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void ButtonNorth_Click(object sender, EventArgs e)
+        {
+            String m = "go north";
+            sendDungeonMessage(m);
+        }
+
+        private void ButtonEast_Click(object sender, EventArgs e)
+        {
+            String m = "go east";
+            sendDungeonMessage(m);
+        }
+
+        private void ButtonSouth_Click(object sender, EventArgs e)
+        {
+            String m = "go south";
+            sendDungeonMessage(m);
+        }
+
+        private void ButtonWest_Click(object sender, EventArgs e)
+        {
+            String m = "go west";
+            sendDungeonMessage(m);
+        }
+
+        private void Form1_KeyDown(object sender, KeyEventArgs e)
+        {
+            String m;
+            switch (e.KeyCode)
+            {
+                case Keys.Up:
+                    m = "go north";
+                    sendDungeonMessage(m);
+                    break;
+                case Keys.Left:
+                     m = "go east";
+                    sendDungeonMessage(m);
+                    break;
+                case Keys.Down:
+                    m = "go south";
+                    sendDungeonMessage(m);
+                    break;
+                case Keys.Right:
+                    m = "go west";
+                    sendDungeonMessage(m);
+                    break;
+
+            }
         }
     }
 }

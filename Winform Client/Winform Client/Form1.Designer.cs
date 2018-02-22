@@ -35,6 +35,10 @@
             this.listBox_ClientList = new System.Windows.Forms.ListBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.TextboxDungeon = new System.Windows.Forms.TextBox();
+            this.ButtonNorth = new System.Windows.Forms.Button();
+            this.ButtonEast = new System.Windows.Forms.Button();
+            this.ButtonSouth = new System.Windows.Forms.Button();
+            this.ButtonWest = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // buttonSend
@@ -60,6 +64,7 @@
             this.textBox_Output.Location = new System.Drawing.Point(430, 52);
             this.textBox_Output.Multiline = true;
             this.textBox_Output.Name = "textBox_Output";
+            this.textBox_Output.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textBox_Output.Size = new System.Drawing.Size(384, 225);
             this.textBox_Output.TabIndex = 3;
             // 
@@ -94,15 +99,61 @@
             this.TextboxDungeon.Location = new System.Drawing.Point(22, 52);
             this.TextboxDungeon.Multiline = true;
             this.TextboxDungeon.Name = "TextboxDungeon";
+            this.TextboxDungeon.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.TextboxDungeon.Size = new System.Drawing.Size(384, 225);
             this.TextboxDungeon.TabIndex = 7;
             this.TextboxDungeon.TextChanged += new System.EventHandler(this.textBox2_TextChanged);
             // 
+            // ButtonNorth
+            // 
+            this.ButtonNorth.Location = new System.Drawing.Point(154, 302);
+            this.ButtonNorth.Name = "ButtonNorth";
+            this.ButtonNorth.Size = new System.Drawing.Size(75, 23);
+            this.ButtonNorth.TabIndex = 8;
+            this.ButtonNorth.Text = "North";
+            this.ButtonNorth.UseVisualStyleBackColor = true;
+            this.ButtonNorth.Click += new System.EventHandler(this.ButtonNorth_Click);
+            // 
+            // ButtonEast
+            // 
+            this.ButtonEast.Location = new System.Drawing.Point(226, 340);
+            this.ButtonEast.Name = "ButtonEast";
+            this.ButtonEast.Size = new System.Drawing.Size(75, 23);
+            this.ButtonEast.TabIndex = 9;
+            this.ButtonEast.Text = "East";
+            this.ButtonEast.UseVisualStyleBackColor = true;
+            this.ButtonEast.Click += new System.EventHandler(this.ButtonEast_Click);
+            // 
+            // ButtonSouth
+            // 
+            this.ButtonSouth.Location = new System.Drawing.Point(154, 378);
+            this.ButtonSouth.Name = "ButtonSouth";
+            this.ButtonSouth.Size = new System.Drawing.Size(75, 23);
+            this.ButtonSouth.TabIndex = 10;
+            this.ButtonSouth.Text = "South";
+            this.ButtonSouth.UseVisualStyleBackColor = true;
+            this.ButtonSouth.Click += new System.EventHandler(this.ButtonSouth_Click);
+            // 
+            // ButtonWest
+            // 
+            this.ButtonWest.Location = new System.Drawing.Point(77, 340);
+            this.ButtonWest.Name = "ButtonWest";
+            this.ButtonWest.Size = new System.Drawing.Size(75, 23);
+            this.ButtonWest.TabIndex = 11;
+            this.ButtonWest.Text = "West";
+            this.ButtonWest.UseVisualStyleBackColor = true;
+            this.ButtonWest.Click += new System.EventHandler(this.ButtonWest_Click);
+            // 
             // Form1
             // 
+            this.AcceptButton = this.buttonSend;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(912, 503);
+            this.Controls.Add(this.ButtonWest);
+            this.Controls.Add(this.ButtonSouth);
+            this.Controls.Add(this.ButtonEast);
+            this.Controls.Add(this.ButtonNorth);
             this.Controls.Add(this.TextboxDungeon);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.listBox_ClientList);
@@ -110,8 +161,11 @@
             this.Controls.Add(this.textBox_Output);
             this.Controls.Add(this.textBox_Input);
             this.Controls.Add(this.buttonSend);
+            this.KeyPreview = true;
             this.Name = "Form1";
             this.Text = "Form1";
+            this.Load += new System.EventHandler(this.Form1_Load);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -126,6 +180,10 @@
         private System.Windows.Forms.ListBox listBox_ClientList;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.TextBox TextboxDungeon;
+        private System.Windows.Forms.Button ButtonNorth;
+        private System.Windows.Forms.Button ButtonEast;
+        private System.Windows.Forms.Button ButtonSouth;
+        private System.Windows.Forms.Button ButtonWest;
     }
 }
 

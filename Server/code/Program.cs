@@ -112,14 +112,6 @@ namespace Server
             }
         }
 
-       static  private String updateDungeon(String user, String command)
-        {
-            lock (dungeonHandle)
-            {
-                return dungeonHandle.playerAction(command, user);
-            }
-        }
-
         static Socket GetSocketFromName(String name)
         {
             lock (clientDictionary)
@@ -221,9 +213,13 @@ namespace Server
                                     {
                                         DungeonCommand dungMsg = (DungeonCommand)m;
 
-                                        /// do command
-                                        String temp = updateDungeon(GetNameFromSocket(chatClient), dungMsg.command);
+                                        String temp;
 
+                                        lock (dungeonHandle)
+                                        {
+                                            /// do command
+                                            temp = dungeonHandle.playerAction(GetNameFromSocket(chatClient), dungMsg.command);
+                                        }
                                         ///add to a q in the dungeon handler
 
                                         SendDungeonResponse(chatClient, temp);
