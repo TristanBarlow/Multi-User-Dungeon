@@ -11,15 +11,20 @@ namespace Dungeon
 {
     public class DungeonS
     {        
-        Dictionary<String, Room> roomMap;
+        private static Dictionary<String, Room> roomMap;
 
-        //Player, Location
-        Dictionary<String, Player> playerDictionary;
+        //List of current Players
+        private static List <Player> playerList;
+
+        public List <Player> GetPlayerList()
+        {
+            return playerList;
+        }
 
         public void Init()
         {
             roomMap = new Dictionary<string, Room>();
-            playerDictionary = new Dictionary<String, Player>();
+            playerList = new List<Player>();
 
             {
                 var room = new Room("Room 0", "You are standing in the entrance hall\nAll adventures start here");
@@ -62,37 +67,44 @@ namespace Dungeon
             }
         }
 
-        public void newClient(String clientName)
+        public void NewClient(String clientName)
         {
-            Room defaultRoom = roomMap["Room 0"];
-            Player newPLayer = new Player(clientName, defaultRoom);
-            defaultRoom.addPlayer(newPLayer);
-            playerDictionary.Add(clientName, newPLayer);
+            Room randomRoom = roomMap["Room 0"];
+            Player newPlayer = new Player(clientName, randomRoom);
+            randomRoom.addPlayer(newPlayer);
+            playerList.Add(newPlayer);
         }
 
-        private void movePlayer(Player p, Room newRoom)
+        private void MovePlayer(Player p, Room newRoom)
         {
             p.currentRoom.removePlayer(p);
             newRoom.addPlayer(p);
             p.currentRoom = newRoom;
         }
 
-        public String playerAction(String action, String PlayerName)
+        private Player GetPlayerReference(String PlayerName)
+        {
+            foreach (Player player in playerList)
+            {
+                if (player.getPlayerName() == PlayerName)
+                {
+                    return player;
+                }
+            }
+            return null; 
+        }
+
+        public String PlayerAction(String action, String PlayerName)
         {
             String returnString = "";
 
-            Player player;
+            Player player = GetPlayerReference(PlayerName);
 
             var input = action.Split(' ');
-           
 
-            if (playerDictionary.ContainsKey(PlayerName))
+            if (player == null)
             {
-                player = playerDictionary[PlayerName];
-            }
-            else
-            {
-                returnString = U.newLineS("Not in list you fucked up");
+                returnString = U.NewLineS("Not in list you do not exsist");
                 return returnString;
             }
 
@@ -100,18 +112,18 @@ namespace Dungeon
             {
                 case "help":
                     Console.Clear();
-                    returnString = U.newLineS("Commands are ....")+
-                                   U.newLineS("help - for this screen")+
-                                   U.newLineS("look - to look around")+
-                                   U.newLineS("go [north | south | east | west]  - to travel between locations")+
-                                   U.newLineS("graf [mesage] to add grafiti to your current room")+
-                                   U.newLineS("Press any key to continue");
+                    returnString = U.NewLineS("Commands are ....")+
+                                   U.NewLineS("help - for this screen")+
+                                   U.NewLineS("look - to look around")+
+                                   U.NewLineS("go [north | south | east | west]  - to travel between locations")+
+                                   U.NewLineS("graf [mesage] to add grafiti to your current room")+
+                                   U.NewLineS("Press any key to continue");
                     break;
 
                 case "look":
                     //loop straight back
-                    returnString = U.newLineS("you look around") +
-                                   U.newLineS(player.currentRoom.getDescription());
+                    returnString = U.NewLineS("you look around") +
+                                   U.NewLineS(player.currentRoom.getDescription());
                     break;
 
                 case "say":
@@ -129,53 +141,53 @@ namespace Dungeon
                     int index = action.IndexOf(' ');
                     String second = action.Substring(index + 1);
                     player.currentRoom.addGraf(second);
-                    returnString = U.newLineS("You added a graffiti");
+                    returnString = U.NewLineS("You added a graffiti");
                     break;
 
                 case "go":
                     // is arg[1] sensible?
                     if ((input[1].ToLower() == "north") && (player.currentRoom.North != null))
                     {
-                       movePlayer(player, roomMap[player.currentRoom.North]);
+                       MovePlayer(player, roomMap[player.currentRoom.North]);
                     }
                     else
                     {
                         if ((input[1].ToLower() == "south") && (player.currentRoom.South != null))
                         {
-                            movePlayer(player, roomMap[player.currentRoom.South]);
+                            MovePlayer(player, roomMap[player.currentRoom.South]);
                         }
                         else
                         {
                             if ((input[1].ToLower() == "east") && (player.currentRoom.East != null))
                             {
-                                movePlayer(player, roomMap[player.currentRoom.East]);
+                                MovePlayer(player, roomMap[player.currentRoom.East]);
                             }
                             else
                             {
                                 if ((input[1].ToLower() == "west") && (player.currentRoom.West != null))
                                 {
                                    
-                                    movePlayer(player, roomMap[player.currentRoom.West]);
+                                    MovePlayer(player, roomMap[player.currentRoom.West]);
                                     
                                 }
                                 else
                                 {
                                     //handle error
-                                   returnString = U.newLineS("\nERROR")+
-                                                  U.newLineS("\nCan not go " + input[1] + " from here")+
-                                                  U.newLineS("\nPress any key to continue");
+                                   returnString = U.NewLineS("\nERROR")+
+                                                  U.NewLineS("\nCan not go " + input[1] + " from here")+
+                                                  U.NewLineS("\nPress any key to continue");
                                 }
                             }
                         }
                     }
-                    returnString = U.newLineS(player.currentRoom.getDescription());
+                    returnString = U.NewLineS(player.currentRoom.getDescription());
                     break;
 
                 default:
                     //handle error
-                    returnString = U.newLineS("\nERROR")+
-                                   U.newLineS("\nCan not " + input)+
-                                   U.newLineS("\nPress any key to continue");
+                    returnString = U.NewLineS("\nERROR")+
+                                   U.NewLineS("\nCan not " + input)+
+                                   U.NewLineS("\nPress any key to continue");
                     break;
             }
             if (returnString != "")
@@ -184,7 +196,7 @@ namespace Dungeon
             }
             else
             {
-                returnString = U.newLineS("welp");
+                returnString = U.NewLineS("welp");
                 return returnString;
             }
 

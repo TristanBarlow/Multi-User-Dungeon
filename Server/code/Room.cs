@@ -43,6 +43,7 @@ namespace Dungeon
             get { return exits[2]; }
             set { exits[2] = value; }
         }
+
         public String West
         {
             get { return exits[3]; }
@@ -55,13 +56,13 @@ namespace Dungeon
 
         public void removePlayer(Player p) { users.Remove(p);}
         
-
         public String getDescription()
         {
             String returnString;
-            returnString = U.newLineS(name) +
-                           U.newLineS(desc)+
-                           U.newLineS("Exits Are:");
+            returnString = U.NewLineS(name) +
+                           U.NewLineS(desc)+
+                           U.NewLineS("//")+
+                           ("Exits Are:");
 
             if (exits.Count() != 0)
             {
@@ -71,19 +72,17 @@ namespace Dungeon
                     {
                         returnString += Room.exitNames[i] + " ";
                     }
-                    else
-                    {
-                        returnString += U.newLineS(" ");
-                    }
                 }
-                returnString += U.newLineS("//");
+                returnString += U.NewLineS(" ")+
+                                U.NewLineS("//");
+                                
             }
             else
             {
                 returnString = "no exits oh no";
             }
 
-            returnString += U.newLineS("Players In room : ");
+            returnString += ("Players In room : ");
 
             if (users.Count() > 1)
             {
@@ -95,12 +94,12 @@ namespace Dungeon
             }
             else
             {
-                returnString +=U.newLineS("You are alone") ;
+                returnString +=U.NewLineS("You are alone") ;
             }
 
-            returnString += U.newLineS("//");
+            returnString += U.NewLineS("//");
 
-            returnString += U.newLineS("Graffiti: ");
+            returnString += U.NewLineS("Graffiti: ");
             if (graffitiList.Count() != 0)
             {
                 foreach (String iter in graffitiList)
@@ -110,7 +109,7 @@ namespace Dungeon
             }
             else
             {
-                returnString += U.newLineS("no Graffiti Be the first!!!");
+                returnString += U.NewLineS("no Graffiti Be the first!!!");
             }
 
             return returnString;
@@ -123,14 +122,14 @@ namespace Dungeon
             {
                 foreach (String graff in graffitiList)
                 {
-                    returnString += U.newLineS(graff);
+                    returnString += U.NewLineS(graff);
                 }
 
                 return returnString;
             }
             else
             {
-                return U.newLineS("no Graffiti");
+                return U.NewLineS("no Graffiti");
             }
         }
 

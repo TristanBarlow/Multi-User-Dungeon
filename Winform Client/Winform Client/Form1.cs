@@ -58,7 +58,7 @@ namespace Winform_Client
                 }
                 catch (System.Exception)
                 {
-                    form.AddText(U.newLineS("No server!"));
+                    form.AddText(U.NewLineS("No server!"));
                     Thread.Sleep(1000);
                 }               
             }
@@ -137,7 +137,7 @@ namespace Winform_Client
                 catch (Exception)
                 {
                     form.bConnected = false;
-                    Console.WriteLine(U.newLineS("Lost server!"));
+                    Console.WriteLine(U.NewLineS("Lost server!"));
                     
                 }
 
@@ -164,7 +164,7 @@ namespace Winform_Client
             }
             else
             {
-                textBox_Output.AppendText(U.newLineS(s));
+                textBox_Output.AppendText(U.NewLineS(s));
             }
         }
 
@@ -176,7 +176,7 @@ namespace Winform_Client
             }
             else
             {
-                TextboxDungeon.AppendText(U.newLineS(s));
+                TextboxDungeon.AppendText(U.NewLineS(s));
             }
         }
 
@@ -216,8 +216,8 @@ namespace Winform_Client
             {
                 listBox_ClientList.DataSource = null;
                 currentClientList.Clear();
-                currentClientList.Add("All");
-                currentClientList.Add("Dung");
+                currentClientList.Add("Global");
+                currentClientList.Add("Dungeon");
 
                 foreach (String s in clientList.clientList)
                 {

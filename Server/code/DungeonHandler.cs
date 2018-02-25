@@ -17,14 +17,14 @@ namespace DungeonHandler
         }
 
 
-        public String playerAction(String action, String player)
+        public String PlayerAction(String action, String player)
         {
-            return dungeon.playerAction(action, player);
+            return dungeon.PlayerAction(action, player);
         }
 
-        public void addPlayer(String name)
+        public void AddPlayer(String name)
         {
-            dungeon.newClient(name);
+            dungeon.NewClient(name);
         }
 
     }

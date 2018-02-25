@@ -12,11 +12,21 @@ namespace PlayerN
         public Room currentRoom;
         float health;
 
-        public String getPlayerName() { return playerName; }
+       public String getPlayerName() { return playerName; }
        public Player(String clientName, Room startRoom)
         {
             playerName = clientName;
             currentRoom = startRoom;
         }
     }
+
+    public class CombatHandler
+    {
+
+        public CombatHandler(Player Agressor, Player Defender)
+         {
+
+         }
+    }
+
 }

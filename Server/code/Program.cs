@@ -16,11 +16,13 @@ namespace Server
 {
     class Program
     {
-        static Dictionary<String,Socket> clientDictionary = new Dictionary<String,Socket>();
-        static int clientID = 1;
+        static private Dictionary<String,Socket> clientDictionary = new Dictionary<String,Socket>();
 
-        static DungeonS dungeon;
-        static DungeonHandlerS dungeonHandle;
+        static private int clientID = 1;
+
+        static private DungeonS dungeon;
+
+        static private DungeonHandlerS dungeonHandle;
 
         static void SendClientName(Socket s, String clientName)
         {
@@ -30,6 +32,11 @@ namespace Server
             MemoryStream outStream = nameMsg.WriteData();
 
             s.Send(outStream.GetBuffer() );
+        }
+
+        static void ChangeClientName(Socket s, String newName)
+        {
+
         }
 
         static void SendClientList()
@@ -160,14 +167,13 @@ namespace Server
 
             lock (dungeonHandle)
             {
-                dungeonHandle.addPlayer(GetNameFromSocket(chatClient));
+                dungeonHandle.AddPlayer(GetNameFromSocket(chatClient));
                 /// do command
-                SendDungeonResponse(chatClient, dungeonHandle.playerAction("look", GetNameFromSocket(chatClient) ));
+                SendDungeonResponse(chatClient, dungeonHandle.PlayerAction("look", GetNameFromSocket(chatClient) ));
             }
 
             SendClientList();
             
-
             while (bQuit == false)
             {
                 try
@@ -224,7 +230,7 @@ namespace Server
                                         lock (dungeonHandle)
                                         {
                                             /// do command
-                                            temp = dungeonHandle.playerAction(dungMsg.command,GetNameFromSocket(chatClient));
+                                            temp = dungeonHandle.PlayerAction(dungMsg.command,GetNameFromSocket(chatClient));
                                         }
                                         ///add to a q in the dungeon handler
 
