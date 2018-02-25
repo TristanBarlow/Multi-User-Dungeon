@@ -229,7 +229,6 @@ namespace MessageTypes
 
         public String response;
 
-
         public DungeonResponse() { mID = ID; }
 
         public override MemoryStream WriteData()
@@ -245,10 +244,41 @@ namespace MessageTypes
             return stream;
         }
 
-
         public override void ReadData(BinaryReader read)
         {
             response = read.ReadString();
+        }
+    }
+
+    public class HealthMessage : Msg
+    {
+        public const int ID = 7;
+
+        public int health;
+
+        public HealthMessage() { mID = ID; }
+
+        public override MemoryStream WriteData()
+        {
+            String healthString = "h" + health;
+            MemoryStream stream = new MemoryStream();
+            BinaryWriter write = new BinaryWriter(stream);
+            write.Write(ID);
+            write.Write(healthString);
+
+            Console.Write("sending: " + healthString);
+
+            write.Close();
+            return stream;
+        }
+
+        public override void ReadData(BinaryReader read)
+        {
+            String temp = read.ReadString();
+            var index = temp.Split('h');
+
+            if (int.TryParse(index[1], out health)) { }
+            else { health = 1; }
         }
     }
 }

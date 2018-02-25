@@ -17,7 +17,6 @@ namespace DungeonHandler
             dungeon = d;
         }
 
-
         public String PlayerAction(String action, String player)
         {
             return dungeon.PlayerAction(action, player);
@@ -43,6 +42,8 @@ namespace DungeonHandler
                 }
             }
         }
+
+        public Player GetPlayer(String playerName){ return dungeon.GetPlayerReference(playerName); }
 
     }
 }

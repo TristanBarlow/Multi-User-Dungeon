@@ -24,6 +24,7 @@ namespace Dungeon
         public void Init()
         {
             roomMap = new Dictionary<string, Room>();
+
             playerList = new List<Player>();
 
             {
@@ -86,7 +87,7 @@ namespace Dungeon
             p.currentRoom = newRoom;
         }
 
-        private Player GetPlayerReference(String PlayerName)
+        public Player GetPlayerReference(String PlayerName)
         {
             foreach (Player player in playerList)
             {
@@ -139,6 +140,10 @@ namespace Dungeon
 
                     Thread.Sleep(1000);
                     Console.Clear();
+                    break;
+
+                case "attack":
+                    player.ChangeHealth(-10);
                     break;
 
                 case "graf":

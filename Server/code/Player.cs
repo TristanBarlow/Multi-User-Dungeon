@@ -9,8 +9,14 @@ namespace PlayerN
     public class Player
     {
         String playerName;
+
         public Room currentRoom;
-        float health;
+
+        private int health;
+
+        public int GetHealth(){ return health;}
+
+        public void ChangeHealth(int x) { health = health + x; }
 
        public String GetPlayerName() { return playerName; }
 
@@ -25,11 +31,23 @@ namespace PlayerN
 
     public class CombatHandler
     {
+        Player Agro;
+        Player Def;
 
         public CombatHandler(ref Player Agressor,ref Player Defender)
          {
-
+            Agro = Agressor;
+            Def = Defender;
          }
+
+        public Player combatLoop()
+        {
+            Player Winner = Agro; 
+
+            return Winner;
+        }
+
     }
+
 
 }

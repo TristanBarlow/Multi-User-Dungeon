@@ -40,6 +40,7 @@
             this.ButtonSouth = new System.Windows.Forms.Button();
             this.ButtonWest = new System.Windows.Forms.Button();
             this.ChangeName = new System.Windows.Forms.Button();
+            this.HealthBar = new System.Windows.Forms.ProgressBar();
             this.SuspendLayout();
             // 
             // buttonSend
@@ -155,12 +156,21 @@
             this.ChangeName.UseVisualStyleBackColor = true;
             this.ChangeName.Click += new System.EventHandler(this.ChangeNameClick);
             // 
+            // HealthBar
+            // 
+            this.HealthBar.Location = new System.Drawing.Point(154, 19);
+            this.HealthBar.Name = "HealthBar";
+            this.HealthBar.Size = new System.Drawing.Size(252, 20);
+            this.HealthBar.TabIndex = 13;
+            this.HealthBar.Value = 100;
+            // 
             // Form1
             // 
             this.AcceptButton = this.buttonSend;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(928, 352);
+            this.ClientSize = new System.Drawing.Size(930, 355);
+            this.Controls.Add(this.HealthBar);
             this.Controls.Add(this.ChangeName);
             this.Controls.Add(this.ButtonWest);
             this.Controls.Add(this.ButtonSouth);
@@ -197,6 +207,7 @@
         private System.Windows.Forms.Button ButtonSouth;
         private System.Windows.Forms.Button ButtonWest;
         private System.Windows.Forms.Button ChangeName;
+        public System.Windows.Forms.ProgressBar HealthBar;
     }
 }
 

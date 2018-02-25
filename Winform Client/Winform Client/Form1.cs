@@ -127,7 +127,12 @@ namespace Winform_Client
                                         form.AddDungeonText(dSponse.response);
                                     }
                                     break;
-
+                                case HealthMessage.ID:
+                                    {
+                                        HealthMessage Msg = (HealthMessage)m;
+                                        form.HealthBar.Value = Msg.health;
+                                    }
+                                    break;
                                 default:
                                     break;
                             }

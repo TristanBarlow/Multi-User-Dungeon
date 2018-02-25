@@ -11,6 +11,7 @@ using System.IO;
 using MessageTypes;
 using DungeonHandler;
 using Dungeon;
+using PlayerN;
 
 namespace Server
 {
@@ -156,6 +157,26 @@ namespace Server
             }
         }
 
+        static void SendHealthToClient( Socket s)
+        {
+            String playerName = GetNameFromSocket(s);
+            Player tempPlayer;
+            lock (dungeonHandle)
+            {
+               tempPlayer = dungeonHandle.GetPlayer(playerName);
+            }
+            HealthMessage Msg = new HealthMessage();
+            Msg.health = tempPlayer.GetHealth();
+            MemoryStream outStream = Msg.WriteData();
+            try
+            {
+                s.Send(outStream.GetBuffer());
+            }
+            catch (System.Exception)
+            {
+
+            }
+        }
 
         static void receiveClientProcess(Object o)
         {
@@ -214,6 +235,7 @@ namespace Server
 
                                                 clientDictionary.Remove(oldName);
                                                 clientDictionary.Add(clientName.name, chatClient);
+                                                SendClientList();
                                             }
                                             else
                                             {
@@ -221,7 +243,7 @@ namespace Server
                                             }
                                         }
                                     
-                                        SendClientList();
+                                        
                                     }
                                     break;
 
