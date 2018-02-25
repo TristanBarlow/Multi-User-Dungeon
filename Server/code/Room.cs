@@ -88,7 +88,7 @@ namespace Dungeon
             {
                 foreach (Player iter in users)
                 {
-                    returnString += iter.getPlayerName() + "  ";
+                    returnString += iter.GetPlayerName() + "  ";
                 }
                 
             }

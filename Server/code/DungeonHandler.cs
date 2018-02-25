@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 
 using Dungeon;
+using PlayerN;
 
 namespace DungeonHandler
 {
@@ -25,6 +26,22 @@ namespace DungeonHandler
         public void AddPlayer(String name)
         {
             dungeon.NewClient(name);
+        }
+
+        public void UpdatePlayerName(String oldName, String newName)
+        {
+            foreach (Player iter in dungeon.GetPlayerList())
+            {
+                if (iter.GetPlayerName() == oldName)
+                {
+                    iter.SetPlayerName(newName);
+                    break;
+                }
+                else
+                {
+                    // check
+                }
+            }
         }
 
     }

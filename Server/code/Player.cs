@@ -12,7 +12,10 @@ namespace PlayerN
         public Room currentRoom;
         float health;
 
-       public String getPlayerName() { return playerName; }
+       public String GetPlayerName() { return playerName; }
+
+        public void SetPlayerName(String newName) { playerName = newName; }
+
        public Player(String clientName, Room startRoom)
         {
             playerName = clientName;
@@ -23,7 +26,7 @@ namespace PlayerN
     public class CombatHandler
     {
 
-        public CombatHandler(Player Agressor, Player Defender)
+        public CombatHandler(ref Player Agressor,ref Player Defender)
          {
 
          }

@@ -21,13 +21,14 @@ namespace Winform_Client
     {
         Socket clientSocket;
         private Thread myThread;
+
         bool bQuit = false;
         bool bConnected = false;
         bool spam = false;
 
         List<String> currentClientList = new List<String>();
 
-        static void clientProcess(Object o)
+        static void ClientProcess(Object o)
         {            
             Form1 form = (Form1)o;
 
@@ -147,7 +148,7 @@ namespace Winform_Client
         {
             InitializeComponent();
 
-            myThread = new Thread(clientProcess);
+            myThread = new Thread(ClientProcess);
             myThread.Start(this);
 
             Application.ApplicationExit += delegate { OnExit(); };
@@ -159,7 +160,7 @@ namespace Winform_Client
         private void AddText(String s)
         {
             if (textBox_Output.InvokeRequired)
-            {
+            { 
                 Invoke(new AddTextDelegate(AddText), new object[] { s });
             }
             else
@@ -366,6 +367,30 @@ namespace Winform_Client
                     m = "go west";
                     sendDungeonMessage(m);
                     break;
+
+            }
+        }
+
+       
+
+        private void ChangeNameClick(object sender, EventArgs e)
+        {
+            if ((NameBox.Text.Length > 0) && (clientSocket != null))
+            {
+                try
+                {
+                    ClientNameMsg nameMsg = new ClientNameMsg();
+
+                    nameMsg.name = NameBox.Text;
+                    MemoryStream outStream = nameMsg.WriteData();
+                    clientSocket.Send(outStream.GetBuffer());
+                }
+                catch (System.Exception)
+                {
+
+                }
+
+                NameBox.Text = "";
 
             }
         }

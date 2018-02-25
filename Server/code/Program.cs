@@ -195,7 +195,38 @@ namespace Server
                             Console.Write("Got a message: ");
                             switch (m.mID)
                             {
+                                case ClientNameMsg.ID:
+                                    {
+                                        ClientNameMsg clientName = (ClientNameMsg)m;
+
+                                        String oldName = GetNameFromSocket(chatClient);
+
+                                        lock (clientDictionary)
+                                        {
+
+                                            if (!clientDictionary.ContainsKey(clientName.name))
+                                            {
+
+                                                lock (dungeonHandle)
+                                                {
+                                                    dungeonHandle.UpdatePlayerName(oldName, clientName.name);
+                                                }
+
+                                                clientDictionary.Remove(oldName);
+                                                clientDictionary.Add(clientName.name, chatClient);
+                                            }
+                                            else
+                                            {
+                                                SendPrivateMessage(chatClient," ",("SERVER: oi you sneaky no-do-well, you cant have the two people with the same name"));
+                                            }
+                                        }
+                                    
+                                        SendClientList();
+                                    }
+                                    break;
+
                                 case PublicChatMsg.ID:
+
                                     {
                                         PublicChatMsg publicMsg = (PublicChatMsg)m;
 
@@ -210,7 +241,7 @@ namespace Server
                                 case PrivateChatMsg.ID:
                                     {
                                         PrivateChatMsg privateMsg = (PrivateChatMsg)m;
-
+                                        
                                         String formattedMsg = "PRIVATE <" + GetNameFromSocket(chatClient) + "> " + privateMsg.msg;
 
                                         Console.WriteLine("private chat - " + formattedMsg + "to " + privateMsg.destination);

@@ -9,6 +9,7 @@ namespace MessageTypes
     public abstract class Msg
     {
         public Msg() { mID = 0; }
+
         public int mID;
 
         public abstract MemoryStream WriteData();
@@ -65,6 +66,7 @@ namespace MessageTypes
     public class PublicChatMsg : Msg
     {
         public const int ID = 1;
+
         public String msg;
 
         public PublicChatMsg() { mID = ID; }
@@ -91,7 +93,9 @@ namespace MessageTypes
     public class PrivateChatMsg : Msg
     {
         public const int ID = 2;
+
         public String msg;
+
         public String destination;
 
         public PrivateChatMsg() { mID = ID; }
@@ -119,6 +123,7 @@ namespace MessageTypes
     public class ClientListMsg : Msg
     {
         public const int ID = 3;
+
         public List<String> clientList;
 
         public ClientListMsg() 
@@ -127,6 +132,7 @@ namespace MessageTypes
 
             clientList = new List<String>();
         }
+
         public override MemoryStream WriteData()
         {
             
@@ -144,6 +150,7 @@ namespace MessageTypes
 
             return stream;
         }
+
         public override void ReadData(BinaryReader read)
         {
             int count = read.ReadInt32();
@@ -156,7 +163,6 @@ namespace MessageTypes
             }
         }
     };
-
 
     public class ClientNameMsg : Msg
     {
@@ -194,8 +200,7 @@ namespace MessageTypes
        {
             return command;
         }
-
-
+ 
         public DungeonCommand() { mID = ID; }
 
         public override MemoryStream WriteData()
@@ -223,7 +228,6 @@ namespace MessageTypes
         public const int ID = 6;
 
         public String response;
-
 
 
         public DungeonResponse() { mID = ID; }

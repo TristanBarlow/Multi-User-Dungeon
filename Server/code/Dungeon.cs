@@ -27,13 +27,13 @@ namespace Dungeon
             playerList = new List<Player>();
 
             {
-                var room = new Room("Room 0", "You are standing in the entrance hall\nAll adventures start here");
+                var room = new Room("Room 0", "You are standing in the entrance hall, You want to find someone to fight.");
                 room.North = "Room 1";
                 roomMap.Add(room.name, room);
             }
 
             {
-                var room = new Room("Room 1", "this the best room you have ever been in");
+                var room = new Room("Room 1", "This room is much like the others, perfect for fighting");
                 room.South = "Room 0";
                 room.West = "Room 3";
                 room.East = "Room 2";
@@ -41,26 +41,27 @@ namespace Dungeon
             }
 
             {
-                var room = new Room("Room 2", "this room is even better!");
+                var room = new Room("Room 2", "Only two exits, a perfect place for an ambush");
                 room.North = "Room 4";
+                room.West = "Room 1";
                 roomMap.Add(room.name, room);
             }
 
             {
-                var room = new Room("Room 3", "omg how");
+                var room = new Room("Room 3", "A dead end, One must be carful");
                 room.East = "Room 1";
                 roomMap.Add(room.name, room);
             }
 
             {
-                var room = new Room("Room 4", "buy battle screens");
+                var room = new Room("Room 4", "Far from the enterance hall probably a good spot for a quiet murder");
                 room.South = "Room 2";
                 room.West = "Room 5";
                 roomMap.Add(room.name, room);
             }
 
             {
-                var room = new Room("Room 5", "this story is so good");
+                var room = new Room("Room 5", "Stop exploring and find some one to kill");
                 room.South = "Room 1";
                 room.East = "Room 4";
                 roomMap.Add(room.name, room);
@@ -69,7 +70,10 @@ namespace Dungeon
 
         public void NewClient(String clientName)
         {
-            Room randomRoom = roomMap["Room 0"];
+            Random rnd = new Random();
+            int num = rnd.Next(0, roomMap.Count());
+            Room randomRoom = roomMap.Values.ElementAt(num);
+
             Player newPlayer = new Player(clientName, randomRoom);
             randomRoom.addPlayer(newPlayer);
             playerList.Add(newPlayer);
@@ -86,7 +90,7 @@ namespace Dungeon
         {
             foreach (Player player in playerList)
             {
-                if (player.getPlayerName() == PlayerName)
+                if (player.GetPlayerName() == PlayerName)
                 {
                     return player;
                 }
