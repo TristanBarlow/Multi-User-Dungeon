@@ -47,7 +47,15 @@ namespace MessageTypes
 
                 case DungeonResponse.ID:
                     m = new DungeonResponse();
-                    break; 
+                    break;
+
+                case HealthMessage.ID:
+                    m = new HealthMessage();
+                    break;
+
+                case AttackMessage.ID:
+                    m = new AttackMessage();
+                    break;
 
                 default:
                     throw (new Exception());
@@ -274,11 +282,38 @@ namespace MessageTypes
 
         public override void ReadData(BinaryReader read)
         {
-            String temp = read.ReadString();
-            var index = temp.Split('h');
+           String temp = read.ReadString();
+           var index = temp.Split('h');
 
-            if (int.TryParse(index[1], out health)) { }
-            else { health = 1; }
+           if (int.TryParse(index[1], out health)) { }
+           else { health = 1; }
+        }
+    }
+
+    public class AttackMessage : Msg
+    {
+        public const int ID = 8;
+
+        public String msg;
+
+        public AttackMessage() { mID = ID; }
+
+        public override MemoryStream WriteData()
+        {
+            MemoryStream stream = new MemoryStream();
+            BinaryWriter write = new BinaryWriter(stream);
+            write.Write(ID);
+            write.Write(msg);
+
+            Console.Write("sending: " + msg);
+
+            write.Close();
+            return stream;
+        }
+
+        public override void ReadData(BinaryReader read)
+        {
+            msg = read.ReadString();
         }
     }
 }

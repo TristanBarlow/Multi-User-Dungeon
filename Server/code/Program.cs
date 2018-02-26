@@ -288,6 +288,7 @@ namespace Server
                                         ///add to a q in the dungeon handler
 
                                         SendDungeonResponse(chatClient, temp);
+                                        SendHealthToClient(chatClient);
                                     }
                                     break;
 

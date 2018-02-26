@@ -29,6 +29,7 @@ namespace Winform_Client
         List<String> currentClientList = new List<String>();
 
         static void ClientProcess(Object o)
+
         {            
             Form1 form = (Form1)o;
 
@@ -130,7 +131,7 @@ namespace Winform_Client
                                 case HealthMessage.ID:
                                     {
                                         HealthMessage Msg = (HealthMessage)m;
-                                        form.HealthBar.Value = Msg.health;
+                                        form.AddText("Player Health: " + Msg.health);
                                     }
                                     break;
                                 default:
@@ -289,14 +290,21 @@ namespace Winform_Client
             }
         }
 
-        private void sendDungeonMessage(String Message)
+        private void SendDungeonMessage(String Message)
         {
             DungeonCommand dungMsg = new DungeonCommand();
             dungMsg.command = Message;
             MemoryStream outStream = dungMsg.WriteData();
             clientSocket.Send(outStream.GetBuffer());
         }
-        
+        private void SendAttackMessage(String Message)
+        {
+            AttackMessage attMsg = new AttackMessage();
+            attMsg.msg= Message;
+            MemoryStream outStream = attMsg.WriteData();
+            clientSocket.Send(outStream.GetBuffer());
+        }
+
         private void listBox_ClientList_SelectedIndexChanged(object sender, EventArgs e)
         {
 
@@ -376,8 +384,6 @@ namespace Winform_Client
             }
         }
 
-       
-
         private void ChangeNameClick(object sender, EventArgs e)
         {
             if ((NameBox.Text.Length > 0) && (clientSocket != null))
@@ -398,6 +404,26 @@ namespace Winform_Client
                 NameBox.Text = "";
 
             }
+        }
+
+        private void attackSend(object sender, EventArgs e)
+        {
+            //implement normal attack send
+        }
+
+        private void DefendSend(object sender, EventArgs e)
+        {
+            SendAttackMessage("Defend");
+        }
+
+        private void AttackSend(object sender, EventArgs e)
+        {
+            SendAttackMessage("Attack");
+        }
+
+        private void WildAttackSend(object sender, EventArgs e)
+        {
+            SendAttackMessage("WildAttack");
         }
     }
 }

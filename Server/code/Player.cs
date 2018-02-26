@@ -12,7 +12,7 @@ namespace PlayerN
 
         public Room currentRoom;
 
-        private int health;
+        private int health = 100;
 
         public int GetHealth(){ return health;}
 

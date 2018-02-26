@@ -40,7 +40,9 @@
             this.ButtonSouth = new System.Windows.Forms.Button();
             this.ButtonWest = new System.Windows.Forms.Button();
             this.ChangeName = new System.Windows.Forms.Button();
-            this.HealthBar = new System.Windows.Forms.ProgressBar();
+            this.AttackButton = new System.Windows.Forms.Button();
+            this.DefendButton = new System.Windows.Forms.Button();
+            this.button3 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // buttonSend
@@ -156,21 +158,44 @@
             this.ChangeName.UseVisualStyleBackColor = true;
             this.ChangeName.Click += new System.EventHandler(this.ChangeNameClick);
             // 
-            // HealthBar
+            // AttackButton
             // 
-            this.HealthBar.Location = new System.Drawing.Point(154, 19);
-            this.HealthBar.Name = "HealthBar";
-            this.HealthBar.Size = new System.Drawing.Size(252, 20);
-            this.HealthBar.TabIndex = 13;
-            this.HealthBar.Value = 100;
+            this.AttackButton.Location = new System.Drawing.Point(331, 283);
+            this.AttackButton.Name = "AttackButton";
+            this.AttackButton.Size = new System.Drawing.Size(75, 23);
+            this.AttackButton.TabIndex = 13;
+            this.AttackButton.Text = "Attack";
+            this.AttackButton.UseVisualStyleBackColor = true;
+            this.AttackButton.Click += new System.EventHandler(this.attackSend);
+            // 
+            // DefendButton
+            // 
+            this.DefendButton.Location = new System.Drawing.Point(331, 312);
+            this.DefendButton.Name = "DefendButton";
+            this.DefendButton.Size = new System.Drawing.Size(75, 23);
+            this.DefendButton.TabIndex = 14;
+            this.DefendButton.Text = "Defend";
+            this.DefendButton.UseVisualStyleBackColor = true;
+            this.DefendButton.Click += new System.EventHandler(this.DefendButton);
+            // 
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(331, 341);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(75, 23);
+            this.button3.TabIndex = 15;
+            this.button3.Text = "Wild Attack";
+            this.button3.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
             this.AcceptButton = this.buttonSend;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(930, 355);
-            this.Controls.Add(this.HealthBar);
+            this.ClientSize = new System.Drawing.Size(980, 368);
+            this.Controls.Add(this.button3);
+            this.Controls.Add(this.DefendButton);
+            this.Controls.Add(this.AttackButton);
             this.Controls.Add(this.ChangeName);
             this.Controls.Add(this.ButtonWest);
             this.Controls.Add(this.ButtonSouth);
@@ -207,7 +232,9 @@
         private System.Windows.Forms.Button ButtonSouth;
         private System.Windows.Forms.Button ButtonWest;
         private System.Windows.Forms.Button ChangeName;
-        public System.Windows.Forms.ProgressBar HealthBar;
+        private System.Windows.Forms.Button AttackButton;
+        private System.Windows.Forms.Button DefendButton;
+        private System.Windows.Forms.Button button3;
     }
 }
 
