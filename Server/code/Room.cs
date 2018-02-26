@@ -15,7 +15,7 @@ namespace Dungeon
         public Room()
         {
             graffitiList = new List<string>();
-            users = new List<Player>();
+            Players = new List<Player>();
         }
 
         public Room(String name, String desc)
@@ -23,7 +23,7 @@ namespace Dungeon
             this.desc = desc;
             this.name = name;
             graffitiList = new List<string>();
-            users = new List<Player>();
+            Players = new List<Player>();
         }
 
         public String North
@@ -50,11 +50,11 @@ namespace Dungeon
             set { exits[3] = value; }
         }
 
-        public void addGraf(String graff){ graffitiList.Add(graff);}
+        public void AddGraf(String graff){ graffitiList.Add(graff);}
+                    
+        public void AddPlayer(Player p) {Players.Add(p); }
 
-        public void addPlayer(Player p) { users.Add(p); }
-
-        public void removePlayer(Player p) { users.Remove(p);}
+        public void RemovePlayer(Player p) {Players.Remove(p);}
         
         public String getDescription()
         {
@@ -84,9 +84,9 @@ namespace Dungeon
 
             returnString += ("Players In room : ");
 
-            if (users.Count() > 1)
+            if (Players.Count() > 1)
             {
-                foreach (Player iter in users)
+                foreach (Player iter in Players)
                 {
                     returnString += iter.GetPlayerName() + "  ";
                 }
@@ -133,10 +133,12 @@ namespace Dungeon
             }
         }
 
+        public List<Player> GetPlayersInRoom() { return Players; }
+
         public String name = "";
         private String desc = "";
         public String[] exits = new String[4];
-        public List <Player> users;
+        private List<Player> Players;
         public List<String> graffitiList;
         public static String[] exitNames = { "NORTH", "SOUTH", "EAST", "WEST" };
 

@@ -6,44 +6,49 @@ using System.Text;
 using Dungeon;
 using PlayerN;
 
-namespace DungeonHandler
+namespace Request
 {
-    class DungeonHandlerS
+    class RequestHandler
     {
         DungeonS dungeon;
+        PlayerHandler PlayerHandle;
 
-        public DungeonHandlerS(ref DungeonS d)
+        public RequestHandler(ref DungeonS d, ref PlayerHandler p)
         {
             dungeon = d;
+            PlayerHandle = p;
         }
 
-        public String PlayerAction(String action, String player)
+        public String PlayerAction(String action, String clientName)
         {
-            return dungeon.PlayerAction(action, player);
+            lock (dungeon)
+            { 
+                return dungeon.PlayerAction(action, PlayerHandle.GetPlayerReference(clientName));
+            }
         }
 
         public void AddPlayer(String name)
         {
-            dungeon.NewClient(name);
-        }
-
-        public void UpdatePlayerName(String oldName, String newName)
-        {
-            foreach (Player iter in dungeon.GetPlayerList())
+            lock (PlayerHandle)
             {
-                if (iter.GetPlayerName() == oldName)
-                {
-                    iter.SetPlayerName(newName);
-                    break;
-                }
-                else
-                {
-                    // check
-                }
+                PlayerHandle.AddNewPlayer(name, dungeon.GetRandomRoom());
             }
         }
 
-        public Player GetPlayer(String playerName){ return dungeon.GetPlayerReference(playerName); }
+        public void playerNameChange(String oldName, String newName)
+        {
+            lock (PlayerHandle)
+            {
+                PlayerHandle.UpdatePlayerName(oldName, newName);
+            }
+         }
 
+        public Player GetPlayer(String playerName)
+        {
+            lock (PlayerHandle)
+            {
+                return PlayerHandle.GetPlayerReference(playerName);
+            }
+        }
     }
 }

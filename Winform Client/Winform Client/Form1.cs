@@ -150,6 +150,7 @@ namespace Winform_Client
 
             }
         }
+
         public Form1()
         {
             InitializeComponent();
@@ -159,7 +160,6 @@ namespace Winform_Client
 
             Application.ApplicationExit += delegate { OnExit(); };
         }
-
 
         private delegate void AddTextDelegate(String s);
 
@@ -189,10 +189,11 @@ namespace Winform_Client
 
         private void StressTest()
         {
-
+            Random rnd = new Random();
             while (spam)
             {
-                sendDungeonMessage("look");
+                //SendDungeonMessage("look");
+                SendNameChangeMessage(rnd.Next(0, 1000).ToString());
                 Thread.Sleep(100);
             }
         }
@@ -234,7 +235,6 @@ namespace Winform_Client
             }
         }
 
-
         private void buttonSend_Click(object sender, EventArgs e)
         {
             if (spam)
@@ -250,7 +250,7 @@ namespace Winform_Client
                 {
                     if (listBox_ClientList.SelectedIndex == 1)
                     {
-                        sendDungeonMessage(textBox_Input.Text);
+                        SendDungeonMessage(textBox_Input.Text);
                     }
 
                     else if (listBox_ClientList.SelectedIndex == 0)
@@ -295,14 +295,119 @@ namespace Winform_Client
             DungeonCommand dungMsg = new DungeonCommand();
             dungMsg.command = Message;
             MemoryStream outStream = dungMsg.WriteData();
-            clientSocket.Send(outStream.GetBuffer());
+            try
+            {
+                clientSocket.Send(outStream.GetBuffer());
+            }
+            catch { }
         }
+
         private void SendAttackMessage(String Message)
         {
             AttackMessage attMsg = new AttackMessage();
             attMsg.msg= Message;
             MemoryStream outStream = attMsg.WriteData();
-            clientSocket.Send(outStream.GetBuffer());
+            try
+            {
+                clientSocket.Send(outStream.GetBuffer());
+            }
+            catch { }
+        }
+
+        private void SendNameChangeMessage(String name)
+        {
+            ClientNameMsg nameMsg = new ClientNameMsg();
+
+            nameMsg.name = name;
+            MemoryStream outStream = nameMsg.WriteData();
+            try
+            {
+                clientSocket.Send(outStream.GetBuffer());
+            }
+            catch { }
+        }
+
+        private void ButtonNorth_Click(object sender, EventArgs e)
+        {
+            String m = "go north";
+            SendDungeonMessage(m);
+        }
+
+        private void ButtonEast_Click(object sender, EventArgs e)
+        {
+            String m = "go east";
+            SendDungeonMessage(m);
+        }
+
+        private void ButtonSouth_Click(object sender, EventArgs e)
+        {
+            String m = "go south";
+            SendDungeonMessage(m);
+        }
+
+        private void ButtonWest_Click(object sender, EventArgs e)
+        {
+            String m = "go west";
+
+            SendDungeonMessage(m);
+        }
+
+        private void Form1_KeyDown(object sender, KeyEventArgs e)
+        {
+            //String m;
+            //switch (e.KeyCode)
+            //{
+            //    case Keys.Up:
+            //        m = "go north";
+            //        SendDungeonMessage(m);
+            //        break;
+            //    case Keys.Left:
+            //         m = "go east";
+            //        SendDungeonMessage(m);
+            //        break;
+            //    case Keys.Down:
+            //        m = "go south";
+            //        SendDungeonMessage(m);
+            //        break;
+            //    case Keys.Right:
+            //        m = "go west";
+            //        SendDungeonMessage(m);
+            //        break;
+
+            //}
+        }
+
+        private void ChangeNameClick(object sender, EventArgs e)
+        {
+            if ((NameBox.Text.Length > 0) && (clientSocket != null))
+            {
+                try
+                {
+                    SendNameChangeMessage(NameBox.Text);
+                }
+                catch (System.Exception)
+                {
+
+                }
+
+                NameBox.Text = "";
+
+            }
+        }
+
+        private void AttackSend(object sender, EventArgs e)
+        {
+            SendAttackMessage("Attack");
+        }
+
+        private void DefendSend(object sender, EventArgs e)
+        {
+            SendAttackMessage("Defend");
+        }
+
+        private void WildAttackSend(object sender, EventArgs e)
+        {
+            SendAttackMessage("WildAttack");
         }
 
         private void listBox_ClientList_SelectedIndexChanged(object sender, EventArgs e)
@@ -333,97 +438,6 @@ namespace Winform_Client
         private void Form1_Load(object sender, EventArgs e)
         {
 
-        }
-
-        private void ButtonNorth_Click(object sender, EventArgs e)
-        {
-            String m = "go north";
-            sendDungeonMessage(m);
-        }
-
-        private void ButtonEast_Click(object sender, EventArgs e)
-        {
-            String m = "go east";
-            sendDungeonMessage(m);
-        }
-
-        private void ButtonSouth_Click(object sender, EventArgs e)
-        {
-            String m = "go south";
-            sendDungeonMessage(m);
-        }
-
-        private void ButtonWest_Click(object sender, EventArgs e)
-        {
-            String m = "go west";
-            sendDungeonMessage(m);
-        }
-
-        private void Form1_KeyDown(object sender, KeyEventArgs e)
-        {
-            String m;
-            switch (e.KeyCode)
-            {
-                case Keys.Up:
-                    m = "go north";
-                    sendDungeonMessage(m);
-                    break;
-                case Keys.Left:
-                     m = "go east";
-                    sendDungeonMessage(m);
-                    break;
-                case Keys.Down:
-                    m = "go south";
-                    sendDungeonMessage(m);
-                    break;
-                case Keys.Right:
-                    m = "go west";
-                    sendDungeonMessage(m);
-                    break;
-
-            }
-        }
-
-        private void ChangeNameClick(object sender, EventArgs e)
-        {
-            if ((NameBox.Text.Length > 0) && (clientSocket != null))
-            {
-                try
-                {
-                    ClientNameMsg nameMsg = new ClientNameMsg();
-
-                    nameMsg.name = NameBox.Text;
-                    MemoryStream outStream = nameMsg.WriteData();
-                    clientSocket.Send(outStream.GetBuffer());
-                }
-                catch (System.Exception)
-                {
-
-                }
-
-                NameBox.Text = "";
-
-            }
-        }
-
-        private void attackSend(object sender, EventArgs e)
-        {
-            //implement normal attack send
-        }
-
-        private void DefendSend(object sender, EventArgs e)
-        {
-            SendAttackMessage("Defend");
-        }
-
-        private void AttackSend(object sender, EventArgs e)
-        {
-            SendAttackMessage("Attack");
-        }
-
-        private void WildAttackSend(object sender, EventArgs e)
-        {
-            SendAttackMessage("WildAttack");
         }
     }
 }

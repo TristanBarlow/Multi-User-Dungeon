@@ -13,19 +13,10 @@ namespace Dungeon
     {        
         private static Dictionary<String, Room> roomMap;
 
-        //List of current Players
-        private static List <Player> playerList;
-
-        public List <Player> GetPlayerList()
-        {
-            return playerList;
-        }
-
+        
         public void Init()
         {
             roomMap = new Dictionary<string, Room>();
-
-            playerList = new List<Player>();
 
             {
                 var room = new Room("Room 0", "You are standing in the entrance hall, You want to find someone to fight.");
@@ -69,41 +60,24 @@ namespace Dungeon
             }
         }
 
-        public void NewClient(String clientName)
+        public Room GetRandomRoom()
         {
             Random rnd = new Random();
             int num = rnd.Next(0, roomMap.Count());
             Room randomRoom = roomMap.Values.ElementAt(num);
-
-            Player newPlayer = new Player(clientName, randomRoom);
-            randomRoom.addPlayer(newPlayer);
-            playerList.Add(newPlayer);
+            return randomRoom;
         }
 
         private void MovePlayer(Player p, Room newRoom)
         {
-            p.currentRoom.removePlayer(p);
-            newRoom.addPlayer(p);
+            p.currentRoom.RemovePlayer(p);
+            newRoom.AddPlayer(p);
             p.currentRoom = newRoom;
         }
 
-        public Player GetPlayerReference(String PlayerName)
-        {
-            foreach (Player player in playerList)
-            {
-                if (player.GetPlayerName() == PlayerName)
-                {
-                    return player;
-                }
-            }
-            return null; 
-        }
-
-        public String PlayerAction(String action, String PlayerName)
+        public String PlayerAction(String action,Player player)
         {
             String returnString = "";
-
-            Player player = GetPlayerReference(PlayerName);
 
             var input = action.Split(' ');
 
@@ -117,11 +91,11 @@ namespace Dungeon
             {
                 case "help":
                     Console.Clear();
-                    returnString = U.NewLineS("Commands are ....")+
-                                   U.NewLineS("help - for this screen")+
-                                   U.NewLineS("look - to look around")+
-                                   U.NewLineS("go [north | south | east | west]  - to travel between locations")+
-                                   U.NewLineS("graf [mesage] to add grafiti to your current room")+
+                    returnString = U.NewLineS("Commands are ....") +
+                                   U.NewLineS("help - for this screen") +
+                                   U.NewLineS("look - to look around") +
+                                   U.NewLineS("go [north | south | east | west]  - to travel between locations") +
+                                   U.NewLineS("graf [mesage] to add grafiti to your current room") +
                                    U.NewLineS("Press any key to continue");
                     break;
 
@@ -142,14 +116,10 @@ namespace Dungeon
                     Console.Clear();
                     break;
 
-                case "attack":
-                    player.ChangeHealth(-10);
-                    break;
-
                 case "graf":
                     int index = action.IndexOf(' ');
                     String second = action.Substring(index + 1);
-                    player.currentRoom.addGraf(second);
+                    player.currentRoom.AddGraf(second);
                     returnString = U.NewLineS("You added a graffiti");
                     break;
 

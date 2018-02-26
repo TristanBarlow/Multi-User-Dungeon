@@ -166,7 +166,7 @@
             this.AttackButton.TabIndex = 13;
             this.AttackButton.Text = "Attack";
             this.AttackButton.UseVisualStyleBackColor = true;
-            this.AttackButton.Click += new System.EventHandler(this.attackSend);
+            this.AttackButton.Click += new System.EventHandler(this.AttackSend);
             // 
             // DefendButton
             // 
@@ -176,7 +176,6 @@
             this.DefendButton.TabIndex = 14;
             this.DefendButton.Text = "Defend";
             this.DefendButton.UseVisualStyleBackColor = true;
-            this.DefendButton.Click += new System.EventHandler(this.DefendButton);
             // 
             // button3
             // 

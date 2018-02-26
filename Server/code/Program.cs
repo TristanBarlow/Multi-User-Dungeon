@@ -9,7 +9,7 @@ using System.Threading;
 using System.IO;
 
 using MessageTypes;
-using DungeonHandler;
+using Request;
 using Dungeon;
 using PlayerN;
 
@@ -21,9 +21,11 @@ namespace Server
 
         static private int clientID = 1;
 
-        static private DungeonS dungeon;
+        static private DungeonS Dungeon;
 
-        static private DungeonHandlerS dungeonHandle;
+        static private RequestHandler RequestHandle;
+
+        static private PlayerHandler PlayerHandle;
 
         static void SendClientName(Socket s, String clientName)
         {
@@ -57,7 +59,16 @@ namespace Server
 
                     foreach (KeyValuePair<String, Socket> s in clientDictionary)
                     {
-                        s.Value.Send(outStream.GetBuffer());
+                        try
+                        {
+                            s.Value.Send(outStream.GetBuffer());
+                        }
+                        catch
+                        {
+                            Console.Write("problem sending");
+                            RemoveClientBySocket(s.Value);
+                            break;
+                        }
                     }
                 }
             }
@@ -161,9 +172,9 @@ namespace Server
         {
             String playerName = GetNameFromSocket(s);
             Player tempPlayer;
-            lock (dungeonHandle)
+            lock (RequestHandle)
             {
-               tempPlayer = dungeonHandle.GetPlayer(playerName);
+               tempPlayer = RequestHandle.GetPlayer(playerName);
             }
             HealthMessage Msg = new HealthMessage();
             Msg.health = tempPlayer.GetHealth();
@@ -186,11 +197,11 @@ namespace Server
 
             Console.WriteLine("client receive thread for " + GetNameFromSocket(chatClient));
 
-            lock (dungeonHandle)
+            lock (RequestHandle)
             {
-                dungeonHandle.AddPlayer(GetNameFromSocket(chatClient));
+                RequestHandle.AddPlayer(GetNameFromSocket(chatClient));
                 /// do command
-                SendDungeonResponse(chatClient, dungeonHandle.PlayerAction("look", GetNameFromSocket(chatClient) ));
+                SendDungeonResponse(chatClient, RequestHandle.PlayerAction("look", GetNameFromSocket(chatClient)));
             }
 
             SendClientList();
@@ -228,10 +239,9 @@ namespace Server
                                             if (!clientDictionary.ContainsKey(clientName.name))
                                             {
 
-                                                lock (dungeonHandle)
-                                                {
-                                                    dungeonHandle.UpdatePlayerName(oldName, clientName.name);
-                                                }
+                                                    RequestHandle.playerNameChange(oldName, clientName.name);
+                                                    SendPrivateMessage(chatClient, " ", ("SERVER: Name changed"));
+
 
                                                 clientDictionary.Remove(oldName);
                                                 clientDictionary.Add(clientName.name, chatClient);
@@ -274,24 +284,21 @@ namespace Server
                                         SendPrivateMessage(chatClient, "", formattedMsg);
                                     }
                                     break;
+
                                 case DungeonCommand.ID:
                                     {
                                         DungeonCommand dungMsg = (DungeonCommand)m;
 
-                                        String temp;
-
-                                        lock (dungeonHandle)
-                                        {
-                                            /// do command
-                                            temp = dungeonHandle.PlayerAction(dungMsg.command,GetNameFromSocket(chatClient));
-                                        }
-                                        ///add to a q in the dungeon handler
-
-                                        SendDungeonResponse(chatClient, temp);
+                                        SendDungeonResponse(chatClient, RequestHandle.PlayerAction(dungMsg.command, GetNameFromSocket(chatClient)));
                                         SendHealthToClient(chatClient);
                                     }
                                     break;
 
+                                case AttackMessage.ID:
+                                    {
+
+                                    }
+                                    break;
                                 default:
                                     break;
                             }
@@ -324,9 +331,12 @@ namespace Server
 
             Console.WriteLine("Server");
 
-            dungeon = new DungeonS();
-            dungeon.Init();
-            dungeonHandle = new DungeonHandlerS(ref dungeon);
+            Dungeon = new DungeonS();
+            Dungeon.Init();
+
+            PlayerHandle = new PlayerHandler();
+
+            RequestHandle = new RequestHandler(ref Dungeon, ref PlayerHandle);
 
             while (!bQuit)
             {
