@@ -294,7 +294,9 @@ namespace MessageTypes
     {
         public const int ID = 8;
 
-        public String msg;
+        public String action;
+
+        public String opponent;
 
         public AttackMessage() { mID = ID; }
 
@@ -303,9 +305,10 @@ namespace MessageTypes
             MemoryStream stream = new MemoryStream();
             BinaryWriter write = new BinaryWriter(stream);
             write.Write(ID);
-            write.Write(msg);
+            write.Write(action);
+            write.Write(opponent);
 
-            Console.Write("sending: " + msg);
+            Console.Write("sending: " + action + opponent);
 
             write.Close();
             return stream;
@@ -313,7 +316,8 @@ namespace MessageTypes
 
         public override void ReadData(BinaryReader read)
         {
-            msg = read.ReadString();
+            action = read.ReadString();
+            opponent = read.ReadString();
         }
     }
 }

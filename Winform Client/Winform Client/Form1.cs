@@ -305,7 +305,8 @@ namespace Winform_Client
         private void SendAttackMessage(String Message)
         {
             AttackMessage attMsg = new AttackMessage();
-            attMsg.msg= Message;
+            attMsg.action = Message;
+            attMsg.opponent = currentClientList[listBox_ClientList.SelectedIndex];
             MemoryStream outStream = attMsg.WriteData();
             try
             {
@@ -397,17 +398,17 @@ namespace Winform_Client
 
         private void AttackSend(object sender, EventArgs e)
         {
-            SendAttackMessage("Attack");
+            SendAttackMessage("attack");
         }
 
         private void DefendSend(object sender, EventArgs e)
         {
-            SendAttackMessage("Defend");
+            SendAttackMessage("defend");
         }
 
         private void WildAttackSend(object sender, EventArgs e)
         {
-            SendAttackMessage("WildAttack");
+            SendAttackMessage("wildattack");
         }
 
         private void listBox_ClientList_SelectedIndexChanged(object sender, EventArgs e)

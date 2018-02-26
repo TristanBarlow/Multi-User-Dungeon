@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.ComponentModel;
+
 using Dungeon;
 
 namespace PlayerN
@@ -10,13 +13,27 @@ namespace PlayerN
     {
         String playerName;
 
+        private String Stance = "attack";
+
+        public bool isInCombat;
+
+        public bool isDead;
+
         public Room currentRoom;
 
         private int health = 100;
 
+        public String GetStance() { return Stance;}
+
+        public void SetStance(String newStance) {Stance = newStance;}
+
         public int GetHealth(){ return health;}
 
-        public void ChangeHealth(int x) { health = health + x; }
+        public void ChangeHealth(int x)
+        {
+            health = health + x;
+            if (health <= 0) { isDead = true; }
+        }
 
        public String GetPlayerName() { return playerName; }
 
@@ -78,26 +95,6 @@ namespace PlayerN
                     }
                 }
             }
-        }
-
-    }
-
-    public class CombatHandler
-    {
-        Player Agro;
-        Player Def;
-
-        public CombatHandler(ref Player Agressor,ref Player Defender)
-         {
-            Agro = Agressor;
-            Def = Defender;
-         }
-
-        public Player combatLoop()
-        {
-            Player Winner = Agro; 
-
-            return Winner;
         }
 
     }

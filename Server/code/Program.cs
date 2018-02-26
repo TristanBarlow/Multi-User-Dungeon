@@ -12,6 +12,7 @@ using MessageTypes;
 using Request;
 using Dungeon;
 using PlayerN;
+using Utilities;
 
 namespace Server
 {
@@ -139,6 +140,34 @@ namespace Server
             }
         }
 
+        static void AttackFunction(AttackMessage attmsg, Socket chatClient)
+        {
+
+            RequestHandle.SetPlayerStance(attmsg.action, GetNameFromSocket(chatClient));
+
+            Socket tempS = null;
+            try { tempS = GetSocketFromName(attmsg.opponent); }
+            catch { SendPrivateMessage(chatClient, "Server: ", "Client does not exsist, select one from the drop menu"); return; }
+
+            if (tempS != null)
+            {
+                if (attmsg.opponent == GetNameFromSocket(chatClient))
+                {
+                    SendPrivateMessage(chatClient, "Server:", " Self harm is bad");
+                }
+                else
+                {
+                    SendPrivateMessage(chatClient, "", U.NewLineS("Server:" + RequestHandle.StartFight(GetNameFromSocket(chatClient), attmsg.opponent)) + attmsg.opponent + " health:  " + RequestHandle.GetPlayer(attmsg.opponent).GetHealth());
+                    SendPrivateMessage(tempS, "Server: ", U.NewLineS(GetNameFromSocket(chatClient) + " atatcked you, Your health is now" + RequestHandle.GetPlayer(attmsg.opponent).GetHealth()));
+                }
+            }
+            else
+            {
+                SendPrivateMessage(chatClient, "Server:", attmsg.opponent + " Is no longer a part of this world.");
+            }
+            SendPrivateMessage(chatClient, " ", U.NewLineS("Server: Stance Changed to " + RequestHandle.GetPlayer(GetNameFromSocket(chatClient)).GetStance()));
+        }
+
         static String GetNameFromSocket(Socket s)
         {
             lock (clientDictionary)
@@ -222,9 +251,9 @@ namespace Server
 
                         Msg m = Msg.DecodeStream(read);
 
-                        if (m != null)
+                        if (m != null && !RequestHandle.GetPlayer(GetNameFromSocket(chatClient)).isDead)
                         {
-                            Console.Write("Got a message: ");
+
                             switch (m.mID)
                             {
                                 case ClientNameMsg.ID:
@@ -239,8 +268,8 @@ namespace Server
                                             if (!clientDictionary.ContainsKey(clientName.name))
                                             {
 
-                                                    RequestHandle.playerNameChange(oldName, clientName.name);
-                                                    SendPrivateMessage(chatClient, " ", ("SERVER: Name changed"));
+                                                RequestHandle.playerNameChange(oldName, clientName.name);
+                                                SendPrivateMessage(chatClient, " ", ("SERVER: Name changed"));
 
 
                                                 clientDictionary.Remove(oldName);
@@ -249,11 +278,11 @@ namespace Server
                                             }
                                             else
                                             {
-                                                SendPrivateMessage(chatClient," ",("SERVER: oi you sneaky no-do-well, you cant have the two people with the same name"));
+                                                SendPrivateMessage(chatClient, " ", ("SERVER: oi you sneaky no-do-well, you cant have the two people with the same name"));
                                             }
                                         }
-                                    
-                                        
+
+
                                     }
                                     break;
 
@@ -262,7 +291,7 @@ namespace Server
                                     {
                                         PublicChatMsg publicMsg = (PublicChatMsg)m;
 
-                                        String formattedMsg = "<" + GetNameFromSocket(chatClient)+"> " + publicMsg.msg;
+                                        String formattedMsg = "<" + GetNameFromSocket(chatClient) + "> " + publicMsg.msg;
 
                                         Console.WriteLine("public chat - " + formattedMsg);
 
@@ -273,14 +302,14 @@ namespace Server
                                 case PrivateChatMsg.ID:
                                     {
                                         PrivateChatMsg privateMsg = (PrivateChatMsg)m;
-                                        
+
                                         String formattedMsg = "PRIVATE <" + GetNameFromSocket(chatClient) + "> " + privateMsg.msg;
 
                                         Console.WriteLine("private chat - " + formattedMsg + "to " + privateMsg.destination);
 
                                         SendPrivateMessage(GetSocketFromName(privateMsg.destination), GetNameFromSocket(chatClient), formattedMsg);
 
-                                        formattedMsg = "<" + GetNameFromSocket(chatClient) + "> --> <" +privateMsg.destination+"> " + privateMsg.msg;
+                                        formattedMsg = "<" + GetNameFromSocket(chatClient) + "> --> <" + privateMsg.destination + "> " + privateMsg.msg;
                                         SendPrivateMessage(chatClient, "", formattedMsg);
                                     }
                                     break;
@@ -290,18 +319,22 @@ namespace Server
                                         DungeonCommand dungMsg = (DungeonCommand)m;
 
                                         SendDungeonResponse(chatClient, RequestHandle.PlayerAction(dungMsg.command, GetNameFromSocket(chatClient)));
-                                        SendHealthToClient(chatClient);
                                     }
                                     break;
 
                                 case AttackMessage.ID:
                                     {
-
+                                        AttackMessage attmsg = (AttackMessage)m;
+                                        AttackFunction(attmsg, chatClient);
                                     }
                                     break;
                                 default:
                                     break;
                             }
+                        }
+                        else
+                        {
+                            SendPrivateMessage(chatClient, "", "Server: You are dead, there is nothing you can do");
                         }
                     }                   
                 }

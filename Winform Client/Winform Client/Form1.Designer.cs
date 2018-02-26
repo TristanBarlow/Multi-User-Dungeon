@@ -42,7 +42,7 @@
             this.ChangeName = new System.Windows.Forms.Button();
             this.AttackButton = new System.Windows.Forms.Button();
             this.DefendButton = new System.Windows.Forms.Button();
-            this.button3 = new System.Windows.Forms.Button();
+            this.WildAttackButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // buttonSend
@@ -176,15 +176,17 @@
             this.DefendButton.TabIndex = 14;
             this.DefendButton.Text = "Defend";
             this.DefendButton.UseVisualStyleBackColor = true;
+            this.DefendButton.Click += new System.EventHandler(this.DefendSend);
             // 
-            // button3
+            // WildAttackButton
             // 
-            this.button3.Location = new System.Drawing.Point(331, 341);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(75, 23);
-            this.button3.TabIndex = 15;
-            this.button3.Text = "Wild Attack";
-            this.button3.UseVisualStyleBackColor = true;
+            this.WildAttackButton.Location = new System.Drawing.Point(331, 341);
+            this.WildAttackButton.Name = "WildAttackButton";
+            this.WildAttackButton.Size = new System.Drawing.Size(75, 23);
+            this.WildAttackButton.TabIndex = 15;
+            this.WildAttackButton.Text = "Wild Attack";
+            this.WildAttackButton.UseVisualStyleBackColor = true;
+            this.WildAttackButton.Click += new System.EventHandler(this.WildAttackSend);
             // 
             // Form1
             // 
@@ -192,7 +194,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(980, 368);
-            this.Controls.Add(this.button3);
+            this.Controls.Add(this.WildAttackButton);
             this.Controls.Add(this.DefendButton);
             this.Controls.Add(this.AttackButton);
             this.Controls.Add(this.ChangeName);
@@ -233,7 +235,7 @@
         private System.Windows.Forms.Button ChangeName;
         private System.Windows.Forms.Button AttackButton;
         private System.Windows.Forms.Button DefendButton;
-        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Button WildAttackButton;
     }
 }
 
