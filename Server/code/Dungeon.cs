@@ -95,6 +95,9 @@ namespace Dungeon
                                    U.NewLineS("look - to look around") +
                                    U.NewLineS("go [north | south | east | west]  - to travel between locations") +
                                    U.NewLineS("graf [mesage] to add grafiti to your current room") +
+                                   U.NewLineS("pickup [name] to pick up the item of that name in the room")+
+                                   U.NewLineS("drop [name] to drop the item of that name into the room")+
+                                   U.NewLineS("inventory will look at the items you have collected")+
                                    U.NewLineS("Press any key to continue");
                     break;
 
@@ -104,22 +107,48 @@ namespace Dungeon
                                    U.NewLineS(player.currentRoom.getDescription());
                     break;
 
-                case "say":
-                    Console.Write("You say ");
-                    for (var i = 1; i < input.Length; i++)
-                    {
-                        Console.Write(input[i] + " ");
-                    }
-
-                    Thread.Sleep(1000);
-                    Console.Clear();
-                    break;
-
                 case "graf":
                     int index = action.IndexOf(' ');
                     String second = action.Substring(index + 1);
                     player.currentRoom.AddGraf(second);
                     returnString = U.NewLineS("You added a graffiti");
+                    break;
+
+                case "pickup":
+                    {
+                        String itemName = input[1];
+                        Item tempItem = player.currentRoom.inventory.TransfereItem(itemName);
+                        if (tempItem != null)
+                        {
+                            player.inventory.AddItem(tempItem);
+                            returnString += " You picked up " + player.inventory.GetFirstItemFromName(itemName).itemName;
+                        }
+                        else
+                        {
+                            returnString += "Could Not Find Item";
+                        }
+                        break;
+                    }
+
+                case "drop":
+                    {
+                        String itemName = input[1];
+                        Item tempItem = player.inventory.TransfereItem(itemName);
+                        if (tempItem != null)
+                        {
+                            player.currentRoom.inventory.AddItem(tempItem);
+                            returnString += " You droped " + player.currentRoom.inventory.GetFirstItemFromName(itemName).itemName;
+                        }
+                        else
+                        {
+                            returnString += "Could Not Find Item to drop";
+                        }
+                        break;
+                    }
+
+                case "invetory":
+                    returnString += U.NewLineS("Inventory:");
+                    returnString += player.inventory.GetIventoryDescription();
                     break;
 
                 case "go":

@@ -190,11 +190,24 @@ namespace Winform_Client
         private void StressTest()
         {
             Random rnd = new Random();
+            
             while (spam)
             {
-                //SendDungeonMessage("look");
-                SendNameChangeMessage(rnd.Next(0, 1000).ToString());
-                Thread.Sleep(100);
+                int rndNum = rnd.Next(0, 100);
+                if (rndNum < 33)
+                {
+                    SendDungeonMessage("pickup cheese");
+                }
+                if (rndNum> 33&& rndNum < 66)
+                {
+                    SendNameChangeMessage(rndNum.ToString());
+                 }
+                else
+                {
+                    SendDungeonMessage("drop cheese");
+                }
+                    //SendNameChangeMessage(rnd.Next(0, 1000).ToString());
+                Thread.Sleep(500);
             }
         }
 
@@ -224,7 +237,7 @@ namespace Winform_Client
             {
                 listBox_ClientList.DataSource = null;
                 currentClientList.Clear();
-                currentClientList.Add("Global");
+                currentClientList.Add("Say");
                 currentClientList.Add("Dungeon");
 
                 foreach (String s in clientList.clientList)

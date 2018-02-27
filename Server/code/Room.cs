@@ -24,7 +24,11 @@ namespace Dungeon
             this.name = name;
             graffitiList = new List<string>();
             Players = new List<Player>();
-            itemList = new List<Item>();
+            inventory = new Inventory();
+            Item newItem = new Item("cheese", "this is a block of chese");
+            inventory.AddItem(newItem);
+            inventory.AddItem(newItem);
+
         }
 
         public String North
@@ -98,19 +102,7 @@ namespace Dungeon
                 returnString +=U.NewLineS("You are alone") ;
             }
 
-            returnString += U.NewLineS("//");
-            if (itemList.Count() > 0)
-            {
-                foreach (Item iter in itemList)
-                {
-                    returnString += iter.Inspect() + "  ";
-                }
-
-            }
-            else
-            {
-                returnString += U.NewLineS("there are no items here");
-            }
+            returnString += inventory.GetIventoryDescription();
 
             returnString += U.NewLineS("//");
 
@@ -150,16 +142,12 @@ namespace Dungeon
 
         public List<Player> GetPlayersInRoom() { return Players; }
 
-        public List<Item> GetItemsInRoom() { if (itemList.Count > 0) return itemList; else return null; }
-
-        public void AddItem(Item nItem) { itemList.Add(nItem); }
-
         public String name = "";
         private String desc = "";
         public String[] exits = new String[4];
         private List<Player> Players;
         public List<String> graffitiList;
-        private List<Item> itemList;
+        public Inventory inventory;
         public static String[] exitNames = { "NORTH", "SOUTH", "EAST", "WEST" };
 
     }

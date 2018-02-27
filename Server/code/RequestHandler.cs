@@ -26,8 +26,11 @@ namespace Request
         public String PlayerAction(String action, String clientName)
         {
             lock (dungeon)
-            { 
-                return dungeon.PlayerAction(action, PlayerHandle.GetPlayerReference(clientName));
+            {
+                lock (PlayerHandle.GetPlayerReference(clientName))
+                {
+                    return dungeon.PlayerAction(action, PlayerHandle.GetPlayerReference(clientName));
+                }
             }
         }
 

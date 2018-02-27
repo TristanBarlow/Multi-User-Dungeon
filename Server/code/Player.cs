@@ -21,19 +21,20 @@ namespace PlayerN
 
         public Room currentRoom;
 
-        private List<Item> itemList;
+        public Inventory inventory;
 
         private int health = 100;
-
-        public List<Item> GetItemList() { if (itemList.Count() > 0) return itemList; else return null; }
-
-        public void AddItemToList(Item nItem) { itemList.Add(nItem); }
 
         public String GetStance() { return Stance;}
 
         public void SetStance(String newStance) {Stance = newStance;}
 
         public int GetHealth(){ return health;}
+
+        public void DropItem(String nItem)
+        {
+            currentRoom.inventory.AddItem(inventory.TransfereItem(nItem));
+        }
 
         public void ChangeHealth(int x)
         {
@@ -49,7 +50,7 @@ namespace PlayerN
         {
             playerName = clientName;
             currentRoom = startRoom;
-            itemList = new List<Item>();
+            inventory = new Inventory();
         }
     }
 

@@ -75,11 +75,14 @@ namespace Server
             }
         }
 
-        static void SendChatMessage(String msg)
+        static void SendRoomMessage(String msg, String clientChat)
         {
             PublicChatMsg chatMsg = new PublicChatMsg();
 
             chatMsg.msg = msg;
+
+            Room pR = RequestHandle.GetPlayer(clientChat).currentRoom;
+
 
             MemoryStream outStream = chatMsg.WriteData();
 
@@ -87,15 +90,44 @@ namespace Server
             {            
                 foreach (KeyValuePair<String,Socket> s in clientDictionary)
                 {
+                    if (pR == RequestHandle.GetPlayer(s.Key).currentRoom)
+                    {
+                        try
+                        {
+                            s.Value.Send(outStream.GetBuffer());
+                        }
+                        catch (System.Exception)
+                        {
+
+                        }
+                    }
+                }
+            }
+        }
+
+        static void SendChatMessage(String msg)
+        {
+            PublicChatMsg chatMsg = new PublicChatMsg();
+
+            chatMsg.msg = msg;
+
+
+            MemoryStream outStream = chatMsg.WriteData();
+
+            lock (clientDictionary)
+            {
+                foreach (KeyValuePair<String, Socket> s in clientDictionary)
+                {
                     try
                     {
                         s.Value.Send(outStream.GetBuffer());
                     }
                     catch (System.Exception)
                     {
-                    	
-                    }                    
+
+                    }
                 }
+                
             }
         }
 
@@ -291,11 +323,10 @@ namespace Server
                                     {
                                         PublicChatMsg publicMsg = (PublicChatMsg)m;
 
-                                        String formattedMsg = "<" + GetNameFromSocket(chatClient) + "> " + publicMsg.msg;
+                                        String formattedMsg = GetNameFromSocket(chatClient) + " says to the room " + publicMsg.msg;
 
-                                        Console.WriteLine("public chat - " + formattedMsg);
 
-                                        SendChatMessage(formattedMsg);
+                                        SendRoomMessage(formattedMsg, GetNameFromSocket(chatClient));
                                     }
                                     break;
 

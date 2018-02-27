@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Dungeon.cs" />
+    <Compile Include="Item.cs" />
     <Compile Include="RequestHandler.cs" />
     <Compile Include="Map.cs" />
     <Compile Include="Player.cs" />
