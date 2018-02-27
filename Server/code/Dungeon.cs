@@ -13,7 +13,6 @@ namespace Dungeon
     {        
         private static Dictionary<String, Room> roomMap;
 
-        
         public void Init()
         {
             roomMap = new Dictionary<string, Room>();

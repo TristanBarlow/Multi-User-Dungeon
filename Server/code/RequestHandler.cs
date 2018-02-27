@@ -104,7 +104,7 @@ namespace Request
                  pD =PlayerHandle.GetPlayerReference(defName);
             }
            
-            if ((pD != null && pA != null)&& (!pD.isDead && !pA.isDead))
+            if ((pD != null && pA != null) && (!pD.isDead && !pA.isDead))
             {
                 if (pA.currentRoom == pD.currentRoom)
                 {

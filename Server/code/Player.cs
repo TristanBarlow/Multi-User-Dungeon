@@ -21,7 +21,13 @@ namespace PlayerN
 
         public Room currentRoom;
 
+        private List<Item> itemList;
+
         private int health = 100;
+
+        public List<Item> GetItemList() { if (itemList.Count() > 0) return itemList; else return null; }
+
+        public void AddItemToList(Item nItem) { itemList.Add(nItem); }
 
         public String GetStance() { return Stance;}
 
@@ -43,6 +49,7 @@ namespace PlayerN
         {
             playerName = clientName;
             currentRoom = startRoom;
+            itemList = new List<Item>();
         }
     }
 
