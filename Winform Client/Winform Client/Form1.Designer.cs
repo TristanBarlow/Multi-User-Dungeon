@@ -31,7 +31,6 @@
             this.buttonSend = new System.Windows.Forms.Button();
             this.textBox_Input = new System.Windows.Forms.TextBox();
             this.textBox_Output = new System.Windows.Forms.TextBox();
-            this.textBox_ClientName = new System.Windows.Forms.TextBox();
             this.listBox_ClientList = new System.Windows.Forms.ListBox();
             this.NameBox = new System.Windows.Forms.TextBox();
             this.TextboxDungeon = new System.Windows.Forms.TextBox();
@@ -72,15 +71,6 @@
             this.textBox_Output.Size = new System.Drawing.Size(384, 225);
             this.textBox_Output.TabIndex = 3;
             // 
-            // textBox_ClientName
-            // 
-            this.textBox_ClientName.Location = new System.Drawing.Point(22, 19);
-            this.textBox_ClientName.Name = "textBox_ClientName";
-            this.textBox_ClientName.ReadOnly = true;
-            this.textBox_ClientName.Size = new System.Drawing.Size(100, 20);
-            this.textBox_ClientName.TabIndex = 4;
-            this.textBox_ClientName.TextChanged += new System.EventHandler(this.textBox_ClientName_TextChanged);
-            // 
             // listBox_ClientList
             // 
             this.listBox_ClientList.FormattingEnabled = true;
@@ -100,17 +90,17 @@
             // 
             // TextboxDungeon
             // 
-            this.TextboxDungeon.Location = new System.Drawing.Point(22, 52);
+            this.TextboxDungeon.Location = new System.Drawing.Point(22, 0);
             this.TextboxDungeon.Multiline = true;
             this.TextboxDungeon.Name = "TextboxDungeon";
             this.TextboxDungeon.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.TextboxDungeon.Size = new System.Drawing.Size(384, 225);
+            this.TextboxDungeon.Size = new System.Drawing.Size(384, 294);
             this.TextboxDungeon.TabIndex = 7;
             this.TextboxDungeon.TextChanged += new System.EventHandler(this.textBox2_TextChanged);
             // 
             // ButtonNorth
             // 
-            this.ButtonNorth.Location = new System.Drawing.Point(154, 283);
+            this.ButtonNorth.Location = new System.Drawing.Point(153, 300);
             this.ButtonNorth.Name = "ButtonNorth";
             this.ButtonNorth.Size = new System.Drawing.Size(75, 23);
             this.ButtonNorth.TabIndex = 8;
@@ -120,7 +110,7 @@
             // 
             // ButtonEast
             // 
-            this.ButtonEast.Location = new System.Drawing.Point(231, 302);
+            this.ButtonEast.Location = new System.Drawing.Point(230, 319);
             this.ButtonEast.Name = "ButtonEast";
             this.ButtonEast.Size = new System.Drawing.Size(75, 23);
             this.ButtonEast.TabIndex = 9;
@@ -130,7 +120,7 @@
             // 
             // ButtonSouth
             // 
-            this.ButtonSouth.Location = new System.Drawing.Point(154, 322);
+            this.ButtonSouth.Location = new System.Drawing.Point(153, 339);
             this.ButtonSouth.Name = "ButtonSouth";
             this.ButtonSouth.Size = new System.Drawing.Size(75, 23);
             this.ButtonSouth.TabIndex = 10;
@@ -140,7 +130,7 @@
             // 
             // ButtonWest
             // 
-            this.ButtonWest.Location = new System.Drawing.Point(73, 302);
+            this.ButtonWest.Location = new System.Drawing.Point(72, 319);
             this.ButtonWest.Name = "ButtonWest";
             this.ButtonWest.Size = new System.Drawing.Size(75, 23);
             this.ButtonWest.TabIndex = 11;
@@ -160,7 +150,7 @@
             // 
             // AttackButton
             // 
-            this.AttackButton.Location = new System.Drawing.Point(331, 283);
+            this.AttackButton.Location = new System.Drawing.Point(435, 328);
             this.AttackButton.Name = "AttackButton";
             this.AttackButton.Size = new System.Drawing.Size(75, 23);
             this.AttackButton.TabIndex = 13;
@@ -170,7 +160,7 @@
             // 
             // DefendButton
             // 
-            this.DefendButton.Location = new System.Drawing.Point(331, 312);
+            this.DefendButton.Location = new System.Drawing.Point(516, 328);
             this.DefendButton.Name = "DefendButton";
             this.DefendButton.Size = new System.Drawing.Size(75, 23);
             this.DefendButton.TabIndex = 14;
@@ -180,7 +170,7 @@
             // 
             // WildAttackButton
             // 
-            this.WildAttackButton.Location = new System.Drawing.Point(331, 341);
+            this.WildAttackButton.Location = new System.Drawing.Point(597, 328);
             this.WildAttackButton.Name = "WildAttackButton";
             this.WildAttackButton.Size = new System.Drawing.Size(75, 23);
             this.WildAttackButton.TabIndex = 15;
@@ -205,7 +195,6 @@
             this.Controls.Add(this.TextboxDungeon);
             this.Controls.Add(this.NameBox);
             this.Controls.Add(this.listBox_ClientList);
-            this.Controls.Add(this.textBox_ClientName);
             this.Controls.Add(this.textBox_Output);
             this.Controls.Add(this.textBox_Input);
             this.Controls.Add(this.buttonSend);
@@ -224,7 +213,6 @@
         private System.Windows.Forms.Button buttonSend;
         private System.Windows.Forms.TextBox textBox_Input;
         private System.Windows.Forms.TextBox textBox_Output;
-        private System.Windows.Forms.TextBox textBox_ClientName;
         private System.Windows.Forms.ListBox listBox_ClientList;
         private System.Windows.Forms.TextBox NameBox;
         private System.Windows.Forms.TextBox TextboxDungeon;

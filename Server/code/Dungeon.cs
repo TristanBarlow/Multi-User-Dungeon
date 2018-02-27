@@ -146,7 +146,7 @@ namespace Dungeon
                         break;
                     }
 
-                case "invetory":
+                case "inventory":
                     returnString += U.NewLineS("Inventory:");
                     returnString += player.inventory.GetIventoryDescription();
                     break;
