@@ -38,7 +38,7 @@ namespace Winform_Client
                 try
                 {
                     form.clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                    form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8500));
+                    form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("46.101.88.130"), 8500));
                     form.bConnected = true;
                     form.AddText("Connected to server");
 
