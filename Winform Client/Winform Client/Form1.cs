@@ -27,7 +27,7 @@ namespace Winform_Client
         bool bConnected = false;
         bool spam = false;
 
-        List<String> currentClientList = new List<String>();
+        List<Enemy> currentClientList = new List<Enemy>();
 
         DungeonDraw DGD;
 
@@ -175,15 +175,18 @@ namespace Winform_Client
         private void AddText(String s)
         {
             if (textBox_Output.InvokeRequired)
-            { 
-                Invoke(new AddTextDelegate(AddText), new object[] { s });
+            {
+
+                try { Invoke(new AddTextDelegate(AddText), new object[] { s }); }
+                catch {}
+
             }
             else
             {
-                if (!textBox_Output.Disposing)
-                {
-                    textBox_Output.AppendText(U.NewLineS(s));
-                }
+
+                try { textBox_Output.AppendText(U.NewLineS(s)); }
+                catch { }
+
             }
         }
 
@@ -249,12 +252,12 @@ namespace Winform_Client
             {
                 listBox_ClientList.DataSource = null;
                 currentClientList.Clear();
-                currentClientList.Add("Say");
-                currentClientList.Add("Dungeon");
+                currentClientList.Add(new Enemy("Say"));
+                currentClientList.Add(new Enemy("Dungeon"));
 
                 foreach (String s in clientList.clientList)
                 {
-                    currentClientList.Add(s);
+                    currentClientList.Add(new Enemy(s));
                 }
                 listBox_ClientList.DataSource = currentClientList;             
             }
@@ -268,8 +271,15 @@ namespace Winform_Client
                 stressThread.Start();
             }
             DGD.DrawLine(0,0, 10,10);
-            DGD.DrawPlayer(50, 50, 100);
-            DGD.DrawEnemy(0, 0, 100, "Meany");
+            DGD.DrawPlayer(50, 50, 10);
+            DGD.DrawEnemy(0, 0, 10, "Meany");
+            DGD.DrawRoom(40, 100, "Room1");
+            DGD.DrawRoom(100, 100, "Room2");
+            DGD.DrawConnector(100, 100 , true);
+            DGD.DrawRoom(100, 40, "Room4");
+            DGD.DrawConnector(100, 100, false);
+            DGD.DrawRoom(100, 160, "Room5");
+
 
             if ( (textBox_Input.Text.Length > 0) && (clientSocket != null))
             {                
@@ -293,7 +303,7 @@ namespace Winform_Client
                         PrivateChatMsg privateMsg = new PrivateChatMsg();
 
                         privateMsg.msg = textBox_Input.Text;
-                        privateMsg.destination = currentClientList[listBox_ClientList.SelectedIndex];
+                        privateMsg.destination = currentClientList[listBox_ClientList.SelectedIndex].Name;
                         MemoryStream outStream = privateMsg.WriteData();
                         clientSocket.Send(outStream.GetBuffer());                
                     }
@@ -335,7 +345,7 @@ namespace Winform_Client
             {
                 AttackMessage attMsg = new AttackMessage();
                 attMsg.action = Message;
-                attMsg.opponent = currentClientList[listBox_ClientList.SelectedIndex];
+                attMsg.opponent = currentClientList[listBox_ClientList.SelectedIndex].Name;
                 MemoryStream outStream = attMsg.WriteData();
                 try
                 {
@@ -362,7 +372,7 @@ namespace Winform_Client
         {
             String m = "go north";
 
-            DGD.DrawPlayer(100,100,100);
+            DGD.DrawPlayer(100,100,10);
 
             SendDungeonMessage(m);
         }
@@ -477,6 +487,10 @@ namespace Winform_Client
         private void DungeonPaint(object sender, PaintEventArgs e)
         {
             DGD.Draw();
+        }
+        private void DungeonMapRead(String map = "")
+        {
+
         }
     }
 }
