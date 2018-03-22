@@ -185,9 +185,10 @@
             this.DungeonGraphic.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.DungeonGraphic.Location = new System.Drawing.Point(507, 69);
             this.DungeonGraphic.Name = "DungeonGraphic";
-            this.DungeonGraphic.Size = new System.Drawing.Size(291, 237);
+            this.DungeonGraphic.Size = new System.Drawing.Size(332, 316);
             this.DungeonGraphic.TabIndex = 16;
             this.DungeonGraphic.TabStop = false;
+            this.DungeonGraphic.Paint += new System.Windows.Forms.PaintEventHandler(this.DungeonPaint);
             // 
             // Form1
             // 

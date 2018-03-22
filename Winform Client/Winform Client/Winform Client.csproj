@@ -65,6 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Client.cs" />
+    <Compile Include="DungeonDraw.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

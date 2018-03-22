@@ -28,8 +28,8 @@ namespace Winform_Client
         bool spam = false;
 
         List<String> currentClientList = new List<String>();
-        private Graphics g;
-        private Pen pen1 = new Pen(Color.White, 5F);
+
+        DungeonDraw DGD;
 
         static void ClientProcess(Object o)
 
@@ -164,6 +164,9 @@ namespace Winform_Client
             myThread = new Thread(ClientProcess);
             myThread.Start(this);
 
+
+            DGD = new DungeonDraw(this.DungeonGraphic);
+
             Application.ApplicationExit += delegate { OnExit(); };
         }
 
@@ -264,6 +267,9 @@ namespace Winform_Client
                 Thread stressThread = new Thread(StressTest);
                 stressThread.Start();
             }
+            DGD.DrawLine(0,0, 10,10);
+            DGD.DrawPlayer(50, 50, 100);
+            DGD.DrawEnemy(0, 0, 100, "Meany");
 
             if ( (textBox_Input.Text.Length > 0) && (clientSocket != null))
             {                
@@ -325,15 +331,18 @@ namespace Winform_Client
 
         private void SendAttackMessage(String Message)
         {
-            AttackMessage attMsg = new AttackMessage();
-            attMsg.action = Message;
-            attMsg.opponent = currentClientList[listBox_ClientList.SelectedIndex];
-            MemoryStream outStream = attMsg.WriteData();
-            try
+            if (bConnected)
             {
-                clientSocket.Send(outStream.GetBuffer());
+                AttackMessage attMsg = new AttackMessage();
+                attMsg.action = Message;
+                attMsg.opponent = currentClientList[listBox_ClientList.SelectedIndex];
+                MemoryStream outStream = attMsg.WriteData();
+                try
+                {
+                    clientSocket.Send(outStream.GetBuffer());
+                }
+                catch { }
             }
-            catch { }
         }
 
         private void SendNameChangeMessage(String name)
@@ -352,6 +361,9 @@ namespace Winform_Client
         private void ButtonNorth_Click(object sender, EventArgs e)
         {
             String m = "go north";
+
+            DGD.DrawPlayer(100,100,100);
+
             SendDungeonMessage(m);
         }
 
@@ -460,6 +472,11 @@ namespace Winform_Client
         private void Form1_Load(object sender, EventArgs e)
         {
 
+        }
+
+        private void DungeonPaint(object sender, PaintEventArgs e)
+        {
+            DGD.Draw();
         }
     }
 }
