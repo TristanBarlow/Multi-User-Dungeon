@@ -42,13 +42,15 @@
             this.AttackButton = new System.Windows.Forms.Button();
             this.DefendButton = new System.Windows.Forms.Button();
             this.WildAttackButton = new System.Windows.Forms.Button();
+            this.DungeonGraphic = new System.Windows.Forms.PictureBox();
+            ((System.ComponentModel.ISupportInitialize)(this.DungeonGraphic)).BeginInit();
             this.SuspendLayout();
             // 
             // buttonSend
             // 
-            this.buttonSend.Location = new System.Drawing.Point(825, 299);
+            this.buttonSend.Location = new System.Drawing.Point(411, 396);
             this.buttonSend.Name = "buttonSend";
-            this.buttonSend.Size = new System.Drawing.Size(75, 23);
+            this.buttonSend.Size = new System.Drawing.Size(90, 21);
             this.buttonSend.TabIndex = 0;
             this.buttonSend.Text = "Send";
             this.buttonSend.UseVisualStyleBackColor = true;
@@ -56,7 +58,7 @@
             // 
             // textBox_Input
             // 
-            this.textBox_Input.Location = new System.Drawing.Point(435, 302);
+            this.textBox_Input.Location = new System.Drawing.Point(21, 396);
             this.textBox_Input.Name = "textBox_Input";
             this.textBox_Input.Size = new System.Drawing.Size(384, 20);
             this.textBox_Input.TabIndex = 2;
@@ -64,33 +66,33 @@
             // 
             // textBox_Output
             // 
-            this.textBox_Output.Location = new System.Drawing.Point(430, 52);
+            this.textBox_Output.Location = new System.Drawing.Point(22, 312);
             this.textBox_Output.Multiline = true;
             this.textBox_Output.Name = "textBox_Output";
             this.textBox_Output.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_Output.Size = new System.Drawing.Size(384, 225);
+            this.textBox_Output.Size = new System.Drawing.Size(384, 78);
             this.textBox_Output.TabIndex = 3;
             // 
             // listBox_ClientList
             // 
             this.listBox_ClientList.FormattingEnabled = true;
-            this.listBox_ClientList.Location = new System.Drawing.Point(829, 52);
+            this.listBox_ClientList.Location = new System.Drawing.Point(412, 69);
             this.listBox_ClientList.Name = "listBox_ClientList";
-            this.listBox_ClientList.Size = new System.Drawing.Size(81, 225);
+            this.listBox_ClientList.Size = new System.Drawing.Size(89, 316);
             this.listBox_ClientList.TabIndex = 5;
             this.listBox_ClientList.SelectedIndexChanged += new System.EventHandler(this.listBox_ClientList_SelectedIndexChanged);
             // 
             // NameBox
             // 
-            this.NameBox.Location = new System.Drawing.Point(736, 22);
+            this.NameBox.Location = new System.Drawing.Point(412, 41);
             this.NameBox.Name = "NameBox";
-            this.NameBox.Size = new System.Drawing.Size(78, 20);
+            this.NameBox.Size = new System.Drawing.Size(89, 20);
             this.NameBox.TabIndex = 6;
             this.NameBox.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // TextboxDungeon
             // 
-            this.TextboxDungeon.Location = new System.Drawing.Point(22, 0);
+            this.TextboxDungeon.Location = new System.Drawing.Point(22, 12);
             this.TextboxDungeon.Multiline = true;
             this.TextboxDungeon.Name = "TextboxDungeon";
             this.TextboxDungeon.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
@@ -100,7 +102,7 @@
             // 
             // ButtonNorth
             // 
-            this.ButtonNorth.Location = new System.Drawing.Point(153, 300);
+            this.ButtonNorth.Location = new System.Drawing.Point(147, 424);
             this.ButtonNorth.Name = "ButtonNorth";
             this.ButtonNorth.Size = new System.Drawing.Size(75, 23);
             this.ButtonNorth.TabIndex = 8;
@@ -110,7 +112,7 @@
             // 
             // ButtonEast
             // 
-            this.ButtonEast.Location = new System.Drawing.Point(230, 319);
+            this.ButtonEast.Location = new System.Drawing.Point(224, 452);
             this.ButtonEast.Name = "ButtonEast";
             this.ButtonEast.Size = new System.Drawing.Size(75, 23);
             this.ButtonEast.TabIndex = 9;
@@ -120,7 +122,7 @@
             // 
             // ButtonSouth
             // 
-            this.ButtonSouth.Location = new System.Drawing.Point(153, 339);
+            this.ButtonSouth.Location = new System.Drawing.Point(147, 481);
             this.ButtonSouth.Name = "ButtonSouth";
             this.ButtonSouth.Size = new System.Drawing.Size(75, 23);
             this.ButtonSouth.TabIndex = 10;
@@ -130,7 +132,7 @@
             // 
             // ButtonWest
             // 
-            this.ButtonWest.Location = new System.Drawing.Point(72, 319);
+            this.ButtonWest.Location = new System.Drawing.Point(66, 452);
             this.ButtonWest.Name = "ButtonWest";
             this.ButtonWest.Size = new System.Drawing.Size(75, 23);
             this.ButtonWest.TabIndex = 11;
@@ -140,9 +142,9 @@
             // 
             // ChangeName
             // 
-            this.ChangeName.Location = new System.Drawing.Point(825, 19);
+            this.ChangeName.Location = new System.Drawing.Point(411, 12);
             this.ChangeName.Name = "ChangeName";
-            this.ChangeName.Size = new System.Drawing.Size(85, 23);
+            this.ChangeName.Size = new System.Drawing.Size(90, 23);
             this.ChangeName.TabIndex = 12;
             this.ChangeName.Text = "Change Name";
             this.ChangeName.UseVisualStyleBackColor = true;
@@ -150,7 +152,7 @@
             // 
             // AttackButton
             // 
-            this.AttackButton.Location = new System.Drawing.Point(435, 328);
+            this.AttackButton.Location = new System.Drawing.Point(305, 423);
             this.AttackButton.Name = "AttackButton";
             this.AttackButton.Size = new System.Drawing.Size(75, 23);
             this.AttackButton.TabIndex = 13;
@@ -160,7 +162,7 @@
             // 
             // DefendButton
             // 
-            this.DefendButton.Location = new System.Drawing.Point(516, 328);
+            this.DefendButton.Location = new System.Drawing.Point(305, 452);
             this.DefendButton.Name = "DefendButton";
             this.DefendButton.Size = new System.Drawing.Size(75, 23);
             this.DefendButton.TabIndex = 14;
@@ -170,7 +172,7 @@
             // 
             // WildAttackButton
             // 
-            this.WildAttackButton.Location = new System.Drawing.Point(597, 328);
+            this.WildAttackButton.Location = new System.Drawing.Point(305, 481);
             this.WildAttackButton.Name = "WildAttackButton";
             this.WildAttackButton.Size = new System.Drawing.Size(75, 23);
             this.WildAttackButton.TabIndex = 15;
@@ -178,12 +180,24 @@
             this.WildAttackButton.UseVisualStyleBackColor = true;
             this.WildAttackButton.Click += new System.EventHandler(this.WildAttackSend);
             // 
+            // DungeonGraphic
+            // 
+            this.DungeonGraphic.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.DungeonGraphic.Location = new System.Drawing.Point(507, 69);
+            this.DungeonGraphic.Name = "DungeonGraphic";
+            this.DungeonGraphic.Size = new System.Drawing.Size(332, 316);
+            this.DungeonGraphic.TabIndex = 16;
+            this.DungeonGraphic.TabStop = false;
+            this.DungeonGraphic.Paint += new System.Windows.Forms.PaintEventHandler(this.DungeonPaint);
+            // 
             // Form1
             // 
             this.AcceptButton = this.buttonSend;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(980, 368);
+            this.BackColor = System.Drawing.SystemColors.Info;
+            this.ClientSize = new System.Drawing.Size(851, 512);
+            this.Controls.Add(this.DungeonGraphic);
             this.Controls.Add(this.WildAttackButton);
             this.Controls.Add(this.DefendButton);
             this.Controls.Add(this.AttackButton);
@@ -198,11 +212,13 @@
             this.Controls.Add(this.textBox_Output);
             this.Controls.Add(this.textBox_Input);
             this.Controls.Add(this.buttonSend);
+            this.ForeColor = System.Drawing.SystemColors.ControlText;
             this.KeyPreview = true;
             this.Name = "Form1";
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
+            ((System.ComponentModel.ISupportInitialize)(this.DungeonGraphic)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -224,6 +240,7 @@
         private System.Windows.Forms.Button AttackButton;
         private System.Windows.Forms.Button DefendButton;
         private System.Windows.Forms.Button WildAttackButton;
+        private System.Windows.Forms.PictureBox DungeonGraphic;
     }
 }
 
