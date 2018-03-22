@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
+
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -27,6 +28,8 @@ namespace Winform_Client
         bool spam = false;
 
         List<String> currentClientList = new List<String>();
+        private Graphics g;
+        private Pen pen1 = new Pen(Color.White, 5F);
 
         static void ClientProcess(Object o)
 
@@ -38,7 +41,7 @@ namespace Winform_Client
                 try
                 {
                     form.clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                    form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8500));
+                    form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("46.101.88.130"), 8500));
                     form.bConnected = true;
                     form.AddText("Connected to server");
 
@@ -60,7 +63,10 @@ namespace Winform_Client
                 }
                 catch (System.Exception)
                 {
-                    form.AddText(U.NewLineS("No server!"));
+                    if (form != null && form.textBox_Output != null)
+                    {
+                        form.AddText(U.NewLineS("No server!"));
+                    }
                     Thread.Sleep(1000);
                 }               
             }
@@ -171,7 +177,10 @@ namespace Winform_Client
             }
             else
             {
-                textBox_Output.AppendText(U.NewLineS(s));
+                if (!textBox_Output.Disposing)
+                {
+                    textBox_Output.AppendText(U.NewLineS(s));
+                }
             }
         }
 
@@ -256,7 +265,6 @@ namespace Winform_Client
                 stressThread.Start();
             }
 
-
             if ( (textBox_Input.Text.Length > 0) && (clientSocket != null))
             {                
                 try
@@ -295,12 +303,12 @@ namespace Winform_Client
 
         private void OnExit()
         {
-            bQuit = true;
-            Thread.Sleep(500);
             if (myThread != null)
             {
                 myThread.Abort();
             }
+            bQuit = true;
+            bConnected = false;
         }
 
         private void SendDungeonMessage(String Message)
