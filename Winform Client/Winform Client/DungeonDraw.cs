@@ -20,13 +20,13 @@ namespace Winform_Client
         private SolidBrush SolidBrushG = new SolidBrush(Color.Green);
         private SolidBrush SolidBrushR = new SolidBrush(Color.Red);
         private Pen PenW = new Pen(Color.White, 4F);
-        private Pen PenB = new Pen(Color.Aqua, 4F);
+        private Pen PenB = new Pen(Color.Black, 4F);
 
         public int Walls { get; set; } = 0;
 
         public int Enemy { get; set; } = 0;
 
-        int Scale = 2 ;
+        int Scale = 4 ;
 
         int Connectors = 0;
 

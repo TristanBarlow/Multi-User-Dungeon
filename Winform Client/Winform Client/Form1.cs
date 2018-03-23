@@ -273,12 +273,10 @@ namespace Winform_Client
             DGD.DrawLine(0,0, 10,10);
             DGD.DrawPlayer(50, 50, 10);
             DGD.DrawEnemy(0, 0, 10, "Meany");
-            DGD.DrawRoom(40, 100, "Room1");
-            DGD.DrawRoom(100, 100, "Room2");
-            DGD.DrawConnector(100, 100 , true);
-            DGD.DrawRoom(100, 40, "Room4");
-            DGD.DrawConnector(100, 100, false);
-            DGD.DrawRoom(100, 160, "Room5");
+            DGD.DrawRoom(0, 0, "Room1");
+            DGD.DrawRoom(120, 0, "Room2");
+            DGD.DrawConnector(120, 0 , true);
+
 
 
             if ( (textBox_Input.Text.Length > 0) && (clientSocket != null))
