@@ -152,4 +152,18 @@ namespace Winform_Client
             RoomNum = Rn;
         }
     }
+
+    public class Room
+    {
+        public int RoomNum { set; get; } = -1;
+        public int North { set; get; } =-1;
+        public int East { set; get; } = -1;
+        public int South { set; get; } =-1;
+        public int West { set; get; } = -1;
+        public Room(int rN)
+        {
+            RoomNum = rN;
+        }
+
+    }
 }
