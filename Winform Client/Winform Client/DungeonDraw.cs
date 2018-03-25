@@ -20,20 +20,22 @@ namespace Winform_Client
         private SolidBrush SolidBrushG = new SolidBrush(Color.Green);
         private SolidBrush SolidBrushR = new SolidBrush(Color.Red);
         private Pen PenW = new Pen(Color.White, 4F);
-        private Pen PenB = new Pen(Color.Black, 4F);
+        private Pen PenB = new Pen(Color.Blue, 4F);
 
         public int Walls { get; set; } = 0;
 
         public int Enemy { get; set; } = 0;
 
-        int Scale = 4 ;
+        int Scale = 2;
 
         int Connectors = 0;
 
         public Color FillColor { get; set; } = Color.Black;
 
-        int roomWidth = 20;
-        int roomHeight = 20;
+       private int RoomWidth = 20;
+       private int RoomHeight = 20;
+       private int RoomGapX = 20;
+       private int RoomGapY = 20;
 
         public delegate void Del();
         public Dictionary<String, Del> DrawDict { get; set; } = new Dictionary<String, Del>();
@@ -46,29 +48,33 @@ namespace Winform_Client
             YPos = DG.Location.Y;
             PB = DG;
             G = DG.CreateGraphics();
-            roomWidth*= Scale;
-            roomHeight *= Scale;
- 
+            RoomWidth*= Scale;
+            RoomHeight *= Scale;
+            RoomGapX = (int)(RoomWidth * 1.5);
+            RoomGapY = (int)(RoomHeight * 1.5);
+
         }
 
         public void DrawLine(int x, int y, int x2, int y2)
         {
             Walls++;
             DrawDict.Add(""+ Walls, () => G.DrawLine(PenW, x, y, x2, y2));
-            Draw();
+            G.DrawLine(PenW, x, y, x2, y2);
         }
 
         public void DrawWall(int SXPos, int SYPos, int EXPos, int EYPos)
         {
             Walls++;
             DrawDict.Add("Wall" + Walls, () => G.DrawLine(PenW, SXPos, SYPos, EXPos, EYPos));
-            Draw();
+            G.DrawLine(PenW, SXPos, SYPos, EXPos, EYPos);
         }
 
         public void DrawConnector(int x, int y, bool isHorizontal)
         {
-            int xSize = roomWidth/2;
-            int ySize = roomHeight/2;
+            int xSize = RoomWidth /2 ;
+            int ySize = RoomHeight /2;
+            x -= RoomWidth / 2;
+            y -= RoomHeight / 2;
             if (isHorizontal)
             {
                 ySize = ySize / 2;
@@ -81,17 +87,21 @@ namespace Winform_Client
                 x += xSize + xSize/2 ;
                 y -= ySize;
             }
+
             Connectors++;
             DrawDict.Add("Connector" + Connectors, () => G.DrawRectangle(PenB, x, y, xSize, ySize));
-            Draw();
+            G.DrawRectangle(PenB, x, y, xSize, ySize);
         }
 
-        public void DrawRoom(int x, int y, String RoomName)
+        public void DrawRoom(Room r)
         {
-            if (!DrawDict.ContainsKey(RoomName))
+            String rN = "Room" + r.RoomNum;
+            int tx = r.XPos - RoomWidth / 2;
+            int ty = r.YPos - RoomHeight / 2;
+            if (!DrawDict.ContainsKey(rN))
             {
-                DrawDict.Add(RoomName, () => G.DrawRectangle(PenW, x, y, roomWidth, roomHeight));
-                Draw();
+                DrawDict.Add(rN, () => G.DrawRectangle(PenW, tx, ty, RoomWidth, RoomHeight));
+                G.DrawRectangle(PenW, tx, ty, RoomWidth, RoomHeight);
             }
         }
 
@@ -136,6 +146,59 @@ namespace Winform_Client
                DrawDict.ElementAt(i).Value();
             }
         }
+
+        public void AddRoomDraws(List<Room> RoomList)
+        {
+            RoomList.OrderBy(o => o.RoomNum).ToList();
+            int midX = (PB.Width / 2) ;
+            int midY = (PB.Height / 2);
+
+            foreach (Room r in RoomList)
+            {
+                if (r.RoomNum == -1) break;
+                if (r.RoomNum == 0)
+                {
+                    r.XPos = midX;
+                    r.YPos = midY;
+                    DrawRoom(r);
+                    r.isDraw = true;
+                }
+                if (r.North != -1 && !RoomList.ElementAt(r.North).isDraw)
+                {
+                    RoomList.ElementAt(r.North).isDraw = true;
+                    RoomList.ElementAt(r.North).XPos = r.XPos;
+                    RoomList.ElementAt(r.North).YPos = r.YPos - RoomGapY;
+                    DrawConnector(r.XPos, r.YPos, false);
+                    DrawRoom(RoomList.ElementAt(r.North));
+                }
+                if (r.East != -1 && !RoomList.ElementAt(r.East).isDraw)
+                {
+                    RoomList.ElementAt(r.East).isDraw = true;
+                    RoomList.ElementAt(r.East).XPos = r.XPos + RoomGapX;
+                    RoomList.ElementAt(r.East).YPos = r.YPos;
+                    DrawConnector(r.XPos + RoomGapX, r.YPos, true);
+                    DrawRoom(RoomList.ElementAt(r.East));
+                }
+                if (r.South!= -1 && !RoomList.ElementAt(r.South).isDraw)
+                {
+                    RoomList.ElementAt(r.South).isDraw = true;
+                    RoomList.ElementAt(r.South).XPos = r.XPos;
+                    RoomList.ElementAt(r.South).YPos = r.YPos + RoomGapY;
+                    DrawConnector(r.XPos, r.YPos + RoomGapY, false);
+                    DrawRoom(RoomList.ElementAt(r.South));
+                }
+                if (r.West != -1 && !RoomList.ElementAt(r.West).isDraw)
+                {
+                    RoomList.ElementAt(r.West).isDraw = true;
+                    RoomList.ElementAt(r.West).XPos = r.XPos - RoomGapX;
+                    RoomList.ElementAt(r.West).YPos = r.YPos;
+                    DrawConnector(r.XPos, r.YPos, true);
+                    DrawRoom(RoomList.ElementAt(r.West));
+                }
+
+
+            }
+        }
     }
 
     public class Enemy
@@ -155,11 +218,14 @@ namespace Winform_Client
 
     public class Room
     {
+        public int XPos { get; set; } = 0;
+        public int YPos { get; set; } = 0;
         public int RoomNum { set; get; } = -1;
         public int North { set; get; } =-1;
         public int East { set; get; } = -1;
         public int South { set; get; } =-1;
         public int West { set; get; } = -1;
+        public bool isDraw { set; get; } = false;
         public Room(int rN)
         {
             RoomNum = rN;
