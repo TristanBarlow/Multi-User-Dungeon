@@ -20,7 +20,7 @@ namespace Winform_Client
         private SolidBrush SolidBrushG = new SolidBrush(Color.Green);
         private SolidBrush SolidBrushR = new SolidBrush(Color.Red);
         private Pen PenW = new Pen(Color.White, 4F);
-        private Pen PenB = new Pen(Color.Blue, 4F);
+        private Pen PenB = new Pen(Color.DarkCyan, 4F);
 
         public int Walls { get; set; } = 0;
 
@@ -36,9 +36,13 @@ namespace Winform_Client
        private int RoomHeight = 20;
        private int RoomGapX = 20;
        private int RoomGapY = 20;
+       private int PlayerSize = 8;
+       private int EnemySize = 6;
 
         public delegate void Del();
-        public Dictionary<String, Del> DrawDict { get; set; } = new Dictionary<String, Del>();
+        private Dictionary<String, Del> MainDrawQueue = new Dictionary<String, Del>();
+        private Dictionary<String, Del> LastDrawQueue = new Dictionary<String, Del>();
+        private Dictionary<String, Del> DynamicDrawQueue = new Dictionary<String, Del>();
 
         public DungeonDraw(PictureBox DG)
         {
@@ -58,14 +62,14 @@ namespace Winform_Client
         public void DrawLine(int x, int y, int x2, int y2)
         {
             Walls++;
-            DrawDict.Add(""+ Walls, () => G.DrawLine(PenW, x, y, x2, y2));
+            MainDrawQueue.Add(""+ Walls, () => G.DrawLine(PenW, x, y, x2, y2));
             G.DrawLine(PenW, x, y, x2, y2);
         }
 
         public void DrawWall(int SXPos, int SYPos, int EXPos, int EYPos)
         {
             Walls++;
-            DrawDict.Add("Wall" + Walls, () => G.DrawLine(PenW, SXPos, SYPos, EXPos, EYPos));
+            MainDrawQueue.Add("Wall" + Walls, () => G.DrawLine(PenW, SXPos, SYPos, EXPos, EYPos));
             G.DrawLine(PenW, SXPos, SYPos, EXPos, EYPos);
         }
 
@@ -89,7 +93,7 @@ namespace Winform_Client
             }
 
             Connectors++;
-            DrawDict.Add("Connector" + Connectors, () => G.DrawRectangle(PenB, x, y, xSize, ySize));
+            LastDrawQueue.Add("Connector" + Connectors, () => G.DrawRectangle(PenB, x, y, xSize, ySize));
             G.DrawRectangle(PenB, x, y, xSize, ySize);
         }
 
@@ -98,53 +102,64 @@ namespace Winform_Client
             String rN = "Room" + r.RoomNum;
             int tx = r.XPos - RoomWidth / 2;
             int ty = r.YPos - RoomHeight / 2;
-            if (!DrawDict.ContainsKey(rN))
+            if (!MainDrawQueue.ContainsKey(rN))
             {
-                DrawDict.Add(rN, () => G.DrawRectangle(PenW, tx, ty, RoomWidth, RoomHeight));
+                MainDrawQueue.Add(rN, () => G.DrawRectangle(PenW, tx, ty, RoomWidth, RoomHeight));
                 G.DrawRectangle(PenW, tx, ty, RoomWidth, RoomHeight);
             }
         }
 
-        public void DrawPlayer(int XPos, int YPos, int Radius)
+        private void DrawPlayer(int XPos, int YPos)
         {
-            SolidBrush t = new SolidBrush(Color.Green);
 
-            if (DrawDict.ContainsKey("player"))
-            {
-                DrawDict.Remove("player");
-                DrawDict.Add("player", () => G.FillEllipse(SolidBrushG, XPos, YPos, Radius, Radius));
-            }
+            if (DynamicDrawQueue.ContainsKey("player"))
+            {   
+                DynamicDrawQueue.Remove("player");
+                DynamicDrawQueue.Add("player", () => G.FillEllipse(SolidBrushG, XPos, YPos, PlayerSize, PlayerSize));
+            }   
             else
-            {
-                DrawDict.Add("player", () => G.FillEllipse(SolidBrushG, XPos, YPos, Radius, Radius));
+            {   
+                DynamicDrawQueue.Add("player", () => G.FillEllipse(SolidBrushG, XPos, YPos, PlayerSize, PlayerSize));
             }
-            Draw();
         }
 
-        public void DrawEnemy(int XPos, int YPos, int Radius, String EnemyName  = " ")
+        private void DrawEnemy(int XPos, int YPos, String EnemyName  = " ")
         {
 
-            if (DrawDict.ContainsKey(EnemyName))
+            if (DynamicDrawQueue.ContainsKey(EnemyName))
             {
-                DrawDict.Remove(EnemyName);
-                DrawDict.Add(EnemyName, () => G.FillEllipse(SolidBrushR, XPos, YPos, Radius, Radius));
+                DynamicDrawQueue.Remove(EnemyName);
+                DynamicDrawQueue.Add(EnemyName, () => G.FillEllipse(SolidBrushR, XPos, YPos, EnemySize, EnemySize));
             }
 
             else
             {
                 Enemy++;
-                DrawDict.Add(EnemyName, () => G.FillEllipse(SolidBrushR, XPos, YPos, Radius, Radius));
+                DynamicDrawQueue.Add(EnemyName, () => G.FillEllipse(SolidBrushR, XPos, YPos, EnemySize, EnemySize));
             }
-            Draw();
+        }
+
+        private void DrawDynamics()
+        {
+            for (int i = 0; i < this.DynamicDrawQueue.Count(); i++)
+            {
+                DynamicDrawQueue.ElementAt(i).Value();
+            }
         }
 
         public void Draw()
         {
             G.Clear(FillColor);
-            for (int i = 0; i < this.DrawDict.Count(); i++)
+
+            for (int i = 0; i < this.LastDrawQueue.Count(); i++)
             {
-               DrawDict.ElementAt(i).Value();
+                LastDrawQueue.ElementAt(i).Value();
             }
+            for (int i = 0; i < this.MainDrawQueue.Count(); i++)
+            {
+                MainDrawQueue.ElementAt(i).Value();
+            }
+            DrawDynamics();
         }
 
         public void AddRoomDraws(List<Room> RoomList)
@@ -198,6 +213,40 @@ namespace Winform_Client
 
 
             }
+        }
+
+        public void UpdateClient(Enemy e, Room r)
+        { }
+
+        public void DrawClients(List<Enemy> enemies, List<Room> roomList, int PlayerRoomNum)
+        {
+            if (roomList.Count > 0)
+            {
+                foreach (Room r in roomList)
+                {
+                    int iter = 0;
+                    int xMove = RoomWidth / 3 ;
+                    int yMove = RoomHeight / 3;
+                    foreach (Enemy e in enemies)
+                    {
+                        if (e.RoomNum == r.RoomNum)
+                        {
+                            
+                            if (iter * PlayerSize *2 > RoomWidth)
+                            {
+                                yMove -= PlayerSize;
+                                xMove = RoomWidth/3;
+                                iter = 0;
+                            }
+                            DrawEnemy(r.XPos - xMove,  r.YPos - yMove , e.Name);
+                            xMove -= PlayerSize;
+                            iter++;
+                        }
+                    }
+                }
+                DrawPlayer(roomList[PlayerRoomNum].XPos, roomList[PlayerRoomNum].YPos);
+                DrawDynamics();
+            }   
         }
     }
 

@@ -313,6 +313,13 @@ namespace Winform_Client
             List<Room> rL = new List<Room>();
             MapParser(ref rL, "&n1e2&s0e3&w0&w2&");
             DGD.AddRoomDraws(rL);
+            for (int i = 0; i < 5; i++)
+            {
+                currentClientList.Add(new Enemy(" " + currentClientList.Count(), 0));
+            }                                        
+
+            DGD.DrawClients(currentClientList, rL, 0);
+            DGD.Draw();
 
             if ( (textBox_Input.Text.Length > 0) && (clientSocket != null))
             {                
@@ -404,8 +411,6 @@ namespace Winform_Client
         private void ButtonNorth_Click(object sender, EventArgs e)
         {
             String m = "go north";
-
-            DGD.DrawPlayer(100,100,10);
 
             SendDungeonMessage(m);
         }
