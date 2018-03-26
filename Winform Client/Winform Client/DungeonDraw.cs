@@ -215,33 +215,28 @@ namespace Winform_Client
             }
         }
 
-        public void UpdateClient(Enemy e, Room r)
-        { }
+        public void UpdateClient(Enemy e, ref List <Room> roomList )
+        {
+            if (roomList[e.RoomNum].NumClients * PlayerSize * 2 > RoomWidth)
+            {
+                roomList[e.RoomNum].YEnemySpawn -= PlayerSize;
+                roomList[e.RoomNum].XEnemySpawn = RoomWidth / 3;
+                roomList[e.RoomNum].NumClients = 0;
+            }
+            DrawEnemy(roomList[e.RoomNum].XPos - roomList[e.RoomNum].XEnemySpawn, roomList[e.RoomNum].YPos - roomList[e.RoomNum].YEnemySpawn, e.Name);
+            roomList[e.RoomNum].XEnemySpawn -= PlayerSize;
+            roomList[e.RoomNum].NumClients++;
 
-        public void DrawClients(List<Enemy> enemies, List<Room> roomList, int PlayerRoomNum)
+        }
+
+        public void DrawClients(List<Enemy> enemies, ref List<Room> roomList, int PlayerRoomNum)
         {
             if (roomList.Count > 0)
             {
-                foreach (Room r in roomList)
-                {
-                    int iter = 0;
-                    int xMove = RoomWidth / 3 ;
-                    int yMove = RoomHeight / 3;
                     foreach (Enemy e in enemies)
                     {
-                        if (e.RoomNum == r.RoomNum)
-                        {
-                            
-                            if (iter * PlayerSize *2 > RoomWidth)
-                            {
-                                yMove -= PlayerSize;
-                                xMove = RoomWidth/3;
-                                iter = 0;
-                            }
-                            DrawEnemy(r.XPos - xMove,  r.YPos - yMove , e.Name);
-                            xMove -= PlayerSize;
-                            iter++;
-                        }
+
+                    UpdateClient(e, ref roomList);
                     }
                 }
                 DrawPlayer(roomList[PlayerRoomNum].XPos, roomList[PlayerRoomNum].YPos);
@@ -267,6 +262,9 @@ namespace Winform_Client
 
     public class Room
     {
+        public int XEnemySpawn { set; get; } = 0;
+        public int YEnemySpawn { set; get; } = 0;
+        public int NumClients { get; set; } = 0;
         public int XPos { get; set; } = 0;
         public int YPos { get; set; } = 0;
         public int RoomNum { set; get; } = -1;
@@ -281,4 +279,4 @@ namespace Winform_Client
         }
 
     }
-}
+

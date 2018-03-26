@@ -28,6 +28,8 @@ namespace Winform_Client
         bool spam = false;
 
         List<Enemy> currentClientList = new List<Enemy>();
+        List<Room> currentMap = new List<Room>();
+        private int PlayerRoom =0;
 
         DungeonDraw DGD;
 
@@ -310,15 +312,14 @@ namespace Winform_Client
                 stressThread.Start();
             }
 
-            List<Room> rL = new List<Room>();
-            MapParser(ref rL, "&n1e2&s0e3&w0&w2&");
-            DGD.AddRoomDraws(rL);
+            MapParser(ref currentMap, "&n1e2&s0e3&w0&w2&");
+            DGD.AddRoomDraws(currentMap);
             for (int i = 0; i < 5; i++)
             {
                 currentClientList.Add(new Enemy(" " + currentClientList.Count(), 0));
             }                                        
 
-            DGD.DrawClients(currentClientList, rL, 0);
+            DGD.DrawClients(currentClientList,ref currentMap, PlayerRoom);
             DGD.Draw();
 
             if ( (textBox_Input.Text.Length > 0) && (clientSocket != null))
