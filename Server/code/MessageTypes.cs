@@ -56,6 +56,7 @@ namespace MessageTypes
                 case AttackMessage.ID:
                     m = new AttackMessage();
                     break;
+                
 
                 default:
                     throw (new Exception());
