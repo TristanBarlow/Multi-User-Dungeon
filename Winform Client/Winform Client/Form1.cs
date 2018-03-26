@@ -27,9 +27,12 @@ namespace Winform_Client
         bool bConnected = false;
         bool spam = false;
 
-        List<Enemy> currentClientList = new List<Enemy>();
-        List<Room> currentMap = new List<Room>();
-        private int PlayerRoom =0;
+        List<String> currentClientList = new List<String>();
+        List<int> numberOfClients = new List<int>();
+        int iter = 0;
+        int xOff = 0;
+        int yOff = 0;
+        int MapMoveSpeed = 10;
 
         DungeonDraw DGD;
 
@@ -186,8 +189,8 @@ namespace Winform_Client
             else
             {
 
-                try { textBox_Output.AppendText(U.NewLineS(s)); }
-                catch { }
+                //try { textBox_Output.AppendText(U.NewLineS(s)); }
+                //catch { }
 
             }
         }
@@ -254,53 +257,14 @@ namespace Winform_Client
             {
                 listBox_ClientList.DataSource = null;
                 currentClientList.Clear();
-                currentClientList.Add(new Enemy("Say"));
-                currentClientList.Add(new Enemy("Dungeon"));
+                currentClientList.Add("Say");
+                currentClientList.Add("Dungeon");
 
                 foreach (String s in clientList.clientList)
                 {
-                    currentClientList.Add(new Enemy(s));
+                    currentClientList.Add(s);
                 }
                 listBox_ClientList.DataSource = currentClientList;             
-            }
-        }
-
-        private void MapParser(ref List<Room> roomList, String str)
-        {
-            String[] words = str.Split('&');
-            int iter = 0;
-            foreach (String w in words)
-            {
-                Room r = new Room(iter);
-                bool GoodRoom = false;
-
-                for (int i = 0; i < w.Length; i++)
-                {
-                    switch (w[i].ToString().ToLower())
-                    {
-                        case "n":
-                            r.North = w[i+1] - '0';
-                            GoodRoom = true;
-                            break;
-                        case "e":
-                            r.East = w[i + 1] - '0';
-                            GoodRoom = true;
-                            break;
-                        case "s":
-                            r.South = w[i + 1] - '0';
-                            GoodRoom = true;
-                            break;
-                        case "w":
-                            r.West = w[i + 1] - '0';
-                            GoodRoom = true;
-                            break;
-                    }
-                }
-                if (GoodRoom)
-                {
-                    roomList.Add(r);
-                    iter++;
-                }
             }
         }
 
@@ -312,15 +276,15 @@ namespace Winform_Client
                 stressThread.Start();
             }
 
-            MapParser(ref currentMap, "&n1e2&s0e3&w0&w2&");
-            DGD.AddRoomDraws(currentMap);
-            for (int i = 0; i < 5; i++)
+            DGD.MapParser("&n1e2s3w4&s0&w0&n0&e0w5&e4&");
+            Random r = new Random();
+            iter+= 5;
+            for (int i = 0; i < iter; i++)
             {
-                currentClientList.Add(new Enemy(" " + currentClientList.Count(), 0));
+                numberOfClients.Add(r.Next(0, DGD.Rooms()));
             }                                        
-
-            DGD.DrawClients(currentClientList,ref currentMap, PlayerRoom);
-            DGD.Draw();
+             
+            DGD.Draw(numberOfClients, xOff, yOff);
 
             if ( (textBox_Input.Text.Length > 0) && (clientSocket != null))
             {                
@@ -344,7 +308,7 @@ namespace Winform_Client
                         PrivateChatMsg privateMsg = new PrivateChatMsg();
 
                         privateMsg.msg = textBox_Input.Text;
-                        privateMsg.destination = currentClientList[listBox_ClientList.SelectedIndex].Name;
+                        privateMsg.destination = currentClientList[listBox_ClientList.SelectedIndex];
                         MemoryStream outStream = privateMsg.WriteData();
                         clientSocket.Send(outStream.GetBuffer());                
                     }
@@ -386,7 +350,7 @@ namespace Winform_Client
             {
                 AttackMessage attMsg = new AttackMessage();
                 attMsg.action = Message;
-                attMsg.opponent = currentClientList[listBox_ClientList.SelectedIndex].Name;
+                attMsg.opponent = currentClientList[listBox_ClientList.SelectedIndex];
                 MemoryStream outStream = attMsg.WriteData();
                 try
                 {
@@ -437,27 +401,24 @@ namespace Winform_Client
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
-            //String m;
-            //switch (e.KeyCode)
-            //{
-            //    case Keys.Up:
-            //        m = "go north";
-            //        SendDungeonMessage(m);
-            //        break;
-            //    case Keys.Left:
-            //         m = "go east";
-            //        SendDungeonMessage(m);
-            //        break;
-            //    case Keys.Down:
-            //        m = "go south";
-            //        SendDungeonMessage(m);
-            //        break;
-            //    case Keys.Right:
-            //        m = "go west";
-            //        SendDungeonMessage(m);
-            //        break;
-
-            //}
+            String m;
+            switch (e.KeyCode)
+            {
+                case Keys.Up:
+                    yOff -= MapMoveSpeed;
+                    break;
+                case Keys.Left:
+                    xOff -= MapMoveSpeed;
+                    break;
+                case Keys.Down:
+                    yOff += MapMoveSpeed;
+                    break;
+                case Keys.Right:
+                    xOff += MapMoveSpeed;
+                    break;
+                    
+            }
+            DGD.Draw(numberOfClients, xOff, yOff);
         }
 
         private void ChangeNameClick(object sender, EventArgs e)
@@ -525,7 +486,7 @@ namespace Winform_Client
 
         private void DungeonPaint(object sender, PaintEventArgs e)
         {
-            DGD.Draw();
+            DGD.Draw(numberOfClients, xOff, yOff);
         }
         private void DungeonMapRead(String map = "")
         {

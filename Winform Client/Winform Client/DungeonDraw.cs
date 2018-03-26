@@ -17,32 +17,22 @@ namespace Winform_Client
         public PictureBox PB { get; set; }
         public Graphics G { get; set; }
 
-        private SolidBrush SolidBrushG = new SolidBrush(Color.Green);
-        private SolidBrush SolidBrushR = new SolidBrush(Color.Red);
-        private Pen PenW = new Pen(Color.White, 4F);
-        private Pen PenB = new Pen(Color.DarkCyan, 4F);
-
-        public int Walls { get; set; } = 0;
-
         public int Enemy { get; set; } = 0;
 
-        int Scale = 2;
-
-        int Connectors = 0;
+        int Scale = 3;
 
         public Color FillColor { get; set; } = Color.Black;
 
-       private int RoomWidth = 20;
-       private int RoomHeight = 20;
-       private int RoomGapX = 20;
-       private int RoomGapY = 20;
-       private int PlayerSize = 8;
-       private int EnemySize = 6;
+        private List<Room> currentMap = new List<Room>();
+        private List<DrawObject> MapObjects = new List<DrawObject>();
+        private Dictionary<String, User> UserDrawDict = new Dictionary<String, User>();
+        private String CurrentMapString = " ";
+        private SolidBrush b = new SolidBrush(Color.Purple);
 
-        public delegate void Del();
-        private Dictionary<String, Del> MainDrawQueue = new Dictionary<String, Del>();
-        private Dictionary<String, Del> LastDrawQueue = new Dictionary<String, Del>();
-        private Dictionary<String, Del> DynamicDrawQueue = new Dictionary<String, Del>();
+        public int Rooms()
+        {
+            return currentMap.Count();
+        }
 
         public DungeonDraw(PictureBox DG)
         {
@@ -52,231 +42,379 @@ namespace Winform_Client
             YPos = DG.Location.Y;
             PB = DG;
             G = DG.CreateGraphics();
-            RoomWidth*= Scale;
-            RoomHeight *= Scale;
-            RoomGapX = (int)(RoomWidth * 1.5);
-            RoomGapY = (int)(RoomHeight * 1.5);
-
         }
 
-        public void DrawLine(int x, int y, int x2, int y2)
-        {
-            Walls++;
-            MainDrawQueue.Add(""+ Walls, () => G.DrawLine(PenW, x, y, x2, y2));
-            G.DrawLine(PenW, x, y, x2, y2);
-        }
-
-        public void DrawWall(int SXPos, int SYPos, int EXPos, int EYPos)
-        {
-            Walls++;
-            MainDrawQueue.Add("Wall" + Walls, () => G.DrawLine(PenW, SXPos, SYPos, EXPos, EYPos));
-            G.DrawLine(PenW, SXPos, SYPos, EXPos, EYPos);
-        }
-
-        public void DrawConnector(int x, int y, bool isHorizontal)
-        {
-            int xSize = RoomWidth /2 ;
-            int ySize = RoomHeight /2;
-            x -= RoomWidth / 2;
-            y -= RoomHeight / 2;
-            if (isHorizontal)
-            {
-                ySize = ySize / 2;
-                x -= xSize;
-                y += ySize + ySize/2 ;
-            }
-            else
-            {
-                xSize = xSize / 2;
-                x += xSize + xSize/2 ;
-                y -= ySize;
-            }
-
-            Connectors++;
-            LastDrawQueue.Add("Connector" + Connectors, () => G.DrawRectangle(PenB, x, y, xSize, ySize));
-            G.DrawRectangle(PenB, x, y, xSize, ySize);
-        }
-
-        public void DrawRoom(Room r)
-        {
-            String rN = "Room" + r.RoomNum;
-            int tx = r.XPos - RoomWidth / 2;
-            int ty = r.YPos - RoomHeight / 2;
-            if (!MainDrawQueue.ContainsKey(rN))
-            {
-                MainDrawQueue.Add(rN, () => G.DrawRectangle(PenW, tx, ty, RoomWidth, RoomHeight));
-                G.DrawRectangle(PenW, tx, ty, RoomWidth, RoomHeight);
-            }
-        }
-
-        private void DrawPlayer(int XPos, int YPos)
-        {
-
-            if (DynamicDrawQueue.ContainsKey("player"))
-            {   
-                DynamicDrawQueue.Remove("player");
-                DynamicDrawQueue.Add("player", () => G.FillEllipse(SolidBrushG, XPos, YPos, PlayerSize, PlayerSize));
-            }   
-            else
-            {   
-                DynamicDrawQueue.Add("player", () => G.FillEllipse(SolidBrushG, XPos, YPos, PlayerSize, PlayerSize));
-            }
-        }
-
-        private void DrawEnemy(int XPos, int YPos, String EnemyName  = " ")
-        {
-
-            if (DynamicDrawQueue.ContainsKey(EnemyName))
-            {
-                DynamicDrawQueue.Remove(EnemyName);
-                DynamicDrawQueue.Add(EnemyName, () => G.FillEllipse(SolidBrushR, XPos, YPos, EnemySize, EnemySize));
-            }
-
-            else
-            {
-                Enemy++;
-                DynamicDrawQueue.Add(EnemyName, () => G.FillEllipse(SolidBrushR, XPos, YPos, EnemySize, EnemySize));
-            }
-        }
-
-        private void DrawDynamics()
-        {
-            for (int i = 0; i < this.DynamicDrawQueue.Count(); i++)
-            {
-                DynamicDrawQueue.ElementAt(i).Value();
-            }
-        }
-
-        public void Draw()
+        public void Draw(List<int> l, int XOffset, int YOffset)
         {
             G.Clear(FillColor);
-
-            for (int i = 0; i < this.LastDrawQueue.Count(); i++)
+            foreach (DrawObject d in MapObjects)
             {
-                LastDrawQueue.ElementAt(i).Value();
+                d.XPos += XOffset;
+                d.YPos += YOffset;
+                d.DrawMe(G);
             }
-            for (int i = 0; i < this.MainDrawQueue.Count(); i++)
-            {
-                MainDrawQueue.ElementAt(i).Value();
-            }
-            DrawDynamics();
+            UpdateUserPositions(l);
+            //DrawUsers();
         }
 
-        public void AddRoomDraws(List<Room> RoomList)
+        public void DrawUsers()
         {
-            RoomList.OrderBy(o => o.RoomNum).ToList();
-            int midX = (PB.Width / 2) ;
+            foreach (KeyValuePair<String, User> u in UserDrawDict)
+            {
+                u.Value.DrawMe(G);
+            }
+        }
+
+        public void UpdateUserPositions(List<int> RoomNum)
+        {
+            //User u;
+            //foreach (String s in sl)
+            //{
+            //    if (UserDrawDict.TryGetValue(s, out u))
+            //    {
+            //        if (u.RoomSlotIndex > 0)
+            //        {
+            //            currentMap[u.RoomNum].FreeRoomSlot(u.RoomSlotIndex);
+            //        }
+            //        RoomSlot rs = currentMap[RoomNum].GetNextRoomSlot(u.size);
+            //        u.MoveUser(rs, RoomNum);
+            //    }
+            //}
+            
+            foreach (Room r in currentMap)
+            {
+                r.FreeAllSlots();
+            }
+            foreach (int i in RoomNum)
+            {
+                RoomSlot rs = currentMap[i].GetNextRoomSlot(3*Scale);
+                if (rs != null)
+                {
+                    G.FillEllipse(b, rs.XPos, rs.YPos, 3 * Scale, 3 * Scale);
+                }
+              }
+        }
+
+        public void AddRoomDraws()
+        {
+            currentMap.OrderBy(o => o.RoomNum).ToList();
+            int midX = (PB.Width / 2);
             int midY = (PB.Height / 2);
 
-            foreach (Room r in RoomList)
+            foreach (Room r in currentMap)
             {
                 if (r.RoomNum == -1) break;
                 if (r.RoomNum == 0)
                 {
                     r.XPos = midX;
                     r.YPos = midY;
-                    DrawRoom(r);
                     r.isDraw = true;
                 }
-                if (r.North != -1 && !RoomList.ElementAt(r.North).isDraw)
+                if (r.North != -1 && !currentMap.ElementAt(r.North).isDraw)
                 {
-                    RoomList.ElementAt(r.North).isDraw = true;
-                    RoomList.ElementAt(r.North).XPos = r.XPos;
-                    RoomList.ElementAt(r.North).YPos = r.YPos - RoomGapY;
-                    DrawConnector(r.XPos, r.YPos, false);
-                    DrawRoom(RoomList.ElementAt(r.North));
+                    currentMap.ElementAt(r.North).isDraw = true;
+                    currentMap.ElementAt(r.North).XPos = r.XPos;
+                    currentMap.ElementAt(r.North).YPos = r.YPos - r.RoomGapY;
+                    MapObjects.Add(new Connector(r, false));
                 }
-                if (r.East != -1 && !RoomList.ElementAt(r.East).isDraw)
+                if (r.East != -1 && !currentMap.ElementAt(r.East).isDraw)
                 {
-                    RoomList.ElementAt(r.East).isDraw = true;
-                    RoomList.ElementAt(r.East).XPos = r.XPos + RoomGapX;
-                    RoomList.ElementAt(r.East).YPos = r.YPos;
-                    DrawConnector(r.XPos + RoomGapX, r.YPos, true);
-                    DrawRoom(RoomList.ElementAt(r.East));
+                    currentMap.ElementAt(r.East).isDraw = true;
+                    currentMap.ElementAt(r.East).XPos = r.XPos + r.RoomGapX;
+                    currentMap.ElementAt(r.East).YPos = r.YPos;
+                    MapObjects.Add(new Connector(currentMap.ElementAt(r.East), true));
                 }
-                if (r.South!= -1 && !RoomList.ElementAt(r.South).isDraw)
+                if (r.South != -1 && !currentMap.ElementAt(r.South).isDraw)
                 {
-                    RoomList.ElementAt(r.South).isDraw = true;
-                    RoomList.ElementAt(r.South).XPos = r.XPos;
-                    RoomList.ElementAt(r.South).YPos = r.YPos + RoomGapY;
-                    DrawConnector(r.XPos, r.YPos + RoomGapY, false);
-                    DrawRoom(RoomList.ElementAt(r.South));
+                    currentMap.ElementAt(r.South).isDraw = true;
+                    currentMap.ElementAt(r.South).XPos = r.XPos;
+                    currentMap.ElementAt(r.South).YPos = r.YPos + r.RoomGapY;
+                    MapObjects.Add(new Connector(currentMap.ElementAt(r.South), false));
                 }
-                if (r.West != -1 && !RoomList.ElementAt(r.West).isDraw)
+                if (r.West != -1 && !currentMap.ElementAt(r.West).isDraw)
                 {
-                    RoomList.ElementAt(r.West).isDraw = true;
-                    RoomList.ElementAt(r.West).XPos = r.XPos - RoomGapX;
-                    RoomList.ElementAt(r.West).YPos = r.YPos;
-                    DrawConnector(r.XPos, r.YPos, true);
-                    DrawRoom(RoomList.ElementAt(r.West));
+                    currentMap.ElementAt(r.West).isDraw = true;
+                    currentMap.ElementAt(r.West).XPos = r.XPos - r.RoomGapX;
+                    currentMap.ElementAt(r.West).YPos = r.YPos;
+                    MapObjects.Add(new Connector(r, true));
                 }
-
-
             }
         }
 
-        public void UpdateClient(Enemy e, ref List <Room> roomList )
+        public void AddClientDraw(String s, int RoomNum)
         {
-            if (roomList[e.RoomNum].NumClients * PlayerSize * 2 > RoomWidth)
-            {
-                roomList[e.RoomNum].YEnemySpawn -= PlayerSize;
-                roomList[e.RoomNum].XEnemySpawn = RoomWidth / 3;
-                roomList[e.RoomNum].NumClients = 0;
-            }
-            DrawEnemy(roomList[e.RoomNum].XPos - roomList[e.RoomNum].XEnemySpawn, roomList[e.RoomNum].YPos - roomList[e.RoomNum].YEnemySpawn, e.Name);
-            roomList[e.RoomNum].XEnemySpawn -= PlayerSize;
-            roomList[e.RoomNum].NumClients++;
 
+            if (UserDrawDict.ContainsKey(s))
+            {
+                return;
+            }
+            User tu = new User(s,RoomNum,Scale);
+            RoomSlot rs = currentMap[RoomNum].GetNextRoomSlot(tu.size);
+            tu.MoveUser(rs,RoomNum);
+            UserDrawDict.Add(s, tu);
         }
 
-        public void DrawClients(List<Enemy> enemies, ref List<Room> roomList, int PlayerRoomNum)
+        public void MapParser(String str)
         {
-            if (roomList.Count > 0)
+            if (str == CurrentMapString)
             {
-                    foreach (Enemy e in enemies)
+                return;
+            }
+
+            CurrentMapString = str;
+            currentMap.Clear();
+            MapObjects.Clear();
+            String[] words = str.Split('&');
+            int iter = 0;
+            foreach (String w in words)
+            {
+                Room r = new Room(iter, Scale);
+                bool GoodRoom = false;
+
+                for (int i = 0; i < w.Length; i++)
+                {
+                    switch (w[i].ToString().ToLower())
                     {
-
-                    UpdateClient(e, ref roomList);
+                        case "n":
+                            r.North = w[i + 1] - '0';
+                            GoodRoom = true;
+                            break;
+                        case "e":
+                            r.East = w[i + 1] - '0';
+                            GoodRoom = true;
+                            break;
+                        case "s":
+                            r.South = w[i + 1] - '0';
+                            GoodRoom = true;
+                            break;
+                        case "w":
+                            r.West = w[i + 1] - '0';
+                            GoodRoom = true;
+                            break;
                     }
                 }
-                DrawPlayer(roomList[PlayerRoomNum].XPos, roomList[PlayerRoomNum].YPos);
-                DrawDynamics();
-            }   
+                if (GoodRoom)
+                {
+                    currentMap.Add(r);
+                    MapObjects.Add(r);
+                    iter++;
+                }
+            }
+            AddRoomDraws();
+        }
+
+        public void PlayersParser(String str)
+        {
+
         }
     }
 
-    public class Enemy
+
+    public class User: DrawObject
     {
         public int RoomNum { set; get; } = -1;
+        public int RoomSlotIndex { set; get; } = -1;
         public String Name { set; get; } = "No Name";
-        public Enemy(String s)
+        public int size { set; get; } = 3;
+        private SolidBrush b = new SolidBrush(Color.Purple);
+        public User(String s)
         {
             Name = s;
         }
-        public Enemy(String s, int Rn)
+        public User(String s, int Rn, int scale = 3, bool IsPlayer = false)
         {
             Name = s;
             RoomNum = Rn;
+            if (IsPlayer)
+            {
+                b = new SolidBrush(Color.Green);
+            }
+            size *= scale;
+        }
+        public void MoveUser(RoomSlot rs, int num)
+        {
+            XPos = rs.XPos;
+            YPos = rs.YPos;
+            RoomSlotIndex = rs.IndexNumber;
+            RoomNum = num;
+        }
+        public override void DrawMe(Graphics G)
+        {
+            G.FillEllipse(b, XPos, YPos, size, size);
+            base.DrawMe(G);
         }
     }
 
-    public class Room
+    public class Room : DrawObject
     {
+        private Pen PenW = new Pen(Color.White, 4F);
+        private List<RoomSlot> RoomSlotList = new List<RoomSlot>();
+        private List<int> InUseSlots = new List<int>();
+        private int Margin = 2;
+        private bool HasSlots = false;
+        public int RoomWidth { set; get; } = 20;
+        public int RoomHeight { set; get; } = 20;
+        public int RoomGapX { set; get; } = 20;
+        public int RoomGapY { set; get; } = 20;
         public int XEnemySpawn { set; get; } = 0;
         public int YEnemySpawn { set; get; } = 0;
-        public int NumClients { get; set; } = 0;
-        public int XPos { get; set; } = 0;
-        public int YPos { get; set; } = 0;
+        public int MaxNumClients { get; set; } = 0;
         public int RoomNum { set; get; } = -1;
-        public int North { set; get; } =-1;
+        public int North { set; get; } = -1;
         public int East { set; get; } = -1;
-        public int South { set; get; } =-1;
+        public int South { set; get; } = -1;
         public int West { set; get; } = -1;
         public bool isDraw { set; get; } = false;
-        public Room(int rN)
+
+        public RoomSlot GetNextRoomSlot(int PlayerSize)
         {
-            RoomNum = rN;
+            if (!HasSlots)
+            {
+                MakeRoomSpaces(PlayerSize);
+            }
+            int index = RoomSlotList.Count/2;
+            int iter = 0;
+            bool flipFlop = true;
+            while(index >= 0 && index < RoomSlotList.Count)
+            {
+                RoomSlot rs = RoomSlotList[index];
+                if (!rs.InUse)
+                {
+                    rs.IndexNumber = index;
+                    InUseSlots.Add(index);
+                    rs.InUse = true;
+                    return rs;
+                }
+                index = RoomSlotList.Count / 2;
+                if (flipFlop)
+                {
+                    index += iter;
+                    flipFlop = false;
+                }
+                else
+                {
+                    index -= iter;
+                    iter++;
+                    flipFlop = true;
+                }
+
+            }
+            return null;
+        }
+        public void FreeRoomSlot(int IndexNumber)
+        {
+            if (RoomSlotList.Count >= IndexNumber&& IndexNumber >=0)
+            {
+                RoomSlotList[IndexNumber].InUse = false;
+            }
+        }
+        public void FreeAllSlots()
+        {
+            if (HasSlots)
+            {
+                foreach (int i in InUseSlots)
+                {
+                    RoomSlotList[i].InUse = false;
+                }
+                InUseSlots.Clear();
+            }
         }
 
+        public Room(int rN, int Scale)
+        {
+            RoomNum = rN;
+            RoomHeight *= Scale;
+            RoomWidth *= Scale;
+            XEnemySpawn = RoomHeight / 3;
+            YEnemySpawn = RoomWidth / 3;
+            RoomGapX = (int)(RoomWidth * 1.5);
+            RoomGapY = (int)(RoomHeight * 1.5);
+            Margin*= Scale;
+        }
+        private void MakeRoomSpaces(int PlayerSize)
+        {
+            int xOffset = XPos + Margin - RoomWidth/2;
+            int yOffset = YPos + Margin - RoomHeight/2;
+            int maxXOffset = XPos + RoomWidth/2 - (Margin * 2) ;
+            int maxYOffset = YPos + RoomHeight/2 - (Margin * 2);
+
+            while (yOffset <= maxYOffset)
+            {
+                xOffset = XPos + Margin - RoomWidth / 2;
+                while (xOffset <= maxXOffset)
+                {
+                    RoomSlotList.Add(new RoomSlot(xOffset, yOffset));
+                    xOffset += PlayerSize + Margin;
+                }
+                yOffset += PlayerSize + Margin;
+            }
+            MaxNumClients++;
+            HasSlots = true;
+        }
+
+        public override void DrawMe(Graphics G)
+        {
+            int tx = this.XPos - RoomWidth / 2;
+            int ty = this.YPos - RoomHeight / 2;
+            G.DrawRectangle(PenW, tx, ty, RoomWidth, RoomHeight);
+            base.DrawMe(G);
+        }
     }
 
+    public class Connector : DrawObject
+    {
+        private bool isHorizontal = false;
+        private int xSize = 0;
+        private int ySize = 0;
+        private Pen PenB = new Pen(Color.DarkCyan, 4F);
+
+        public Connector(Room r, bool H)
+        {
+            isHorizontal = H;
+            XPos = r.XPos;
+            YPos = r.YPos;
+            xSize = r.RoomWidth / 2;
+            ySize = r.RoomHeight / 2;
+            XPos -= r.RoomWidth / 2;
+            YPos -= r.RoomHeight / 2;
+            if (isHorizontal)
+            {
+                ySize = ySize / 2;
+                XPos -= xSize;
+                YPos += ySize + ySize / 2;
+            }
+            else
+            {
+                xSize = xSize / 2;
+                XPos += xSize + xSize / 2;
+                YPos -= ySize;
+            }
+        }
+        public override void DrawMe(Graphics G)
+        {
+            G.DrawRectangle(PenB, XPos, YPos, xSize, ySize);
+            base.DrawMe(G);
+
+        }
+    }
+
+    public abstract class DrawObject
+    {
+        public int XPos { get; set; } = 0;
+        public int YPos { get; set; } = 0;
+        public virtual void DrawMe(Graphics G) { }
+    }
+
+    public class RoomSlot
+    {
+        public int XPos { get; set; } = 0;
+        public int YPos { get; set; } = 0;
+        public int IndexNumber { get; set; } = 0;
+        public bool InUse { get; set; } = false;
+        public RoomSlot(int x, int y)
+                {
+                    XPos = x;
+                    YPos = y;
+                }
+    }
+}
