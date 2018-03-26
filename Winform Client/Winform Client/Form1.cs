@@ -263,6 +263,45 @@ namespace Winform_Client
             }
         }
 
+        private void MapParser(ref List<Room> roomList, String str)
+        {
+            String[] words = str.Split('&');
+            int iter = 0;
+            foreach (String w in words)
+            {
+                Room r = new Room(iter);
+                bool GoodRoom = false;
+
+                for (int i = 0; i < w.Length; i++)
+                {
+                    switch (w[i].ToString().ToLower())
+                    {
+                        case "n":
+                            r.North = w[i+1] - '0';
+                            GoodRoom = true;
+                            break;
+                        case "e":
+                            r.East = w[i + 1] - '0';
+                            GoodRoom = true;
+                            break;
+                        case "s":
+                            r.South = w[i + 1] - '0';
+                            GoodRoom = true;
+                            break;
+                        case "w":
+                            r.West = w[i + 1] - '0';
+                            GoodRoom = true;
+                            break;
+                    }
+                }
+                if (GoodRoom)
+                {
+                    roomList.Add(r);
+                    iter++;
+                }
+            }
+        }
+
         private void buttonSend_Click(object sender, EventArgs e)
         {
             if (spam)
@@ -270,14 +309,17 @@ namespace Winform_Client
                 Thread stressThread = new Thread(StressTest);
                 stressThread.Start();
             }
-            DGD.DrawLine(0,0, 10,10);
-            DGD.DrawPlayer(50, 50, 10);
-            DGD.DrawEnemy(0, 0, 10, "Meany");
-            DGD.DrawRoom(0, 0, "Room1");
-            DGD.DrawRoom(120, 0, "Room2");
-            DGD.DrawConnector(120, 0 , true);
 
+            List<Room> rL = new List<Room>();
+            MapParser(ref rL, "&n1e2&s0e3&w0&w2&");
+            DGD.AddRoomDraws(rL);
+            for (int i = 0; i < 5; i++)
+            {
+                currentClientList.Add(new Enemy(" " + currentClientList.Count(), 0));
+            }                                        
 
+            DGD.DrawClients(currentClientList, rL, 0);
+            DGD.Draw();
 
             if ( (textBox_Input.Text.Length > 0) && (clientSocket != null))
             {                
@@ -369,8 +411,6 @@ namespace Winform_Client
         private void ButtonNorth_Click(object sender, EventArgs e)
         {
             String m = "go north";
-
-            DGD.DrawPlayer(100,100,10);
 
             SendDungeonMessage(m);
         }
