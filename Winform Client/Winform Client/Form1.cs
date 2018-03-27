@@ -30,8 +30,6 @@ namespace Winform_Client
         List<String> currentClientList = new List<String>();
         List<int> numberOfClients = new List<int>();
         int iter = 0;
-        int xOff = 0;
-        int yOff = 0;
         int MapMoveSpeed = 10;
 
         DungeonDraw DGD;
@@ -282,9 +280,9 @@ namespace Winform_Client
             for (int i = 0; i < iter; i++)
             {
                 numberOfClients.Add(r.Next(0, DGD.Rooms()));
-            }                                        
-             
-            DGD.Draw(numberOfClients, xOff, yOff);
+            }
+            DGD.ClientNumberList = numberOfClients;
+            DGD.Draw();
 
             if ( (textBox_Input.Text.Length > 0) && (clientSocket != null))
             {                
@@ -405,20 +403,25 @@ namespace Winform_Client
             switch (e.KeyCode)
             {
                 case Keys.Up:
-                    yOff -= MapMoveSpeed;
+                    DGD.MoveY(MapMoveSpeed);
                     break;
                 case Keys.Left:
-                    xOff -= MapMoveSpeed;
+                    DGD.MoveX(MapMoveSpeed);
                     break;
                 case Keys.Down:
-                    yOff += MapMoveSpeed;
+                    DGD.MoveY(-MapMoveSpeed);
                     break;
                 case Keys.Right:
-                    xOff += MapMoveSpeed;
+                    DGD.MoveX(-MapMoveSpeed);
+                    break;
+                case Keys.S:
+                    DGD.ChangeScale(-1);
+                    break;
+                case Keys.W:
+                    DGD.ChangeScale(1);
                     break;
                     
             }
-            DGD.Draw(numberOfClients, xOff, yOff);
         }
 
         private void ChangeNameClick(object sender, EventArgs e)
@@ -486,7 +489,8 @@ namespace Winform_Client
 
         private void DungeonPaint(object sender, PaintEventArgs e)
         {
-            DGD.Draw(numberOfClients, xOff, yOff);
+            DGD.ClientNumberList = numberOfClients;
+            DGD.Draw();
         }
         private void DungeonMapRead(String map = "")
         {
