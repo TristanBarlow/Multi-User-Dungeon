@@ -92,13 +92,14 @@
             // 
             // TextboxDungeon
             // 
+            this.TextboxDungeon.BackColor = System.Drawing.SystemColors.ActiveCaption;
             this.TextboxDungeon.Location = new System.Drawing.Point(22, 12);
             this.TextboxDungeon.Multiline = true;
             this.TextboxDungeon.Name = "TextboxDungeon";
+            this.TextboxDungeon.ReadOnly = true;
             this.TextboxDungeon.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.TextboxDungeon.Size = new System.Drawing.Size(384, 294);
             this.TextboxDungeon.TabIndex = 7;
-            this.TextboxDungeon.TextChanged += new System.EventHandler(this.textBox2_TextChanged);
             // 
             // ButtonNorth
             // 
@@ -195,7 +196,7 @@
             this.AcceptButton = this.buttonSend;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.SystemColors.Info;
+            this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(851, 512);
             this.Controls.Add(this.DungeonGraphic);
             this.Controls.Add(this.WildAttackButton);
@@ -215,7 +216,7 @@
             this.ForeColor = System.Drawing.SystemColors.ControlText;
             this.KeyPreview = true;
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "Dungeon Madness";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
             ((System.ComponentModel.ISupportInitialize)(this.DungeonGraphic)).EndInit();

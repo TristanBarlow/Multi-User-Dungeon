@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Utilities
 {
-   public static class U
+    public static class U
     {
         public static String NewLineS(String s)
         {
@@ -13,6 +13,10 @@ namespace Utilities
             String finalString = s + newline;
             return finalString;
         }
-
+        public static String GenerateDungeon(int NumberOfDungeons)
+        {
+            String rStr = " ";
+            return rStr;
+        }
     }
 }

@@ -34,7 +34,7 @@ namespace Winform_Client
 
         DungeonDraw DGD;
 
-        static void ClientProcess(Object o)
+        private void ClientProcess(Object o)
 
         {            
             Form1 form = (Form1)o;
@@ -44,7 +44,8 @@ namespace Winform_Client
                 try
                 {
                     form.clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                    form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("46.101.88.130"), 8500));
+                    //form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("46.101.88.130"), 8500));
+                    form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8500));
                     form.bConnected = true;
                     form.AddText("Connected to server");
 
@@ -70,14 +71,15 @@ namespace Winform_Client
                     {
                         form.AddText(U.NewLineS("No server!"));
                     }
-                    Thread.Sleep(1000);
+                    Thread.Sleep(500);
                 }               
             }
         }
 
-        static void clientReceive(Object o)
+        private void clientReceive(Object o)
         {
             Form1 form = (Form1)o;
+
 
             while (form.bConnected == true)
             {
@@ -141,6 +143,14 @@ namespace Winform_Client
                                     {
                                         HealthMessage Msg = (HealthMessage)m;
                                         form.AddText("Player Health: " + Msg.health);
+                                    }
+                                    break;
+                                case MapLayout.ID:
+                                    {
+                                        MapLayout ML = (MapLayout)m;
+                                        Random r = new Random();
+                                        Thread newThread = new Thread(() => DGD.MapParser(ML.mapInfo));
+                                        newThread.Start();
                                     }
                                     break;
                                 default:
@@ -273,17 +283,6 @@ namespace Winform_Client
                 Thread stressThread = new Thread(StressTest);
                 stressThread.Start();
             }
-
-            DGD.MapParser("&n1e2s3w4&s0&w0&n0&e0w5&e4&");
-            Random r = new Random();
-            iter+= 5;
-            for (int i = 0; i < iter; i++)
-            {
-                numberOfClients.Add(r.Next(0, DGD.Rooms()));
-            }
-            DGD.ClientNumberList = numberOfClients;
-            DGD.Draw();
-
             if ( (textBox_Input.Text.Length > 0) && (clientSocket != null))
             {                
                 try
@@ -491,10 +490,6 @@ namespace Winform_Client
         {
             DGD.ClientNumberList = numberOfClients;
             DGD.Draw();
-        }
-        private void DungeonMapRead(String map = "")
-        {
-
         }
     }
 }

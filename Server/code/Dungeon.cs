@@ -13,6 +13,8 @@ namespace Dungeon
     {        
         private static Dictionary<String, Room> roomMap;
 
+        public String DungeonStr { set; get; } = "&n1e2s3w4&s0&w0&n0&e0w5&e4&";
+
         public void Init()
         {
             roomMap = new Dictionary<string, Room>();
@@ -104,7 +106,7 @@ namespace Dungeon
                 case "look":
                     //loop straight back
                     returnString = U.NewLineS("you look around") +
-                                   U.NewLineS(player.currentRoom.getDescription());
+                                   U.NewLineS(player.currentRoom.GetDescription());
                     break;
 
                 case "graf":
@@ -187,7 +189,7 @@ namespace Dungeon
                             }
                         }
                     }
-                    returnString = U.NewLineS(player.currentRoom.getDescription());
+                    returnString = U.NewLineS(player.currentRoom.GetDescription());
                     break;
 
                 default:

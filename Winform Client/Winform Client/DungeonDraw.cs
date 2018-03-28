@@ -77,9 +77,12 @@ namespace Winform_Client
         public void Draw()
         {
             G.Clear(FillColor);
-            foreach (DrawObject d in MapObjects)
+            lock (MapObjects)
             {
-                d.DrawMe(G, XOffset, YOffset);
+                foreach (DrawObject d in MapObjects)
+                {
+                    d.DrawMe(G, XOffset, YOffset);
+                }
             }
             UpdateUserPositions();
         }
@@ -104,32 +107,21 @@ namespace Winform_Client
 
         public void UpdateUserPositions()
         {
-            //User u;
-            //foreach (String s in sl)
-            //{
-            //    if (UserDrawDict.TryGetValue(s, out u))
-            //    {
-            //        if (u.RoomSlotIndex > 0)
-            //        {
-            //            currentMap[u.RoomNum].FreeRoomSlot(u.RoomSlotIndex);
-            //        }
-            //        RoomSlot rs = currentMap[RoomNum].GetNextRoomSlot(u.size);
-            //        u.MoveUser(rs, RoomNum);
-            //    }
-            //}
-            
-            foreach (Room r in currentMap)
+            lock (currentMap)
             {
-                r.FreeAllSlots();
-            }
-            foreach (int i in ClientNumberList)
-            {
-                RoomSlot rs = currentMap[i].GetNextRoomSlot(3*Scale);
-                if (rs != null)
+                foreach (Room r in currentMap)
                 {
-                    G.FillEllipse(b, rs.XPos+XOffset, rs.YPos+YOffset, 3 * Scale, 3 * Scale);
+                    r.FreeAllSlots();
                 }
-              }
+                foreach (int i in ClientNumberList)
+                {
+                    RoomSlot rs = currentMap[i].GetNextRoomSlot(3 * Scale);
+                    if (rs != null)
+                    {
+                        G.FillEllipse(b, rs.XPos + XOffset, rs.YPos + YOffset, 3 * Scale, 3 * Scale);
+                    }
+                }
+            }
         }
 
         public void AddConnectorDraws()
@@ -176,6 +168,7 @@ namespace Winform_Client
                     MapObjects.Add(new Connector(r, true));
                 }
             }
+            Draw();
         }
 
         public void AddClientDraw(String s, int RoomNum)
@@ -203,31 +196,38 @@ namespace Winform_Client
             MapObjects.Clear();
             String[] words = str.Split('&');
             int iter = 0;
-            foreach (String w in words)
+            foreach (String room in words)
             {
                 Room r = new Room(iter, Scale);
                 bool GoodRoom = false;
 
-                for (int i = 0; i < w.Length; i++)
+                String[] exits = room.Split(' ');
+                foreach (String w in exits)
                 {
-                    switch (w[i].ToString().ToLower())
+                    if (w.Length > 0)
                     {
-                        case "n":
-                            r.North = w[i + 1] - '0';
-                            GoodRoom = true;
-                            break;
-                        case "e":
-                            r.East = w[i + 1] - '0';
-                            GoodRoom = true;
-                            break;
-                        case "s":
-                            r.South = w[i + 1] - '0';
-                            GoodRoom = true;
-                            break;
-                        case "w":
-                            r.West = w[i + 1] - '0';
-                            GoodRoom = true;
-                            break;
+                        for (int i = 0; i < w.Length; i++)
+                        {
+                            switch (w[i].ToString().ToLower())
+                            {
+                                case "n":
+                                    r.North = Int32.Parse(w.Remove(0,1));
+                                    GoodRoom = true;
+                                    break;
+                                case "e":
+                                    r.East = Int32.Parse(w.Remove(0, 1));
+                                    GoodRoom = true;
+                                    break;
+                                case "s":
+                                    r.South = Int32.Parse(w.Remove(0, 1));
+                                    GoodRoom = true;
+                                    break;
+                                case "w":
+                                    r.West = Int32.Parse(w.Remove(0, 1));
+                                    GoodRoom = true;
+                                    break;
+                            }
+                        }
                     }
                 }
                 if (GoodRoom)

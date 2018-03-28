@@ -35,7 +35,16 @@ namespace Server
 
             MemoryStream outStream = nameMsg.WriteData();
 
-            s.Send(outStream.GetBuffer() );
+            s.Send(outStream.GetBuffer());
+        }
+
+        static void SendDungeonInfo(Socket s)
+        {
+            MapLayout ML = new MapLayout();
+            ML.mapInfo = Dungeon.DungeonStr;
+            MemoryStream outStream = ML.WriteData();
+
+            s.Send(outStream.GetBuffer());
         }
 
         static void ChangeClientName(Socket s, String newName)
@@ -256,6 +265,9 @@ namespace Server
 
             Socket chatClient = (Socket)o;
 
+            Thread.Sleep(500);
+            SendDungeonInfo(chatClient);
+
             Console.WriteLine("client receive thread for " + GetNameFromSocket(chatClient));
 
             lock (RequestHandle)
@@ -388,8 +400,11 @@ namespace Server
         {
             Socket serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-            serverSocket.Bind(new IPEndPoint(IPAddress.Parse("46.101.88.130"), 8500));
+            //serverSocket.Bind(new IPEndPoint(IPAddress.Parse("46.101.88.130"), 8500));
+            serverSocket.Bind(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8500));
             serverSocket.Listen(32);
+
+ 
 
             bool bQuit = false;
 
@@ -397,6 +412,7 @@ namespace Server
 
             Dungeon = new DungeonS();
             Dungeon.Init();
+            Dungeon.DungeonStr = U.GenerateDungeonString(U.GenerateDungeon(20, 4));
 
             PlayerHandle = new PlayerHandler();
 
@@ -415,6 +431,7 @@ namespace Server
                     clientDictionary.Add(clientName, serverClient);
 
                     SendClientName(serverClient, clientName);
+                    
                     Thread.Sleep(500);
                     SendClientList();
 

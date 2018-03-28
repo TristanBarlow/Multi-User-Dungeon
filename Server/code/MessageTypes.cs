@@ -56,7 +56,9 @@ namespace MessageTypes
                 case AttackMessage.ID:
                     m = new AttackMessage();
                     break;
-                
+                case MapLayout.ID:
+                    m = new MapLayout();
+                    break;
 
                 default:
                     throw (new Exception());
@@ -319,6 +321,32 @@ namespace MessageTypes
         {
             action = read.ReadString();
             opponent = read.ReadString();
+        }
+    }
+    public class MapLayout : Msg
+    {
+        public const int ID = 9;
+
+        public String mapInfo;
+
+        public MapLayout() { mID = ID; }
+
+        public override MemoryStream WriteData()
+        {
+            MemoryStream stream = new MemoryStream();
+            BinaryWriter write = new BinaryWriter(stream);
+            write.Write(ID);
+            write.Write(mapInfo);
+
+            Console.Write("sending: " + mapInfo);
+
+            write.Close();
+            return stream;
+        }
+
+        public override void ReadData(BinaryReader read)
+        {
+            mapInfo = read.ReadString();
         }
     }
 }
