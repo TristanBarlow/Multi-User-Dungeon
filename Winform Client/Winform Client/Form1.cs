@@ -147,6 +147,7 @@ namespace Winform_Client
                                     break;
                                 case MapLayout.ID:
                                     {
+                                        
                                         MapLayout ML = (MapLayout)m;
                                         Random r = new Random();
                                         Thread newThread = new Thread(() => DGD.MapParser(ML.mapInfo));
@@ -490,6 +491,21 @@ namespace Winform_Client
         {
             DGD.ClientNumberList = numberOfClients;
             DGD.Draw();
+        }
+
+        private void DungeonGraphic_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void TextboxDungeon_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBox_Output_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

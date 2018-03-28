@@ -48,17 +48,21 @@
             // 
             // buttonSend
             // 
-            this.buttonSend.Location = new System.Drawing.Point(411, 396);
+            this.buttonSend.BackColor = System.Drawing.Color.Black;
+            this.buttonSend.ForeColor = System.Drawing.Color.Lime;
+            this.buttonSend.Location = new System.Drawing.Point(968, 387);
             this.buttonSend.Name = "buttonSend";
             this.buttonSend.Size = new System.Drawing.Size(90, 21);
             this.buttonSend.TabIndex = 0;
             this.buttonSend.Text = "Send";
-            this.buttonSend.UseVisualStyleBackColor = true;
+            this.buttonSend.UseVisualStyleBackColor = false;
             this.buttonSend.Click += new System.EventHandler(this.buttonSend_Click);
             // 
             // textBox_Input
             // 
-            this.textBox_Input.Location = new System.Drawing.Point(21, 396);
+            this.textBox_Input.BackColor = System.Drawing.Color.Black;
+            this.textBox_Input.ForeColor = System.Drawing.Color.White;
+            this.textBox_Input.Location = new System.Drawing.Point(578, 388);
             this.textBox_Input.Name = "textBox_Input";
             this.textBox_Input.Size = new System.Drawing.Size(384, 20);
             this.textBox_Input.TabIndex = 2;
@@ -66,129 +70,158 @@
             // 
             // textBox_Output
             // 
-            this.textBox_Output.Location = new System.Drawing.Point(22, 312);
+            this.textBox_Output.BackColor = System.Drawing.Color.Black;
+            this.textBox_Output.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textBox_Output.ForeColor = System.Drawing.Color.White;
+            this.textBox_Output.Location = new System.Drawing.Point(578, 303);
             this.textBox_Output.Multiline = true;
             this.textBox_Output.Name = "textBox_Output";
             this.textBox_Output.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textBox_Output.Size = new System.Drawing.Size(384, 78);
             this.textBox_Output.TabIndex = 3;
+            this.textBox_Output.TextChanged += new System.EventHandler(this.textBox_Output_TextChanged);
             // 
             // listBox_ClientList
             // 
+            this.listBox_ClientList.BackColor = System.Drawing.Color.Black;
+            this.listBox_ClientList.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.listBox_ClientList.ForeColor = System.Drawing.Color.White;
             this.listBox_ClientList.FormattingEnabled = true;
-            this.listBox_ClientList.Location = new System.Drawing.Point(412, 69);
+            this.listBox_ClientList.Location = new System.Drawing.Point(968, 3);
             this.listBox_ClientList.Name = "listBox_ClientList";
-            this.listBox_ClientList.Size = new System.Drawing.Size(89, 316);
+            this.listBox_ClientList.Size = new System.Drawing.Size(89, 312);
             this.listBox_ClientList.TabIndex = 5;
             this.listBox_ClientList.SelectedIndexChanged += new System.EventHandler(this.listBox_ClientList_SelectedIndexChanged);
             // 
             // NameBox
             // 
-            this.NameBox.Location = new System.Drawing.Point(412, 41);
+            this.NameBox.BackColor = System.Drawing.Color.Black;
+            this.NameBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.NameBox.Location = new System.Drawing.Point(968, 332);
             this.NameBox.Name = "NameBox";
-            this.NameBox.Size = new System.Drawing.Size(89, 20);
+            this.NameBox.Size = new System.Drawing.Size(89, 13);
             this.NameBox.TabIndex = 6;
             this.NameBox.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // TextboxDungeon
             // 
-            this.TextboxDungeon.BackColor = System.Drawing.SystemColors.ActiveCaption;
-            this.TextboxDungeon.Location = new System.Drawing.Point(22, 12);
+            this.TextboxDungeon.BackColor = System.Drawing.SystemColors.InfoText;
+            this.TextboxDungeon.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.TextboxDungeon.ForeColor = System.Drawing.Color.White;
+            this.TextboxDungeon.Location = new System.Drawing.Point(578, 3);
             this.TextboxDungeon.Multiline = true;
             this.TextboxDungeon.Name = "TextboxDungeon";
             this.TextboxDungeon.ReadOnly = true;
             this.TextboxDungeon.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.TextboxDungeon.Size = new System.Drawing.Size(384, 294);
+            this.TextboxDungeon.Size = new System.Drawing.Size(384, 290);
             this.TextboxDungeon.TabIndex = 7;
+            this.TextboxDungeon.TextChanged += new System.EventHandler(this.TextboxDungeon_TextChanged);
             // 
             // ButtonNorth
             // 
-            this.ButtonNorth.Location = new System.Drawing.Point(147, 424);
+            this.ButtonNorth.BackColor = System.Drawing.Color.Black;
+            this.ButtonNorth.ForeColor = System.Drawing.Color.Lime;
+            this.ButtonNorth.Location = new System.Drawing.Point(1, 388);
             this.ButtonNorth.Name = "ButtonNorth";
             this.ButtonNorth.Size = new System.Drawing.Size(75, 23);
             this.ButtonNorth.TabIndex = 8;
             this.ButtonNorth.Text = "North";
-            this.ButtonNorth.UseVisualStyleBackColor = true;
+            this.ButtonNorth.UseVisualStyleBackColor = false;
             this.ButtonNorth.Click += new System.EventHandler(this.ButtonNorth_Click);
             // 
             // ButtonEast
             // 
-            this.ButtonEast.Location = new System.Drawing.Point(224, 452);
+            this.ButtonEast.BackColor = System.Drawing.Color.Black;
+            this.ButtonEast.ForeColor = System.Drawing.Color.Lime;
+            this.ButtonEast.Location = new System.Drawing.Point(163, 388);
             this.ButtonEast.Name = "ButtonEast";
             this.ButtonEast.Size = new System.Drawing.Size(75, 23);
             this.ButtonEast.TabIndex = 9;
             this.ButtonEast.Text = "East";
-            this.ButtonEast.UseVisualStyleBackColor = true;
+            this.ButtonEast.UseVisualStyleBackColor = false;
             this.ButtonEast.Click += new System.EventHandler(this.ButtonEast_Click);
             // 
             // ButtonSouth
             // 
-            this.ButtonSouth.Location = new System.Drawing.Point(147, 481);
+            this.ButtonSouth.BackColor = System.Drawing.Color.Black;
+            this.ButtonSouth.ForeColor = System.Drawing.Color.Lime;
+            this.ButtonSouth.Location = new System.Drawing.Point(244, 388);
             this.ButtonSouth.Name = "ButtonSouth";
             this.ButtonSouth.Size = new System.Drawing.Size(75, 23);
             this.ButtonSouth.TabIndex = 10;
             this.ButtonSouth.Text = "South";
-            this.ButtonSouth.UseVisualStyleBackColor = true;
+            this.ButtonSouth.UseVisualStyleBackColor = false;
             this.ButtonSouth.Click += new System.EventHandler(this.ButtonSouth_Click);
             // 
             // ButtonWest
             // 
-            this.ButtonWest.Location = new System.Drawing.Point(66, 452);
+            this.ButtonWest.BackColor = System.Drawing.Color.Black;
+            this.ButtonWest.ForeColor = System.Drawing.Color.Lime;
+            this.ButtonWest.Location = new System.Drawing.Point(82, 388);
             this.ButtonWest.Name = "ButtonWest";
             this.ButtonWest.Size = new System.Drawing.Size(75, 23);
             this.ButtonWest.TabIndex = 11;
             this.ButtonWest.Text = "West";
-            this.ButtonWest.UseVisualStyleBackColor = true;
+            this.ButtonWest.UseVisualStyleBackColor = false;
             this.ButtonWest.Click += new System.EventHandler(this.ButtonWest_Click);
             // 
             // ChangeName
             // 
-            this.ChangeName.Location = new System.Drawing.Point(411, 12);
+            this.ChangeName.BackColor = System.Drawing.Color.Black;
+            this.ChangeName.ForeColor = System.Drawing.Color.Lime;
+            this.ChangeName.Location = new System.Drawing.Point(968, 358);
             this.ChangeName.Name = "ChangeName";
             this.ChangeName.Size = new System.Drawing.Size(90, 23);
             this.ChangeName.TabIndex = 12;
             this.ChangeName.Text = "Change Name";
-            this.ChangeName.UseVisualStyleBackColor = true;
+            this.ChangeName.UseVisualStyleBackColor = false;
             this.ChangeName.Click += new System.EventHandler(this.ChangeNameClick);
             // 
             // AttackButton
             // 
-            this.AttackButton.Location = new System.Drawing.Point(305, 423);
+            this.AttackButton.BackColor = System.Drawing.Color.Black;
+            this.AttackButton.ForeColor = System.Drawing.Color.Lime;
+            this.AttackButton.Location = new System.Drawing.Point(325, 388);
             this.AttackButton.Name = "AttackButton";
             this.AttackButton.Size = new System.Drawing.Size(75, 23);
             this.AttackButton.TabIndex = 13;
             this.AttackButton.Text = "Attack";
-            this.AttackButton.UseVisualStyleBackColor = true;
+            this.AttackButton.UseVisualStyleBackColor = false;
             this.AttackButton.Click += new System.EventHandler(this.AttackSend);
             // 
             // DefendButton
             // 
-            this.DefendButton.Location = new System.Drawing.Point(305, 452);
+            this.DefendButton.BackColor = System.Drawing.Color.Black;
+            this.DefendButton.ForeColor = System.Drawing.Color.Lime;
+            this.DefendButton.Location = new System.Drawing.Point(406, 388);
             this.DefendButton.Name = "DefendButton";
             this.DefendButton.Size = new System.Drawing.Size(75, 23);
             this.DefendButton.TabIndex = 14;
             this.DefendButton.Text = "Defend";
-            this.DefendButton.UseVisualStyleBackColor = true;
+            this.DefendButton.UseVisualStyleBackColor = false;
             this.DefendButton.Click += new System.EventHandler(this.DefendSend);
             // 
             // WildAttackButton
             // 
-            this.WildAttackButton.Location = new System.Drawing.Point(305, 481);
+            this.WildAttackButton.BackColor = System.Drawing.Color.Black;
+            this.WildAttackButton.ForeColor = System.Drawing.Color.Lime;
+            this.WildAttackButton.Location = new System.Drawing.Point(487, 388);
             this.WildAttackButton.Name = "WildAttackButton";
             this.WildAttackButton.Size = new System.Drawing.Size(75, 23);
             this.WildAttackButton.TabIndex = 15;
             this.WildAttackButton.Text = "Wild Attack";
-            this.WildAttackButton.UseVisualStyleBackColor = true;
+            this.WildAttackButton.UseVisualStyleBackColor = false;
             this.WildAttackButton.Click += new System.EventHandler(this.WildAttackSend);
             // 
             // DungeonGraphic
             // 
             this.DungeonGraphic.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.DungeonGraphic.Location = new System.Drawing.Point(507, 69);
+            this.DungeonGraphic.Location = new System.Drawing.Point(1, 3);
             this.DungeonGraphic.Name = "DungeonGraphic";
-            this.DungeonGraphic.Size = new System.Drawing.Size(332, 316);
+            this.DungeonGraphic.Size = new System.Drawing.Size(561, 378);
             this.DungeonGraphic.TabIndex = 16;
             this.DungeonGraphic.TabStop = false;
+            this.DungeonGraphic.Click += new System.EventHandler(this.DungeonGraphic_Click);
             this.DungeonGraphic.Paint += new System.Windows.Forms.PaintEventHandler(this.DungeonPaint);
             // 
             // Form1
@@ -196,8 +229,8 @@
             this.AcceptButton = this.buttonSend;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(851, 512);
+            this.BackColor = System.Drawing.Color.Black;
+            this.ClientSize = new System.Drawing.Size(1075, 417);
             this.Controls.Add(this.DungeonGraphic);
             this.Controls.Add(this.WildAttackButton);
             this.Controls.Add(this.DefendButton);

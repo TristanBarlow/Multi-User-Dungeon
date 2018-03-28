@@ -412,7 +412,7 @@ namespace Server
 
             Dungeon = new DungeonS();
             Dungeon.Init();
-            Dungeon.DungeonStr = U.GenerateDungeonString(U.GenerateDungeon(20, 4));
+            Dungeon.DungeonStr = U.GenerateDungeonString(U.GenerateDungeon(100,25));
 
             PlayerHandle = new PlayerHandler();
 

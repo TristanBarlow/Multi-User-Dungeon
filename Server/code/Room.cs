@@ -66,16 +66,16 @@ namespace Dungeon
             {
                 switch (Direction)
                 {
-                    case 0:
+                    case 1:
                         if (north == -1) { north = indexOfRoom; Used = true; return true; }
                         break;
-                    case 1:
+                    case 2:
                         if (east == -1) { east = indexOfRoom; Used = true; return true; }
                         break;
-                    case 2:
+                    case -1:
                         if (south == -1) { south = indexOfRoom; Used = true; return true; }
                         break;
-                    case 3:
+                    case -2:
                         if (west == -1) { west = indexOfRoom; Used = true; return true; }
                         break;
 
