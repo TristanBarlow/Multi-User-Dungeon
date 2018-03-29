@@ -59,6 +59,9 @@ namespace MessageTypes
                 case MapLayout.ID:
                     m = new MapLayout();
                     break;
+                case PlayerLocations.ID:
+                    m = new PlayerLocations();
+                    break;
 
                 default:
                     throw (new Exception());
@@ -137,8 +140,8 @@ namespace MessageTypes
 
         public List<String> clientList;
 
-        public ClientListMsg() 
-        { 
+        public ClientListMsg()
+        {
             mID = ID;
 
             clientList = new List<String>();
@@ -146,7 +149,7 @@ namespace MessageTypes
 
         public override MemoryStream WriteData()
         {
-            
+
             MemoryStream stream = new MemoryStream();
             BinaryWriter write = new BinaryWriter(stream);
 
@@ -208,10 +211,10 @@ namespace MessageTypes
         public String command;
 
         public String getCommand()
-       {
+        {
             return command;
         }
- 
+
         public DungeonCommand() { mID = ID; }
 
         public override MemoryStream WriteData()
@@ -285,11 +288,11 @@ namespace MessageTypes
 
         public override void ReadData(BinaryReader read)
         {
-           String temp = read.ReadString();
-           var index = temp.Split('h');
+            String temp = read.ReadString();
+            var index = temp.Split('h');
 
-           if (int.TryParse(index[1], out health)) { }
-           else { health = 1; }
+            if (int.TryParse(index[1], out health)) { }
+            else { health = 1; }
         }
     }
 
@@ -347,6 +350,33 @@ namespace MessageTypes
         public override void ReadData(BinaryReader read)
         {
             mapInfo = read.ReadString();
+        }
+    }
+    public class PlayerLocations : Msg
+    {
+        public const int ID = 10;
+
+        public String LocationString = " ";
+
+        public PlayerLocations() { mID = ID; }
+
+        public override MemoryStream WriteData()
+        {
+
+            MemoryStream stream = new MemoryStream();
+            BinaryWriter write = new BinaryWriter(stream);
+            write.Write(ID);
+            write.Write(LocationString);
+
+            Console.Write("sending: " + LocationString);
+
+            write.Close();
+            return stream;
+        }
+
+        public override void ReadData(BinaryReader read)
+        {
+            LocationString = read.ReadString();
         }
     }
 }

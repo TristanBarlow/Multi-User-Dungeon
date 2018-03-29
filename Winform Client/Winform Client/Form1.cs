@@ -136,6 +136,7 @@ namespace Winform_Client
                                 case DungeonResponse.ID:
                                     {
                                         DungeonResponse dSponse = (DungeonResponse)m;
+
                                         form.AddDungeonText(dSponse.response);
                                     }
                                     break;
@@ -149,10 +150,25 @@ namespace Winform_Client
                                     {
                                         
                                         MapLayout ML = (MapLayout)m;
-                                        Random r = new Random();
                                         Thread newThread = new Thread(() => DGD.MapParser(ML.mapInfo));
                                         newThread.Start();
                                     }
+                                    break;
+                                case PlayerLocations.ID:
+                                    {
+                                        PlayerLocations PL = (PlayerLocations)m;
+                                        String[] words = PL.LocationString.Split('&');
+                                        DGD.ClientNumberList.Clear();
+                                        foreach (String w in words)
+                                        {
+                                            String[] s = w.Split(' ');
+                                            if (s.Count() >= 2)
+                                            {
+                                                DGD.ClientNumberList.Add(Int32.Parse(s[1]));
+                                            }
+                                        }
+                                        DGD.Draw();
+                                   }
                                     break;
                                 default:
                                     break;

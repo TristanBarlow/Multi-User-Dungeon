@@ -396,6 +396,39 @@ namespace Server
             }
         }
 
+        public static void SendLocations()
+        {
+            while (true)
+            {
+                String rStr = "&";
+                lock (clientDictionary)
+                {
+                    if (clientDictionary.Count > 0)
+                    {
+                        foreach (KeyValuePair<String, Socket> s in clientDictionary)
+                        {
+                            lock (RequestHandle)
+                            {
+                                if (RequestHandle.GetPlayer(s.Key) != null)
+                                {
+                                    rStr += s.Key+ " " + RequestHandle.GetPlayer(s.Key).currentRoom.RoomIndex + "&";
+                                }
+                            }
+                        }
+                        rStr += "&";
+                        PlayerLocations m = new PlayerLocations();
+                        m.LocationString = rStr;
+                        MemoryStream outStream = m.WriteData();
+                        foreach (KeyValuePair<String, Socket> s in clientDictionary)
+                        {
+                            s.Value.Send(outStream.GetBuffer());
+                        }
+                    }
+                }
+                Thread.Sleep(1500);
+            }
+        }
+
         static void Main(string[] args)
         {
             Socket serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -404,20 +437,20 @@ namespace Server
             serverSocket.Bind(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8500));
             serverSocket.Listen(32);
 
- 
-
             bool bQuit = false;
 
             Console.WriteLine("Server");
 
             Dungeon = new DungeonS();
-            Dungeon.Init();
-            Dungeon.DungeonStr = U.GenerateDungeonString(U.GenerateDungeon(100,25));
+            Dungeon.Init(100,25);
 
             PlayerHandle = new PlayerHandler();
 
             RequestHandle = new RequestHandler(ref Dungeon, ref PlayerHandle);
-
+            {
+                Thread t = new Thread(SendLocations);
+                 t.Start();
+             }
             while (!bQuit)
             {
                 Socket serverClient = serverSocket.Accept();

@@ -45,6 +45,7 @@ namespace Winform_Client
 
         public PictureBox PB { get; set; }
         public Graphics G { get; set; }
+        public Graphics GU { get; set; }
 
         public int Enemy { get; set; } = 0;
 
@@ -54,6 +55,7 @@ namespace Winform_Client
         private List<DrawObject> MapObjects = new List<DrawObject>();
         private Dictionary<String, User> UserDrawDict = new Dictionary<String, User>();
         private String CurrentMapString = " ";
+        private String CurrentPlayerLocations = " ";
         public List<int> ClientNumberList = new List<int>();
 
         private SolidBrush b = new SolidBrush(Color.Purple);
@@ -72,13 +74,15 @@ namespace Winform_Client
             YPos = DG.Location.Y;
             PB = DG;
             G = DG.CreateGraphics();
+            GU = DG.CreateGraphics();
         }
 
         public void Draw()
         {
-            G.Clear(FillColor);
+            
             lock (MapObjects)
             {
+                G.Clear(FillColor);
                 foreach (DrawObject d in MapObjects)
                 {
                     d.DrawMe(G, XOffset, YOffset);
@@ -89,14 +93,22 @@ namespace Winform_Client
 
         public void DrawUsers()
         {
-            foreach (KeyValuePair<String, User> u in UserDrawDict)
-            {
-                u.Value.DrawMe(G, XOffset, YOffset);
-            }
+                lock (UserDrawDict)
+                {
+                    lock (GU)
+                    {
+                        foreach (KeyValuePair<String, User> u in UserDrawDict)
+                        {
+                            u.Value.size = Scale*3;
+                            RoomSlot rs = currentMap[u.Value.RoomNum].GetNextRoomSlot(u.Value.size);
+                            u.Value.DrawMe(GU, XOffset, YOffset);
+                        }
+                    }
+                }
         }
 
         public void UpdateScale()
-        {
+        { 
             currentMap.Clear();
             MapObjects.Clear();
             String temp =CurrentMapString;
@@ -118,7 +130,7 @@ namespace Winform_Client
                     RoomSlot rs = currentMap[i].GetNextRoomSlot(3 * Scale);
                     if (rs != null)
                     {
-                        G.FillEllipse(b, rs.XPos + XOffset, rs.YPos + YOffset, 3 * Scale, 3 * Scale);
+                        GU.FillEllipse(b, rs.XPos + XOffset, rs.YPos + YOffset, 3 * Scale, 3 * Scale);
                     }
                 }
             }
@@ -240,11 +252,49 @@ namespace Winform_Client
             AddConnectorDraws();
         }
 
-        public void PlayersParser(String str)
+        public void DrawPlayers(String str)
         {
+            if (str == CurrentPlayerLocations)
+            {
+                return;
+            }
+            CurrentPlayerLocations = str;
+            String[]words =  CurrentPlayerLocations.Split('&');
+            foreach(String w in words)
+            {
+                String[]s =  w.Split(' ');
+                if (s.Count() >= 2)
+                {
+                    int i = Int32.Parse(s[1]);
+                    lock (UserDrawDict)
+                    {
+                        if (!UserDrawDict.ContainsKey(s[0]))
+                        {
+                            User u = new User(s[0], i, Scale);
+                            RoomSlot rs = currentMap[i].GetNextRoomSlot(u.size);
+                            u.XPos = rs.XPos; u.YPos = rs.YPos;
+                            UserDrawDict.Add(s[0], u);
+                        }
+                        else
+                        {
+                            User u = UserDrawDict[s[0]];
+                            if (u.RoomNum != i)
+                            {
 
+                                currentMap[u.RoomNum].FreeRoomSlot(u.RoomSlotIndex);
+                                RoomSlot rs = currentMap[i].GetNextRoomSlot(u.size);
+                                UserDrawDict[s[0]].MoveUser(rs, i);
+                            }
+
+                        }
+                    }
+                }
+                    
+            }
+            Draw();
         }
     }
+ }
 
 
     public class User: DrawObject
@@ -266,7 +316,7 @@ namespace Winform_Client
             {
                 b = new SolidBrush(Color.Green);
             }
-            size *= scale;
+             size = scale;
         }
         public void MoveUser(RoomSlot rs, int num)
         {
@@ -454,4 +504,3 @@ namespace Winform_Client
                     YPos = y;
                 }
     }
-}

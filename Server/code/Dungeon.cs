@@ -11,61 +11,27 @@ namespace Dungeon
 {
     public class DungeonS
     {        
-        private static Dictionary<String, Room> roomMap;
+        //private Dictionary<String, Room> roomMap;
+        private List<Room> RoomList;
 
         public String DungeonStr { set; get; } = "&n1e2s3w4&s0&w0&n0&e0w5&e4&";
 
-        public void Init()
+        public void Init(int size, int spread)
         {
-            roomMap = new Dictionary<string, Room>();
-
+           // roomMap = new Dictionary<string, Room>();
+            RoomList = GenerateDungeon(size, spread);
+            foreach (Room r in RoomList)
             {
-                var room = new Room("Room 0", "You are standing in the entrance hall, You want to find someone to fight.");
-                room.North = "Room 1";
-                roomMap.Add(room.name, room);
+               // roomMap.Add(r.name, r);
             }
-
-            {
-                var room = new Room("Room 1", "This room is much like the others, perfect for fighting");
-                room.South = "Room 0";
-                room.West = "Room 3";
-                room.East = "Room 2";
-                roomMap.Add(room.name, room);
-            }
-
-            {
-                var room = new Room("Room 2", "Only two exits, a perfect place for an ambush");
-                room.North = "Room 4";
-                room.West = "Room 1";
-                roomMap.Add(room.name, room);
-            }
-
-            {
-                var room = new Room("Room 3", "A dead end, One must be carful");
-                room.East = "Room 1";
-                roomMap.Add(room.name, room);
-            }
-
-            {
-                var room = new Room("Room 4", "Far from the enterance hall probably a good spot for a quiet murder");
-                room.South = "Room 2";
-                room.West = "Room 5";
-                roomMap.Add(room.name, room);
-            }
-
-            {
-                var room = new Room("Room 5", "Stop exploring and find some one to kill");
-                room.South = "Room 1";
-                room.East = "Room 4";
-                roomMap.Add(room.name, room);
-            }
+            DungeonStr = GenerateDungeonString(RoomList);
         }
 
         public Room GetRandomRoom()
         {
             Random rnd = new Random();
-            int num = rnd.Next(0, roomMap.Count());
-            Room randomRoom = roomMap.Values.ElementAt(num);
+            int num = rnd.Next(0, RoomList.Count);
+            Room randomRoom = RoomList[num];
             return randomRoom;
         }
 
@@ -155,28 +121,29 @@ namespace Dungeon
 
                 case "go":
                     // is arg[1] sensible?
-                    if ((input[1].ToLower() == "north") && (player.currentRoom.North != null))
+                    int[] indexs = player.currentRoom.GetExitIndexs();
+                    if ((input[1].ToLower() == "north") && (indexs[0] != -1))
                     {
-                       MovePlayer(player, roomMap[player.currentRoom.North]);
+                        MovePlayer(player, RoomList[indexs[0]]);
                     }
                     else
                     {
-                        if ((input[1].ToLower() == "south") && (player.currentRoom.South != null))
+                        if ((input[1].ToLower() == "south") && (indexs[2] != -1))
                         {
-                            MovePlayer(player, roomMap[player.currentRoom.South]);
+                            MovePlayer(player, RoomList[indexs[2]]);
                         }
                         else
                         {
-                            if ((input[1].ToLower() == "east") && (player.currentRoom.East != null))
+                            if ((input[1].ToLower() == "east") && (indexs[1] != -1))
                             {
-                                MovePlayer(player, roomMap[player.currentRoom.East]);
+                                MovePlayer(player, RoomList[indexs[1]]);
                             }
                             else
                             {
-                                if ((input[1].ToLower() == "west") && (player.currentRoom.West != null))
+                                if ((input[1].ToLower() == "west") && (indexs[3] != -1))
                                 {
                                    
-                                    MovePlayer(player, roomMap[player.currentRoom.West]);
+                                    MovePlayer(player, RoomList[indexs[1]]);
                                     
                                 }
                                 else
@@ -209,6 +176,101 @@ namespace Dungeon
                 return returnString;
             }
 
+        }
+        public static String GenerateDungeonString(List<Room> RoomList)
+        {
+            String rStr = "&";
+            foreach (Room r in RoomList)
+            {
+                bool GoodRoom = false;
+                int[] temp = r.GetExitIndexs();
+                if (temp[0] != -1)
+                {
+                    rStr += "n" + temp[0] + " ";
+                    GoodRoom = true;
+                }
+                if (temp[1] != -1)
+                {
+                    rStr += "e" + temp[1] + " ";
+                    GoodRoom = true;
+                }
+                if (temp[2] != -1)
+                {
+                    rStr += "s" + temp[2] + " ";
+                    GoodRoom = true;
+                }
+                if (temp[3] != -1)
+                {
+                    rStr += "w" + temp[3] + " ";
+                    GoodRoom = true;
+                }
+                if (GoodRoom) rStr += "&";
+            }
+
+            return rStr;
+        }
+
+        public static void MakeConnections(ref int i, int RoomLength, int direction, ref List<Room> rRooms)
+        {
+            int opposite = -1 * direction;
+            rRooms[0].AddConection(direction, i);
+            rRooms[i].AddConection(opposite, 0);
+            int max = i + RoomLength;
+            while (i < max)
+            {
+                int ti = i - 1;
+                rRooms[i].AddConection(opposite, ti);
+                rRooms[i].AddConection(direction, i + 1);
+                i++;
+            }
+            rRooms[i].AddConection(opposite, i - 1);
+            i++;
+        }
+
+        public static void MakeBranch(ref int i, int BranchStart, int NumberOfRooms, int direction, ref List<Room> rRooms)
+        {
+            int opposite = -1 * direction;
+            if (rRooms[BranchStart].AddConection(direction, i))
+            {
+                rRooms[i].AddConection(opposite, BranchStart);
+                i++;
+            }
+        }
+
+        public static List<Room> GenerateDungeon(int size, int spread)
+        {
+            if (size < 4)
+            {
+                size = 4;
+            }
+            size += 1;
+            List<Room> rRooms = new List<Room>();
+            Random rand = new Random();
+            int iter = 0;
+            while (rRooms.Count < size)
+            {
+                rRooms.Add(new Room("Room" + iter, iter));
+                iter++;
+            }
+            int RoomLength = (int)(size / spread) - 1;
+
+            int i = 1;
+
+            MakeConnections(ref i, RoomLength, 1, ref rRooms);
+            MakeConnections(ref i, RoomLength, -1, ref rRooms);
+            MakeConnections(ref i, RoomLength, 2, ref rRooms);
+            MakeConnections(ref i, RoomLength, -2, ref rRooms);
+
+            int RoomsLeftOver = rRooms.Count - i;
+            int[] Dir = { 1, -1, -2, 2 };
+
+            while (i < rRooms.Count)
+            {
+                MakeBranch(ref i, rand.Next(0, i), 0, Dir[rand.Next(0, 3)], ref rRooms);
+            }
+
+            // Console.Write(U.GenerateDungeonString(rRooms));
+            return rRooms;
         }
     }
 }

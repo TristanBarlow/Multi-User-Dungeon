@@ -59,6 +59,9 @@ namespace MessageTypes
                 case MapLayout.ID:
                     m = new MapLayout();
                     break;
+                case PlayerLocations.ID:
+                    m = new PlayerLocations();
+                    break;
 
                 default:
                     throw (new Exception());
@@ -347,6 +350,33 @@ namespace MessageTypes
         public override void ReadData(BinaryReader read)
         {
             mapInfo = read.ReadString();
+        }
+    }
+    public class PlayerLocations : Msg
+    {
+        public const int ID = 10;
+
+        public String LocationString = " "; 
+
+        public PlayerLocations() { mID = ID; }
+
+        public override MemoryStream WriteData()
+        {
+
+            MemoryStream stream = new MemoryStream();
+            BinaryWriter write = new BinaryWriter(stream);
+            write.Write(ID);
+            write.Write(LocationString);
+
+            Console.Write("sending: " + LocationString);
+
+            write.Close();
+            return stream;
+        }
+
+        public override void ReadData(BinaryReader read)
+        {
+            LocationString = read.ReadString();
         }
     }
 }
