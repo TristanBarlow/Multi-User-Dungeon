@@ -72,7 +72,7 @@ namespace Dungeon
                 case "look":
                     //loop straight back
                     returnString = U.NewLineS("you look around") +
-                                   U.NewLineS(player.currentRoom.GetDescription());
+                                   U.NewLineS(player.currentRoom.GetDescription(RoomList));
                     break;
 
                 case "graf":
@@ -143,7 +143,7 @@ namespace Dungeon
                                 if ((input[1].ToLower() == "west") && (indexs[3] != -1))
                                 {
                                    
-                                    MovePlayer(player, RoomList[indexs[1]]);
+                                    MovePlayer(player, RoomList[indexs[3]]);
                                     
                                 }
                                 else
@@ -156,7 +156,7 @@ namespace Dungeon
                             }
                         }
                     }
-                    returnString = U.NewLineS(player.currentRoom.GetDescription());
+                    returnString = U.NewLineS(player.currentRoom.GetDescription(RoomList));
                     break;
 
                 default:
@@ -266,7 +266,7 @@ namespace Dungeon
 
             while (i < rRooms.Count)
             {
-                MakeBranch(ref i, rand.Next(0, i), 0, Dir[rand.Next(0, 3)], ref rRooms);
+                MakeBranch(ref i, rand.Next(0, i), 0, Dir[rand.Next(0, 4)], ref rRooms);
             }
 
             // Console.Write(U.GenerateDungeonString(rRooms));

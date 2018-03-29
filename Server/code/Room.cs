@@ -15,11 +15,9 @@ namespace Dungeon
         public int RoomIndex { set; get; } = -1;
         public String name = "";
         private String desc = "";
-        public String[] exits = new String[4];
         private List<Player> Players;
         public List<String> graffitiList;
         public Inventory inventory;
-        public static String[] exitNames = { "NORTH", "SOUTH", "EAST", "WEST" };
        private int north = -1;
        private int east = -1;
        private int south = -1;
@@ -90,29 +88,6 @@ namespace Dungeon
             Players = new List<Player>();
             inventory = new Inventory();
         }
-        public String North
-        {
-            get { return exits[0]; }
-            set { exits[0] = value; }
-        }
-
-        public String South
-        {
-            get { return exits[1]; }
-            set { exits[1] = value; }
-        }
-
-        public String East
-        {
-            get { return exits[2]; }
-            set { exits[2] = value; }
-        }
-
-        public String West
-        {
-            get { return exits[3]; }
-            set { exits[3] = value; }
-        }
 
         public void AddGraf(String graff){ graffitiList.Add(graff);}
                     
@@ -120,7 +95,7 @@ namespace Dungeon
 
         public void RemovePlayer(Player p) {Players.Remove(p);}
         
-        public String GetDescription()
+        public String GetDescription(List<Room> Map)
         {
             String returnString;
             returnString = U.NewLineS(name) +
@@ -128,24 +103,18 @@ namespace Dungeon
                            U.NewLineS("//")+
                            ("Exits Are:");
 
-            if (exits.Count() != 0)
+            if (Used)
             {
-                for (var i = 0; i < exits.Length; i++)
-                {
-                    if (exits[i] != null)
-                    {
-                        returnString += Room.exitNames[i] + " ";
-                    }
-                }
-                returnString += U.NewLineS(" ")+
-                                U.NewLineS("//");
-                                
+                if (north != -1) returnString += "North ";
+                if (east != -1) returnString += "East ";
+                if (south != -1) returnString += "South ";
+                if (west != -1) returnString += "West ";
             }
             else
             {
                 returnString = "no exits oh no";
             }
-
+            returnString += U.NewLineS(" ");
             returnString += ("Players In room : ");
 
             if (Players.Count() > 1)

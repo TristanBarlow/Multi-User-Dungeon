@@ -167,7 +167,7 @@ namespace Winform_Client
                                                 DGD.ClientNumberList.Add(Int32.Parse(s[1]));
                                             }
                                         }
-                                        DGD.Draw();
+                                        DGD.DrawPlayers(PL.LocationString);
                                    }
                                     break;
                                 default:

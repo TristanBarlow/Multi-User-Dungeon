@@ -169,7 +169,7 @@ namespace Server
             }
             catch (System.Exception)
             {
-
+                RemoveClientBySocket(s);
             }
         }
 
@@ -255,7 +255,7 @@ namespace Server
             }
             catch (System.Exception)
             {
-
+                RemoveClientBySocket(s.Value);
             }
         }
 
@@ -421,11 +421,18 @@ namespace Server
                         MemoryStream outStream = m.WriteData();
                         foreach (KeyValuePair<String, Socket> s in clientDictionary)
                         {
-                            s.Value.Send(outStream.GetBuffer());
+                            try
+                            {
+                                s.Value.Send(outStream.GetBuffer());
+                            }
+                            catch (System.Exception)
+                            {
+                                RemoveClientBySocket(s.Value);
+                            }
                         }
                     }
                 }
-                Thread.Sleep(1500);
+                Thread.Sleep(500);
             }
         }
 
@@ -442,7 +449,7 @@ namespace Server
             Console.WriteLine("Server");
 
             Dungeon = new DungeonS();
-            Dungeon.Init(100,25);
+            Dungeon.Init(40,10);
 
             PlayerHandle = new PlayerHandler();
 
@@ -450,7 +457,7 @@ namespace Server
             {
                 Thread t = new Thread(SendLocations);
                  t.Start();
-             }
+            }
             while (!bQuit)
             {
                 Socket serverClient = serverSocket.Accept();

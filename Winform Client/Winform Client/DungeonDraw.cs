@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Threading.Tasks;
 
 namespace Winform_Client
 {
@@ -37,14 +38,16 @@ namespace Winform_Client
         public void ChangeScale(int Offset)
         {
             Scale += Offset;
-            if (Scale <= 0) Scale = 1;
-            if (Scale >= 20) Scale = 19;
+            if (Scale <= 1) Scale = 1;
+            if (Scale >= 15) Scale = 15;
             UpdateScale();
             
         }
 
         public PictureBox PB { get; set; }
         public Graphics G { get; set; }
+
+        public Graphics G2 { get; set; }
         public Graphics GU { get; set; }
 
         public int Enemy { get; set; } = 0;
@@ -75,22 +78,51 @@ namespace Winform_Client
             PB = DG;
             G = DG.CreateGraphics();
             GU = DG.CreateGraphics();
+            G2 = DG.CreateGraphics();
         }
 
         public void Draw()
         {
-            
+
             lock (MapObjects)
             {
                 G.Clear(FillColor);
+
                 foreach (DrawObject d in MapObjects)
                 {
                     d.DrawMe(G, XOffset, YOffset);
                 }
+
+
             }
             UpdateUserPositions();
         }
 
+        public void SplitDraw()
+        {
+                List<DrawObject> t;
+                lock (MapObjects)
+                {
+                    t = new List<DrawObject>(MapObjects);
+
+                }
+            lock (G)
+            {
+                G.Clear(FillColor);
+                int count = t.Count;
+                Task task = new Task(() => DrawHalf(t.Take(count / 2).ToArray(), G2, XOffset, YOffset));
+                task.Start();
+                DrawObject[] tb = t.Skip(count / 2).ToArray();
+                foreach (DrawObject d in tb)
+                {
+                    d.DrawMe(G, XOffset, YOffset);
+                }
+                task.Wait();
+            }
+
+
+            UpdateUserPositions();
+        }
         public void DrawUsers()
         {
                 lock (UserDrawDict)
@@ -107,7 +139,7 @@ namespace Winform_Client
                 }
         }
 
-        public void UpdateScale()
+        private void UpdateScale()
         { 
             currentMap.Clear();
             MapObjects.Clear();
@@ -125,12 +157,15 @@ namespace Winform_Client
                 {
                     r.FreeAllSlots();
                 }
-                foreach (int i in ClientNumberList)
-                {
-                    RoomSlot rs = currentMap[i].GetNextRoomSlot(3 * Scale);
-                    if (rs != null)
+                lock(ClientNumberList)
+               {
+                    foreach (int i in ClientNumberList)
                     {
-                        GU.FillEllipse(b, rs.XPos + XOffset, rs.YPos + YOffset, 3 * Scale, 3 * Scale);
+                        RoomSlot rs = currentMap[i].GetNextRoomSlot(3 * Scale);
+                        if (rs != null)
+                        {
+                            GU.FillEllipse(b, rs.XPos + XOffset, rs.YPos + YOffset, 3 * Scale, 3 * Scale);
+                        }
                     }
                 }
             }
@@ -258,6 +293,7 @@ namespace Winform_Client
             {
                 return;
             }
+            Draw();
             CurrentPlayerLocations = str;
             String[]words =  CurrentPlayerLocations.Split('&');
             foreach(String w in words)
@@ -291,7 +327,14 @@ namespace Winform_Client
                 }
                     
             }
-            Draw();
+           
+        }
+        public static void DrawHalf(DrawObject[] l, Graphics GD, int x, int y)
+        {
+            foreach (DrawObject d in l)
+            {
+                d.DrawMe(GD, x, y);
+            }
         }
     }
  }
@@ -443,10 +486,14 @@ namespace Winform_Client
         {
             int tx = this.XPos - RoomWidth / 2;
             int ty = this.YPos - RoomHeight / 2;
-            G.DrawRectangle(PenW, tx+XOff, ty+YOff, RoomWidth, RoomHeight);
-            base.DrawMe(G,XOff,YOff);
+            if (tx + RoomWidth + XOff > 0 && ty + RoomHeight + YOff > 0)
+            {
+                G.DrawRectangle(PenW, tx + XOff, ty + YOff, RoomWidth, RoomHeight);
+                base.DrawMe(G, XOff, YOff);
+            }
         }
     }
+
 
     public class Connector : DrawObject
     {
@@ -479,7 +526,10 @@ namespace Winform_Client
         }
         public override void DrawMe(Graphics G,int XOff, int YOff)
         {
-            G.DrawRectangle(PenB, XPos+XOff, YPos+YOff, xSize, ySize);
+            if (XPos + XOff + xSize > 0 && YPos + YOff + ySize>0)
+            {
+                G.DrawRectangle(PenB, XPos + XOff, YPos + YOff, xSize, ySize);
+            }
             base.DrawMe(G, XOff,YOff);
 
         }
