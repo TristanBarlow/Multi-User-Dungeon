@@ -255,7 +255,7 @@ namespace Server
             }
             catch (System.Exception)
             {
-                RemoveClientBySocket(s.Value);
+                RemoveClientBySocket(s);
             }
         }
 
@@ -440,8 +440,8 @@ namespace Server
         {
             Socket serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-            //serverSocket.Bind(new IPEndPoint(IPAddress.Parse("46.101.88.130"), 8500));
-            serverSocket.Bind(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8500));
+            serverSocket.Bind(new IPEndPoint(IPAddress.Parse("46.101.88.130"), 8500));
+            //serverSocket.Bind(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8500));
             serverSocket.Listen(32);
 
             bool bQuit = false;
@@ -472,12 +472,11 @@ namespace Server
 
                     SendClientName(serverClient, clientName);
                     
-                    Thread.Sleep(500);
                     SendClientList();
 
                     clientID++;
                 }
-                
+                Thread.Sleep(1500);
             }
         }
     }

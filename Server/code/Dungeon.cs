@@ -43,6 +43,7 @@ namespace Dungeon
         }
 
         public String PlayerAction(String action,Player player)
+
         {
             String returnString = "";
 
@@ -177,6 +178,7 @@ namespace Dungeon
             }
 
         }
+
         public static String GenerateDungeonString(List<Room> RoomList)
         {
             String rStr = "&";

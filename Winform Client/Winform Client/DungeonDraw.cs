@@ -370,8 +370,11 @@ namespace Winform_Client
         }
         public override void DrawMe(Graphics G,int XOff, int YOff)
         {
-            G.FillEllipse(b, XPos+XOff, YPos+YOff, size, size);
-            base.DrawMe(G, XOff, YOff);
+            if (XPos + XOff + size > 0 && YPos+YOff + size > 0)
+            {
+                G.FillEllipse(b, XPos + XOff, YPos + YOff, size, size);
+                base.DrawMe(G, XOff, YOff);
+            }
         }
     }
 
