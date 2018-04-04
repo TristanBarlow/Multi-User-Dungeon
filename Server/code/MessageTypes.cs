@@ -368,8 +368,6 @@ namespace MessageTypes
             write.Write(ID);
             write.Write(LocationString);
 
-            Console.Write("sending: " + LocationString);
-
             write.Close();
             return stream;
         }

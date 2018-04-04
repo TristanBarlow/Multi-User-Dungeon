@@ -35,7 +35,11 @@ namespace Server
 
             MemoryStream outStream = nameMsg.WriteData();
 
-            s.Send(outStream.GetBuffer());
+            try { s.Send(outStream.GetBuffer()); }
+            catch (System.Exception)
+            {
+                RemoveClientBySocket(s);
+            }
         }
 
         static void SendDungeonInfo(Socket s)
@@ -44,43 +48,11 @@ namespace Server
             ML.mapInfo = Dungeon.DungeonStr;
             MemoryStream outStream = ML.WriteData();
 
-            s.Send(outStream.GetBuffer());
-        }
-
-        static void ChangeClientName(Socket s, String newName)
-        {
-
-        }
-
-        static void SendClientList()
-        {
-            ClientListMsg clientListMsg = new ClientListMsg();
-
-            if (clientDictionary.Count() > 0)
+            try { s.Send(outStream.GetBuffer()); }
+            catch
             {
-                lock (clientDictionary)
-                {
-                    foreach (KeyValuePair<String, Socket> s in clientDictionary)
-                    {
-                        clientListMsg.clientList.Add(s.Key);
-                    }
-
-                    MemoryStream outStream = clientListMsg.WriteData();
-
-                    foreach (KeyValuePair<String, Socket> s in clientDictionary)
-                    {
-                        try
-                        {
-                            s.Value.Send(outStream.GetBuffer());
-                        }
-                        catch
-                        {
-                            Console.Write("problem sending");
-                            RemoveClientBySocket(s.Value);
-                            break;
-                        }
-                    }
-                }
+                Console.Write("problem sending");
+                RemoveClientBySocket(s);
             }
         }
 
@@ -107,7 +79,7 @@ namespace Server
                         }
                         catch (System.Exception)
                         {
-
+                            RemoveClientBySocket(s.Value);
                         }
                     }
                 }
@@ -153,7 +125,7 @@ namespace Server
             }
             catch (System.Exception)
             {
-
+                RemoveClientBySocket(s);
             }
         }
 
@@ -259,25 +231,19 @@ namespace Server
             }
         }
 
-        static void receiveClientProcess(Object o)
+        static void ReceiveClientProcess(Object o)
         {
             bool bQuit = false;
 
             Socket chatClient = (Socket)o;
 
-            Thread.Sleep(500);
             SendDungeonInfo(chatClient);
 
             Console.WriteLine("client receive thread for " + GetNameFromSocket(chatClient));
 
-            lock (RequestHandle)
-            {
-                RequestHandle.AddPlayer(GetNameFromSocket(chatClient));
-                /// do command
-                SendDungeonResponse(chatClient, RequestHandle.PlayerAction("look", GetNameFromSocket(chatClient)));
-            }
-
-            SendClientList();
+            RequestHandle.AddPlayer(GetNameFromSocket(chatClient));
+            /// do command
+            SendDungeonResponse(chatClient, RequestHandle.PlayerAction("look", GetNameFromSocket(chatClient)));
             
             while (bQuit == false)
             {
@@ -318,7 +284,6 @@ namespace Server
 
                                                 clientDictionary.Remove(oldName);
                                                 clientDictionary.Add(clientName.name, chatClient);
-                                                SendClientList();
                                             }
                                             else
                                             {
@@ -371,6 +336,9 @@ namespace Server
                                         AttackFunction(attmsg, chatClient);
                                     }
                                     break;
+                                case MapLayout.ID:
+                                    SendDungeonInfo(chatClient);
+                                    break;
                                 default:
                                     break;
                             }
@@ -390,35 +358,37 @@ namespace Server
                     SendChatMessage(output);
 
                     RemoveClientBySocket(chatClient);
-
-                    SendClientList();
                 }
             }
         }
 
         public static void SendLocations()
         {
+            String OldString = "&&";
             while (true)
             {
                 String rStr = "&";
                 lock (clientDictionary)
                 {
-                    if (clientDictionary.Count > 0)
+                    foreach (KeyValuePair<String, Socket> s in clientDictionary)
                     {
-                        foreach (KeyValuePair<String, Socket> s in clientDictionary)
+                        if (RequestHandle.GetPlayer(s.Key) != null)
                         {
-                            lock (RequestHandle)
-                            {
-                                if (RequestHandle.GetPlayer(s.Key) != null)
-                                {
-                                    rStr += s.Key+ " " + RequestHandle.GetPlayer(s.Key).currentRoom.RoomIndex + "&";
-                                }
-                            }
+                            rStr += s.Key + " " + RequestHandle.GetPlayer(s.Key).currentRoom.RoomIndex + "&";
                         }
-                        rStr += "&";
-                        PlayerLocations m = new PlayerLocations();
-                        m.LocationString = rStr;
-                        MemoryStream outStream = m.WriteData();
+                    }
+                }
+
+                rStr += "&";
+                if (rStr != OldString)
+                {
+
+                    PlayerLocations m = new PlayerLocations();
+                    m.LocationString = rStr;
+                    MemoryStream outStream = m.WriteData();
+                    OldString = rStr;
+                    lock (clientDictionary)
+                    {
                         foreach (KeyValuePair<String, Socket> s in clientDictionary)
                         {
                             try
@@ -432,7 +402,7 @@ namespace Server
                         }
                     }
                 }
-                Thread.Sleep(500);
+                Thread.Sleep(200);
             }
         }
 
@@ -458,25 +428,26 @@ namespace Server
                 Thread t = new Thread(SendLocations);
                  t.Start();
             }
+
             while (!bQuit)
             {
                 Socket serverClient = serverSocket.Accept();
 
-                Thread myThread = new Thread(receiveClientProcess);
+                Thread myThread = new Thread(ReceiveClientProcess);
                 myThread.Start(serverClient);
+
+                String clientName = "client" + clientID;
 
                 lock (clientDictionary)
                 {
-                    String clientName = "client" + clientID;
                     clientDictionary.Add(clientName, serverClient);
-
-                    SendClientName(serverClient, clientName);
-                    
-                    SendClientList();
-
-                    clientID++;
                 }
-                Thread.Sleep(1500);
+
+                SendClientName(serverClient, clientName);
+
+                clientID++;
+
+                Thread.Sleep(500);
             }
         }
     }

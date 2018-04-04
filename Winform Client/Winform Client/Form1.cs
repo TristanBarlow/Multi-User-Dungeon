@@ -38,22 +38,21 @@ namespace Winform_Client
 
         {            
             Form1 form = (Form1)o;
-
+            Thread receiveThread;
             while ((form.bConnected == false) && (form.bQuit == false))
             {
                 try
                 {
-                    form.clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                    form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("46.101.88.130"), 8500));
-                    //form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8500));
-                    form.bConnected = true;
-                    form.AddText("Connected to server");
+                    if (bConnected == false)
+                    {
+                        form.clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                        form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("46.101.88.130"), 8500));
+                        //form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8500));
+                        form.bConnected = true;
 
-                    Thread receiveThread;
-
-                    receiveThread = new Thread(clientReceive);
-                    receiveThread.Start(o);
-
+                        receiveThread = new Thread(ClientReceive);
+                        receiveThread.Start(o);
+                    }
                     while ((form.bQuit == false) && (form.bConnected == true))
                     {
                         if (form.IsDisposed == true)
@@ -62,24 +61,23 @@ namespace Winform_Client
                             form.clientSocket.Close();
                         }
                     }                    
-
-                    receiveThread.Abort();
                 }
                 catch (System.Exception)
                 {
-                    if (form != null && form.textBox_Output != null)
-                    {
-                        form.AddText(U.NewLineS("No server!"));
-                    }
-                    Thread.Sleep(500);
-                }               
+                    try { form.AddText(U.NewLineS("No server!")); }
+                    catch { }
+                }
+                Thread.Sleep(500);
             }
         }
 
-        private void clientReceive(Object o)
+        private void ClientReceive(Object o)
         {
             Form1 form = (Form1)o;
 
+            SetClientList(new ClientListMsg());
+
+            form.AddText("Connected to server");
 
             while (form.bConnected == true)
             {
@@ -150,24 +148,32 @@ namespace Winform_Client
                                     {
                                         
                                         MapLayout ML = (MapLayout)m;
+                                        DGD.IsInUse = true;
                                         Thread newThread = new Thread(() => DGD.MapParser(ML.mapInfo));
                                         newThread.Start();
                                     }
                                     break;
                                 case PlayerLocations.ID:
                                     {
-                                        PlayerLocations PL = (PlayerLocations)m;
-                                        String[] words = PL.LocationString.Split('&');
-                                        DGD.ClientNumberList.Clear();
-                                        foreach (String w in words)
+                                        if (DGD.IsInUse == false)
                                         {
-                                            String[] s = w.Split(' ');
-                                            if (s.Count() >= 2)
-                                            {
-                                                DGD.ClientNumberList.Add(Int32.Parse(s[1]));
-                                            }
+                                            RequestMapLayout("r");
                                         }
-                                        DGD.DrawPlayers(PL.LocationString);
+                                        else
+                                        {
+                                            PlayerLocations PL = (PlayerLocations)m;
+                                            String[] words = PL.LocationString.Split('&');
+                                            DGD.ClientNumberList.Clear();
+                                            foreach (String w in words)
+                                            {
+                                                String[] s = w.Split(' ');
+                                                if (s.Count() >= 2)
+                                                {
+                                                    DGD.ClientNumberList.Add(Int32.Parse(s[1]));
+                                                }
+                                            }
+                                            DGD.DrawPlayers(PL.LocationString);
+                                        }
                                    }
                                     break;
                                 default:
@@ -204,7 +210,8 @@ namespace Winform_Client
 
         private void AddText(String s)
         {
-            if (textBox_Output.InvokeRequired)
+
+            if (ChatBox.InvokeRequired)
             {
 
                 try { Invoke(new AddTextDelegate(AddText), new object[] { s }); }
@@ -214,8 +221,8 @@ namespace Winform_Client
             else
             {
 
-                //try { textBox_Output.AppendText(U.NewLineS(s)); }
-                //catch { }
+                try { ChatBox.AppendText(U.NewLineS(s)); }
+                catch { ChatBox.Dispose(); };
 
             }
         }
@@ -243,7 +250,7 @@ namespace Winform_Client
                 {
                     SendDungeonMessage("pickup cheese");
                 }
-                if (rndNum> 33&& rndNum < 66)
+                if (rndNum> 33 && rndNum < 66)
                 {
                     SendNameChangeMessage(rndNum.ToString());
                  }
@@ -351,6 +358,18 @@ namespace Winform_Client
             DungeonCommand dungMsg = new DungeonCommand();
             dungMsg.command = Message;
             MemoryStream outStream = dungMsg.WriteData();
+            try
+            {
+                clientSocket.Send(outStream.GetBuffer());
+            }
+            catch { }
+        }
+
+        private void RequestMapLayout(String Message)
+        {
+            MapLayout request = new MapLayout();
+            request.mapInfo = Message;
+            MemoryStream outStream = request.WriteData();
             try
             {
                 clientSocket.Send(outStream.GetBuffer());
@@ -515,11 +534,6 @@ namespace Winform_Client
         }
 
         private void TextboxDungeon_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void textBox_Output_TextChanged(object sender, EventArgs e)
         {
 
         }

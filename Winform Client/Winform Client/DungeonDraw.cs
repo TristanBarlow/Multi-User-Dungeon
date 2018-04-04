@@ -54,6 +54,8 @@ namespace Winform_Client
 
         public Color FillColor { get; set; } = Color.Black;
 
+        public bool IsInUse = false;
+
         private List<Room> currentMap = new List<Room>();
         private List<DrawObject> MapObjects = new List<DrawObject>();
         private Dictionary<String, User> UserDrawDict = new Dictionary<String, User>();
@@ -123,6 +125,7 @@ namespace Winform_Client
 
             UpdateUserPositions();
         }
+
         public void DrawUsers()
         {
                 lock (UserDrawDict)
@@ -237,7 +240,6 @@ namespace Winform_Client
             {
                 return;
             }
-
             CurrentMapString = str;
             currentMap.Clear();
             MapObjects.Clear();

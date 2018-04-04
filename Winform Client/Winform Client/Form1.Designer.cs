@@ -30,7 +30,6 @@
         {
             this.buttonSend = new System.Windows.Forms.Button();
             this.textBox_Input = new System.Windows.Forms.TextBox();
-            this.textBox_Output = new System.Windows.Forms.TextBox();
             this.listBox_ClientList = new System.Windows.Forms.ListBox();
             this.NameBox = new System.Windows.Forms.TextBox();
             this.TextboxDungeon = new System.Windows.Forms.TextBox();
@@ -43,6 +42,7 @@
             this.DefendButton = new System.Windows.Forms.Button();
             this.WildAttackButton = new System.Windows.Forms.Button();
             this.DungeonGraphic = new System.Windows.Forms.PictureBox();
+            this.ChatBox = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.DungeonGraphic)).BeginInit();
             this.SuspendLayout();
             // 
@@ -67,19 +67,6 @@
             this.textBox_Input.Size = new System.Drawing.Size(384, 20);
             this.textBox_Input.TabIndex = 2;
             this.textBox_Input.TextChanged += new System.EventHandler(this.textBox_Input_TextChanged);
-            // 
-            // textBox_Output
-            // 
-            this.textBox_Output.BackColor = System.Drawing.Color.Black;
-            this.textBox_Output.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox_Output.ForeColor = System.Drawing.Color.White;
-            this.textBox_Output.Location = new System.Drawing.Point(578, 303);
-            this.textBox_Output.Multiline = true;
-            this.textBox_Output.Name = "textBox_Output";
-            this.textBox_Output.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_Output.Size = new System.Drawing.Size(384, 78);
-            this.textBox_Output.TabIndex = 3;
-            this.textBox_Output.TextChanged += new System.EventHandler(this.textBox_Output_TextChanged);
             // 
             // listBox_ClientList
             // 
@@ -224,6 +211,19 @@
             this.DungeonGraphic.Click += new System.EventHandler(this.DungeonGraphic_Click);
             this.DungeonGraphic.Paint += new System.Windows.Forms.PaintEventHandler(this.DungeonPaint);
             // 
+            // ChatBox
+            // 
+            this.ChatBox.BackColor = System.Drawing.SystemColors.GrayText;
+            this.ChatBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.ChatBox.ForeColor = System.Drawing.Color.White;
+            this.ChatBox.Location = new System.Drawing.Point(578, 299);
+            this.ChatBox.Multiline = true;
+            this.ChatBox.Name = "ChatBox";
+            this.ChatBox.ReadOnly = true;
+            this.ChatBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.ChatBox.Size = new System.Drawing.Size(384, 82);
+            this.ChatBox.TabIndex = 17;
+            // 
             // Form1
             // 
             this.AcceptButton = this.buttonSend;
@@ -231,6 +231,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Black;
             this.ClientSize = new System.Drawing.Size(1075, 417);
+            this.Controls.Add(this.ChatBox);
             this.Controls.Add(this.DungeonGraphic);
             this.Controls.Add(this.WildAttackButton);
             this.Controls.Add(this.DefendButton);
@@ -243,7 +244,6 @@
             this.Controls.Add(this.TextboxDungeon);
             this.Controls.Add(this.NameBox);
             this.Controls.Add(this.listBox_ClientList);
-            this.Controls.Add(this.textBox_Output);
             this.Controls.Add(this.textBox_Input);
             this.Controls.Add(this.buttonSend);
             this.ForeColor = System.Drawing.SystemColors.ControlText;
@@ -262,7 +262,6 @@
 
         private System.Windows.Forms.Button buttonSend;
         private System.Windows.Forms.TextBox textBox_Input;
-        private System.Windows.Forms.TextBox textBox_Output;
         private System.Windows.Forms.ListBox listBox_ClientList;
         private System.Windows.Forms.TextBox NameBox;
         private System.Windows.Forms.TextBox TextboxDungeon;
@@ -275,6 +274,7 @@
         private System.Windows.Forms.Button DefendButton;
         private System.Windows.Forms.Button WildAttackButton;
         private System.Windows.Forms.PictureBox DungeonGraphic;
+        private System.Windows.Forms.TextBox ChatBox;
     }
 }
 
