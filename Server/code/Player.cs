@@ -105,6 +105,12 @@ namespace PlayerN
             }
         }
 
+        public void RemovePlayer(String Name)
+        {
+            GetPlayerReference(Name).currentRoom.RemovePlayer(GetPlayerReference(Name));
+            playerList.Remove(GetPlayerReference(Name));
+        }
+
     }
 
 

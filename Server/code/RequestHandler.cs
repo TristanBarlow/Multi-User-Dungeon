@@ -27,7 +27,7 @@ namespace Request
         {
             lock (dungeon)
             {
-                lock (PlayerHandle.GetPlayerReference(clientName))
+                lock (PlayerHandle)
                 {
                     return dungeon.PlayerAction(action, PlayerHandle.GetPlayerReference(clientName));
                 }
@@ -50,13 +50,24 @@ namespace Request
             }
         }
 
-        public void playerNameChange(String oldName, String newName)
+        public void PlayerNameChange(String oldName, String newName)
         {
             lock (PlayerHandle)
             {
                 PlayerHandle.UpdatePlayerName(oldName, newName);
             }
          }
+
+        public void RemovePlayer(String PlayerName)
+        {
+            lock (dungeon)
+            {
+                lock (PlayerHandle)
+                {
+                    PlayerHandle.RemovePlayer(PlayerName);
+                }
+            }
+        }
 
         public Player GetPlayer(String playerName)
         {

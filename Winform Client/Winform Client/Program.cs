@@ -16,7 +16,9 @@ namespace Winform_Client
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            LoginScreen loginFrm = new LoginScreen();
+            loginFrm.Show();
+            Application.Run();
         }
     }
 }

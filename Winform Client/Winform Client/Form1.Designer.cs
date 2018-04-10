@@ -250,6 +250,7 @@
             this.KeyPreview = true;
             this.Name = "Form1";
             this.Text = "Dungeon Madness";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
             ((System.ComponentModel.ISupportInitialize)(this.DungeonGraphic)).EndInit();

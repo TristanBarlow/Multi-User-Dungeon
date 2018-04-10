@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.Threading.Tasks;
 using System.IO;
 
 using MessageTypes;
@@ -29,14 +30,16 @@ namespace Winform_Client
 
         List<String> currentClientList = new List<String>();
         List<int> numberOfClients = new List<int>();
-        int iter = 0;
+
         int MapMoveSpeed = 10;
+
+        public String ClientName { set; get; } = " ";
 
         DungeonDraw DGD;
 
         private void ClientProcess(Object o)
 
-        {            
+        {
             Form1 form = (Form1)o;
             Thread receiveThread;
             while ((form.bConnected == false) && (form.bQuit == false))
@@ -49,18 +52,19 @@ namespace Winform_Client
                         form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("46.101.88.130"), 8500));
                         //form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8500));
                         form.bConnected = true;
-
                         receiveThread = new Thread(ClientReceive);
                         receiveThread.Start(o);
+                        SendNameChangeMessage("");
                     }
                     while ((form.bQuit == false) && (form.bConnected == true))
                     {
                         if (form.IsDisposed == true)
                         {
+
                             form.bQuit = true;
                             form.clientSocket.Close();
                         }
-                    }                    
+                    }
                 }
                 catch (System.Exception)
                 {
@@ -90,116 +94,126 @@ namespace Winform_Client
 
                     if (result > 0)
                     {
-                        MemoryStream stream = new MemoryStream(buffer);
-                        BinaryReader read = new BinaryReader(stream);
-
-                        Msg m = Msg.DecodeStream(read);
-
-                        if (m != null)
-                        {
-                            Console.Write("Got a message: ");
-                            switch (m.mID)
-                            {
-                                case PublicChatMsg.ID:
-                                    {
-                                        PublicChatMsg publicMsg = (PublicChatMsg)m;
-
-                                        form.AddText(publicMsg.msg);
-                                    }
-                                    break;
-
-                                case PrivateChatMsg.ID:
-                                    {
-                                        PrivateChatMsg privateMsg = (PrivateChatMsg)m;
-                                        form.AddText(privateMsg.msg);
-                                    }
-                                    break;
-
-                                case ClientListMsg.ID:
-                                    {
-                                        ClientListMsg clientList = (ClientListMsg)m;
-                                        
-                                        form.SetClientList(clientList);
-                                    }
-                                    break;
-
-                                case ClientNameMsg.ID:
-                                    {
-                                        ClientNameMsg clientName = (ClientNameMsg)m;
-
-                                        form.SetClientName(clientName.name);
-                                    }
-                                    break;
-
-                                case DungeonResponse.ID:
-                                    {
-                                        DungeonResponse dSponse = (DungeonResponse)m;
-
-                                        form.AddDungeonText(dSponse.response);
-                                    }
-                                    break;
-                                case HealthMessage.ID:
-                                    {
-                                        HealthMessage Msg = (HealthMessage)m;
-                                        form.AddText("Player Health: " + Msg.health);
-                                    }
-                                    break;
-                                case MapLayout.ID:
-                                    {
-                                        
-                                        MapLayout ML = (MapLayout)m;
-                                        DGD.IsInUse = true;
-                                        Thread newThread = new Thread(() => DGD.MapParser(ML.mapInfo));
-                                        newThread.Start();
-                                    }
-                                    break;
-                                case PlayerLocations.ID:
-                                    {
-                                        if (DGD.IsInUse == false)
-                                        {
-                                            RequestMapLayout("r");
-                                        }
-                                        else
-                                        {
-                                            PlayerLocations PL = (PlayerLocations)m;
-                                            String[] words = PL.LocationString.Split('&');
-                                            DGD.ClientNumberList.Clear();
-                                            foreach (String w in words)
-                                            {
-                                                String[] s = w.Split(' ');
-                                                if (s.Count() >= 2)
-                                                {
-                                                    DGD.ClientNumberList.Add(Int32.Parse(s[1]));
-                                                }
-                                            }
-                                            DGD.DrawPlayers(PL.LocationString);
-                                        }
-                                   }
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                    }     
-                    
+                        Task task = new Task(() => ProcessBuffer(buffer, form));
+                        task.Start();
+                    }
                 }
                 catch (Exception)
                 {
                     form.bConnected = false;
                     Console.WriteLine(U.NewLineS("Lost server!"));
-                    
+
                 }
 
             }
         }
 
-        public Form1()
+        private void ProcessBuffer(byte[] buffer, Object o)
+        {
+
+            Form1 form = (Form1)o;
+
+            MemoryStream stream = new MemoryStream(buffer);
+            BinaryReader read = new BinaryReader(stream);
+
+            Msg m = Msg.DecodeStream(read);
+
+            if (m != null)
+            {
+                Console.Write("Got a message: ");
+                switch (m.mID)
+                {
+                    case PublicChatMsg.ID:
+                        {
+                            PublicChatMsg publicMsg = (PublicChatMsg)m;
+
+                            form.AddText(publicMsg.msg);
+                        }
+                        break;
+
+                    case PrivateChatMsg.ID:
+                        {
+                            PrivateChatMsg privateMsg = (PrivateChatMsg)m;
+                            form.AddText(privateMsg.msg);
+                        }
+                        break;
+
+                    case ClientListMsg.ID:
+                        {
+                            ClientListMsg clientList = (ClientListMsg)m;
+
+                            form.SetClientList(clientList);
+                        }
+                        break;
+
+                    case ClientNameMsg.ID:
+                        {
+                            ClientNameMsg clientName = (ClientNameMsg)m;
+
+                            form.SetClientName(clientName.name);
+                        }
+                        break;
+
+                    case DungeonResponse.ID:
+                        {
+                            DungeonResponse dSponse = (DungeonResponse)m;
+
+                            form.AddDungeonText(dSponse.response);
+                        }
+                        break;
+                    case HealthMessage.ID:
+                        {
+                            HealthMessage Msg = (HealthMessage)m;
+                            form.AddText("Player Health: " + Msg.health);
+                        }
+                        break;
+                    case MapLayout.ID:
+                        {
+
+                            MapLayout ML = (MapLayout)m;
+                            DGD.MapParser(ML.mapInfo);
+                            DGD.IsInUse = true;
+                            if (DGD.HasUsers) DGD.UpdateClientPositions();
+                        }
+                        break;
+                    case PlayerLocations.ID:
+                        {
+                            if (DGD.IsInUse == false)
+                            {
+                                RequestMapLayout("r");
+                            }
+                            else
+                            {
+                                PlayerLocations PL = (PlayerLocations)m;
+                                //String[] words = PL.LocationString.Split('&');
+                                //DGD.ClientNumberList.Clear();
+                                //foreach (String w in words)
+                                //{
+                                //    String[] s = w.Split(' ');
+                                //    if (s.Count() >= 2)
+                                //    {
+                                //        DGD.ClientNumberList.Add(Int32.Parse(s[1]));
+                                //    }
+                                //}
+                                DGD.HasUsers = true;
+                                DGD.DrawClients(PL.LocationString, ClientName);
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        public Form1(String Name, String Password)
         {
             InitializeComponent();
 
             myThread = new Thread(ClientProcess);
             myThread.Start(this);
 
+            ClientName = Name;
 
             DGD = new DungeonDraw(this.DungeonGraphic);
 
@@ -215,14 +229,13 @@ namespace Winform_Client
             {
 
                 try { Invoke(new AddTextDelegate(AddText), new object[] { s }); }
-                catch {}
+                catch { Application.Exit(); }
 
             }
             else
             {
 
-                try { ChatBox.AppendText(U.NewLineS(s)); }
-                catch { ChatBox.Dispose(); };
+                ChatBox.AppendText(U.NewLineS(s));
 
             }
         }
@@ -393,11 +406,10 @@ namespace Winform_Client
             }
         }
 
-        private void SendNameChangeMessage(String name)
+        public void SendNameChangeMessage(String name)
         {
             ClientNameMsg nameMsg = new ClientNameMsg();
-
-            nameMsg.name = name;
+            nameMsg.name = ClientName;
             MemoryStream outStream = nameMsg.WriteData();
             try
             {
@@ -449,12 +461,12 @@ namespace Winform_Client
                 case Keys.Right:
                     DGD.MoveX(-MapMoveSpeed);
                     break;
-                case Keys.S:
-                    DGD.ChangeScale(-1);
-                    break;
-                case Keys.W:
-                    DGD.ChangeScale(1);
-                    break;
+                //case Keys.S:
+                //    DGD.ChangeScale(-1);
+                //    break;
+                //case Keys.W:
+                //    DGD.ChangeScale(1);
+                //    break;
                     
             }
         }
@@ -536,6 +548,12 @@ namespace Winform_Client
         private void TextboxDungeon_TextChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            OnExit();
+            Application.Exit();
         }
     }
 }

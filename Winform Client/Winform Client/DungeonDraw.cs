@@ -5,6 +5,7 @@ using System.Text;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace Winform_Client
 {
@@ -34,7 +35,7 @@ namespace Winform_Client
         }
 
 
-        private int Scale = 1;
+        private int Scale = 7;
         public void ChangeScale(int Offset)
         {
             Scale += Offset;
@@ -54,13 +55,19 @@ namespace Winform_Client
 
         public Color FillColor { get; set; } = Color.Black;
 
+        private User LocalClient = null;
+
         public bool IsInUse = false;
+
+        public bool SlowDraw = false;
+
+        public bool HasUsers = true;
 
         private List<Room> currentMap = new List<Room>();
         private List<DrawObject> MapObjects = new List<DrawObject>();
-        private Dictionary<String, User> UserDrawDict = new Dictionary<String, User>();
+        private Dictionary<String, User> ClientDrawDict = new Dictionary<String, User>();
         private String CurrentMapString = " ";
-        private String CurrentPlayerLocations = " ";
+        private String CurrentClientLocations = " ";
         public List<int> ClientNumberList = new List<int>();
 
         private SolidBrush b = new SolidBrush(Color.Purple);
@@ -85,19 +92,23 @@ namespace Winform_Client
 
         public void Draw()
         {
-
+            G.Clear(FillColor);
+            DrawClientPositions();
             lock (MapObjects)
             {
-                G.Clear(FillColor);
 
                 foreach (DrawObject d in MapObjects)
                 {
                     d.DrawMe(G, XOffset, YOffset);
+                    if (SlowDraw)
+                    {
+                        Thread.Sleep(25);
+                    }
                 }
-
+                if (SlowDraw) SlowDraw = false;
 
             }
-            UpdateUserPositions();
+            //UpdateClientPositions();
         }
 
         public void SplitDraw()
@@ -123,23 +134,7 @@ namespace Winform_Client
             }
 
 
-            UpdateUserPositions();
-        }
-
-        public void DrawUsers()
-        {
-                lock (UserDrawDict)
-                {
-                    lock (GU)
-                    {
-                        foreach (KeyValuePair<String, User> u in UserDrawDict)
-                        {
-                            u.Value.size = Scale*3;
-                            RoomSlot rs = currentMap[u.Value.RoomNum].GetNextRoomSlot(u.Value.size);
-                            u.Value.DrawMe(GU, XOffset, YOffset);
-                        }
-                    }
-                }
+            UpdateClientPositions();
         }
 
         private void UpdateScale()
@@ -152,7 +147,7 @@ namespace Winform_Client
             Draw();
         }
 
-        public void UpdateUserPositions()
+        public void UpdateClientPositions()
         {
             lock (currentMap)
             {
@@ -168,6 +163,38 @@ namespace Winform_Client
                         if (rs != null)
                         {
                             GU.FillEllipse(b, rs.XPos + XOffset, rs.YPos + YOffset, 3 * Scale, 3 * Scale);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void DrawClientPositions()
+        {
+            lock (currentMap)
+            {
+                foreach (Room r in currentMap)
+                {
+                    r.FreeAllSlots();
+                }
+                lock (ClientDrawDict)
+                {
+                    if (LocalClient != null)
+                    {
+                        RoomSlot prs = currentMap[LocalClient.RoomNum].GetNextRoomSlot(3 * Scale);
+                        LocalClient.MoveUser(prs, Scale);
+                        XOffset = -LocalClient.XPos + Width/2;
+                        YOffset = -LocalClient.YPos + Height/2;
+                        LocalClient.DrawMe(GU, XOffset, YOffset);
+                    }
+                    foreach (KeyValuePair<String, User> u in ClientDrawDict)
+                    {
+                        RoomSlot rs = currentMap[u.Value.RoomNum].GetNextRoomSlot(3 * Scale);
+                        if (rs != null && u.Key != LocalClient.Name)
+                        {
+                            //u.Value.DrawMeExact(GU, rs.XPos + XOffset, rs.YPos+YOffset, Scale * 3);
+                            u.Value.MoveUser(rs, Scale);
+                            u.Value.DrawMe(GU, XOffset, YOffset);
                         }
                     }
                 }
@@ -221,19 +248,6 @@ namespace Winform_Client
             Draw();
         }
 
-        public void AddClientDraw(String s, int RoomNum)
-        {
-
-            if (UserDrawDict.ContainsKey(s))
-            {
-                return;
-            }
-            User tu = new User(s,RoomNum,Scale);
-            RoomSlot rs = currentMap[RoomNum].GetNextRoomSlot(tu.size);
-            tu.MoveUser(rs,RoomNum);
-            UserDrawDict.Add(s, tu);
-        }
-
         public void MapParser(String str)
         {
             if (str == CurrentMapString)
@@ -279,57 +293,60 @@ namespace Winform_Client
                         }
                     }
                 }
-                if (GoodRoom)
+                lock (MapObjects)
                 {
-                    currentMap.Add(r);
-                    MapObjects.Add(r);
-                    iter++;
+                    lock (currentMap)
+                    {
+                        if (GoodRoom)
+                        {
+                            currentMap.Add(r);
+                            MapObjects.Add(r);
+                            iter++;
+                        }
+                    }
                 }
             }
             AddConnectorDraws();
         }
 
-        public void DrawPlayers(String str)
+        public void DrawClients(String str, String PlayerName)
         {
-            if (str == CurrentPlayerLocations)
+            if (str == CurrentClientLocations)
             {
                 return;
             }
-            Draw();
-            CurrentPlayerLocations = str;
-            String[]words =  CurrentPlayerLocations.Split('&');
-            foreach(String w in words)
+            CurrentClientLocations = str;
+
+            String[] ClientLocations = str.Split('&');
+            foreach (String Client in ClientLocations)
             {
-                String[]s =  w.Split(' ');
-                if (s.Count() >= 2)
+                if (Client != "")
                 {
-                    int i = Int32.Parse(s[1]);
-                    lock (UserDrawDict)
+                    int Room = Int32.Parse(Client.Split(' ')[1]);
+                    String ClientName = Client.Split(' ')[0];
+
+                    if (ClientDrawDict.ContainsKey(ClientName))
                     {
-                        if (!UserDrawDict.ContainsKey(s[0]))
+                        if (ClientDrawDict[ClientName].RoomNum != Room) ClientDrawDict[ClientName].RoomNum = Room;
+                    }
+                    else
+                    {
+                        User u;
+                        if (ClientName == PlayerName)
                         {
-                            User u = new User(s[0], i, Scale);
-                            RoomSlot rs = currentMap[i].GetNextRoomSlot(u.size);
-                            u.XPos = rs.XPos; u.YPos = rs.YPos;
-                            UserDrawDict.Add(s[0], u);
+                            u = new User(ClientName, Room, Scale, true);
+                            LocalClient = u;
+
                         }
                         else
                         {
-                            User u = UserDrawDict[s[0]];
-                            if (u.RoomNum != i)
-                            {
-
-                                currentMap[u.RoomNum].FreeRoomSlot(u.RoomSlotIndex);
-                                RoomSlot rs = currentMap[i].GetNextRoomSlot(u.size);
-                                UserDrawDict[s[0]].MoveUser(rs, i);
-                            }
-
+                            u = new User(ClientName, Room, Scale);
                         }
+                        ClientDrawDict.Add(ClientName, u);
                     }
                 }
-                    
             }
-           
+            Draw();
         }
         public static void DrawHalf(DrawObject[] l, Graphics GD, int x, int y)
         {
@@ -363,13 +380,14 @@ namespace Winform_Client
             }
              size = scale;
         }
-        public void MoveUser(RoomSlot rs, int num)
+        public void MoveUser(RoomSlot rs, int Scale)
         {
             XPos = rs.XPos;
             YPos = rs.YPos;
+            size = Scale *3;
             RoomSlotIndex = rs.IndexNumber;
-            RoomNum = num;
         }
+
         public override void DrawMe(Graphics G,int XOff, int YOff)
         {
             if (XPos + XOff + size > 0 && YPos+YOff + size > 0)
@@ -378,7 +396,15 @@ namespace Winform_Client
                 base.DrawMe(G, XOff, YOff);
             }
         }
+    public  void DrawMeExact(Graphics G, int XLocation, int YLocation, int Scale)
+    {
+        if (XLocation + size > 0 && YLocation + size > 0)
+        {
+            G.FillEllipse(b, XLocation, YLocation, Scale, Scale);
+            base.DrawMe(G, XLocation, YLocation);
+        }
     }
+}
 
     public class Room : DrawObject
     {
