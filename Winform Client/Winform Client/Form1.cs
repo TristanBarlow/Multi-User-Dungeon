@@ -26,7 +26,7 @@ namespace Winform_Client
 
         bool bQuit = false;
         bool bConnected = false;
-        bool spam = true;
+        bool TestTheStress = false;
 
         List<String> currentClientList = new List<String>();
 
@@ -217,7 +217,7 @@ namespace Winform_Client
         {
             Random rnd = new Random();
             
-            while (spam)
+            while (TestTheStress)
             {
                 int rndNum = rnd.Next(0, 6);
                 switch (rndNum)
@@ -253,7 +253,7 @@ namespace Winform_Client
 
         private void buttonSend_Click(object sender, EventArgs e)
         {
-            if (spam)
+            if (TestTheStress)
             {
                 Thread stressThread = new Thread(StressTest);
                 stressThread.Start();
