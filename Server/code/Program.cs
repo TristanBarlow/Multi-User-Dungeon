@@ -63,7 +63,7 @@ namespace Server
 
             chatMsg.msg = msg;
 
-            Room pR = RequestHandle.GetPlayer(clientChat).currentRoom;
+            Room pR = RequestHandle.GetPlayerRoom(clientChat);
 
 
             MemoryStream outStream = chatMsg.WriteData();
@@ -72,7 +72,7 @@ namespace Server
             {            
                 foreach (KeyValuePair<String,Socket> s in clientDictionary)
                 {
-                    if (pR == RequestHandle.GetPlayer(s.Key).currentRoom)
+                    if (pR == RequestHandle.GetPlayerRoom(clientChat))
                     {
                         try
                         {
@@ -364,7 +364,7 @@ namespace Server
                     {
                         if (RequestHandle.GetPlayer(s.Key) != null)
                         {
-                            rStr += s.Key + " " + RequestHandle.GetPlayer(s.Key).currentRoom.RoomIndex + "&";
+                            rStr += s.Key + " " + RequestHandle.GetPlayerRoom(s.Key).RoomIndex + "&";
                         }
                     }
                 }

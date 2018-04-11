@@ -46,7 +46,23 @@ namespace Request
         {
             lock (PlayerHandle)
             {
-                PlayerHandle.AddNewPlayer(name, dungeon.GetRandomRoom());
+                lock (dungeon)
+                {
+                    PlayerHandle.AddNewPlayer(name, dungeon.GetRandomRoom());
+                }
+            }
+        }
+
+        public Room GetPlayerRoom(String playerName)
+        {
+            Player p;
+            lock (PlayerHandle)
+            {
+                p = PlayerHandle.GetPlayerReference(playerName);
+            }
+            lock (dungeon)
+            {
+                return p.currentRoom;
             }
         }
 
