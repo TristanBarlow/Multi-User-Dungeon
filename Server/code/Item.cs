@@ -109,6 +109,7 @@ namespace Dungeon
         }
 
     }
+
     public class Weapon : Item
     {
         public int damage = 1;

@@ -348,6 +348,7 @@ namespace Winform_Client
             }
             Draw();
         }
+
         public static void DrawHalf(DrawObject[] l, Graphics GD, int x, int y)
         {
             foreach (DrawObject d in l)

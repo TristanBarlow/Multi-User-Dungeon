@@ -11,7 +11,7 @@ namespace PlayerN
 {
     public class Player
     {
-        String playerName;
+        public String PlayerName { set; get;}
 
         private String Stance = "attack";
 
@@ -29,6 +29,12 @@ namespace PlayerN
 
         public void SetStance(String newStance) {Stance = newStance;}
 
+        public Player(String name)
+        {
+            PlayerName = name;
+            isDead = true;
+        }
+
         public int GetHealth(){ return health;}
 
         public void DropItem(String nItem)
@@ -42,76 +48,16 @@ namespace PlayerN
             if (health <= 0) { isDead = true; }
         }
 
-       public String GetPlayerName() { return playerName; }
+        public String GetPlayerName() { return PlayerName; }
 
-        public void SetPlayerName(String newName) { playerName = newName; }
+        public void SetPlayerName(String newName) { PlayerName = newName;}
 
-       public Player(String clientName, Room startRoom)
+        public Player(String clientName, Room startRoom)
         {
-            playerName = clientName;
+            PlayerName = clientName;
             currentRoom = startRoom;
             inventory = new Inventory();
+            isDead = false;
         }
     }
-
-    public class PlayerHandler
-    {
-        private static List<Player> playerList = new List<Player>();
-
-        public List<Player> GetPlayerList()
-        {
-            return playerList;
-        }
-
-        public Player AddNewPlayer(String clientName, Room randomRoom)
-        {
-            Player newPlayer = new Player(clientName, randomRoom);
-            randomRoom.AddPlayer(newPlayer);
-            playerList.Add(newPlayer);
-            return newPlayer;
-        }
-
-        public Player GetPlayerReference(String PlayerName)
-        {
-            lock (playerList)
-            {
-                foreach (Player player in playerList)
-                {
-                    if (player.GetPlayerName() == PlayerName)
-                    {
-                        return player;
-                    }
-                }
-                return null;
-            }
-        }
-
-        public void UpdatePlayerName(String oldName, String newName)
-        {
-            lock (playerList)
-            {
-                foreach (Player iter in playerList)
-                {
-                    if (iter.GetPlayerName() == oldName)
-                    {
-                        iter.SetPlayerName(newName);
-                        break;
-                    }
-                    else
-                    {
-                        // check
-                    }
-                }
-            }
-        }
-
-        public void RemovePlayer(String Name)
-        {
-            GetPlayerReference(Name).currentRoom.RemovePlayer(GetPlayerReference(Name));
-            playerList.Remove(GetPlayerReference(Name));
-        }
-
-    }
-
-
 }

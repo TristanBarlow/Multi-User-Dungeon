@@ -26,9 +26,10 @@ namespace Winform_Client
 
         bool bQuit = false;
         bool bConnected = false;
-        bool spam = false;
+        bool spam = true;
 
         List<String> currentClientList = new List<String>();
+
         List<int> numberOfClients = new List<int>();
 
         int MapMoveSpeed = 10;
@@ -54,7 +55,9 @@ namespace Winform_Client
                         form.bConnected = true;
                         receiveThread = new Thread(ClientReceive);
                         receiveThread.Start(o);
+                        Thread.Sleep(100);
                         SendNameChangeMessage("");
+
                     }
                     while ((form.bQuit == false) && (form.bConnected == true))
                     {
@@ -79,9 +82,9 @@ namespace Winform_Client
         {
             Form1 form = (Form1)o;
 
-            SetClientList(new ClientListMsg());
-
             form.AddText("Connected to server");
+
+
 
             while (form.bConnected == true)
             {
@@ -123,37 +126,6 @@ namespace Winform_Client
                 Console.Write("Got a message: ");
                 switch (m.mID)
                 {
-                    case PublicChatMsg.ID:
-                        {
-                            PublicChatMsg publicMsg = (PublicChatMsg)m;
-
-                            form.AddText(publicMsg.msg);
-                        }
-                        break;
-
-                    case PrivateChatMsg.ID:
-                        {
-                            PrivateChatMsg privateMsg = (PrivateChatMsg)m;
-                            form.AddText(privateMsg.msg);
-                        }
-                        break;
-
-                    case ClientListMsg.ID:
-                        {
-                            ClientListMsg clientList = (ClientListMsg)m;
-
-                            form.SetClientList(clientList);
-                        }
-                        break;
-
-                    case ClientNameMsg.ID:
-                        {
-                            ClientNameMsg clientName = (ClientNameMsg)m;
-
-                            form.SetClientName(clientName.name);
-                        }
-                        break;
-
                     case DungeonResponse.ID:
                         {
                             DungeonResponse dSponse = (DungeonResponse)m;
@@ -161,19 +133,15 @@ namespace Winform_Client
                             form.AddDungeonText(dSponse.response);
                         }
                         break;
-                    case HealthMessage.ID:
-                        {
-                            HealthMessage Msg = (HealthMessage)m;
-                            form.AddText("Player Health: " + Msg.health);
-                        }
-                        break;
                     case MapLayout.ID:
                         {
-
                             MapLayout ML = (MapLayout)m;
-                            DGD.MapParser(ML.mapInfo);
-                            DGD.IsInUse = true;
-                            if (DGD.HasUsers) DGD.UpdateClientPositions();
+                            lock (DGD)
+                            {
+                                DGD.MapParser(ML.mapInfo);
+                                DGD.IsInUse = true;
+                                if (DGD.HasUsers) DGD.UpdateClientPositions();
+                            }
                         }
                         break;
                     case PlayerLocations.ID:
@@ -185,18 +153,11 @@ namespace Winform_Client
                             else
                             {
                                 PlayerLocations PL = (PlayerLocations)m;
-                                //String[] words = PL.LocationString.Split('&');
-                                //DGD.ClientNumberList.Clear();
-                                //foreach (String w in words)
-                                //{
-                                //    String[] s = w.Split(' ');
-                                //    if (s.Count() >= 2)
-                                //    {
-                                //        DGD.ClientNumberList.Add(Int32.Parse(s[1]));
-                                //    }
-                                //}
-                                DGD.HasUsers = true;
-                                DGD.DrawClients(PL.LocationString, ClientName);
+                                lock (DGD)
+                                {
+                                    DGD.HasUsers = true;
+                                    DGD.DrawClients(PL.LocationString, ClientName);
+                                }
                             }
                         }
                         break;
@@ -258,58 +219,35 @@ namespace Winform_Client
             
             while (spam)
             {
-                int rndNum = rnd.Next(0, 100);
-                if (rndNum < 33)
+                int rndNum = rnd.Next(0, 6);
+                switch (rndNum)
                 {
-                    SendDungeonMessage("pickup cheese");
+                    case 0:
+                        SendDungeonMessage("pickup cheese");
+                        break;
+                    case 1:
+                        SendDungeonMessage("drop cheese");
+                        break;
+                    case 2:
+                        String m = "go north";
+
+                        SendDungeonMessage(m);
+                        break;
+                    case 3:
+                        String b = "go south";
+
+                        SendDungeonMessage(b);
+                        break;
+                    case 4:
+                        String c = "go east";
+                        SendDungeonMessage(c);
+                        break;
+                    case 5:
+                        String d = "go west";
+                        SendDungeonMessage(d);
+                        break;
                 }
-                if (rndNum> 33 && rndNum < 66)
-                {
-                    SendNameChangeMessage(rndNum.ToString());
-                 }
-                else
-                {
-                    SendDungeonMessage("drop cheese");
-                }
-                    //SendNameChangeMessage(rnd.Next(0, 1000).ToString());
-                Thread.Sleep(500);
-            }
-        }
-
-        private delegate void SetClientNameDelegate(String s);
-
-        private void SetClientName(String s)
-        {
-            if (this.InvokeRequired)
-            {
-                Invoke(new SetClientNameDelegate(SetClientName), new object[] {s});
-            }
-            else
-            {
-                Text = s;
-            }
-        }
-
-        private delegate void SetClientListDelegate(ClientListMsg clientList);
-
-        private void SetClientList(ClientListMsg clientList)
-        {
-            if (this.InvokeRequired)
-            {
-                Invoke(new SetClientListDelegate(SetClientList), new object[] { clientList });
-            }
-            else
-            {
-                listBox_ClientList.DataSource = null;
-                currentClientList.Clear();
-                currentClientList.Add("Say");
-                currentClientList.Add("Dungeon");
-
-                foreach (String s in clientList.clientList)
-                {
-                    currentClientList.Add(s);
-                }
-                listBox_ClientList.DataSource = currentClientList;             
+                Thread.Sleep(200);
             }
         }
 
@@ -324,28 +262,7 @@ namespace Winform_Client
             {                
                 try
                 {
-                    if (listBox_ClientList.SelectedIndex == 1)
-                    {
-                        SendDungeonMessage(textBox_Input.Text);
-                    }
-
-                    else if (listBox_ClientList.SelectedIndex == 0)
-                    {
-                        PublicChatMsg publicMsg = new PublicChatMsg();
-
-                        publicMsg.msg = textBox_Input.Text;
-                        MemoryStream outStream = publicMsg.WriteData();
-                        clientSocket.Send(outStream.GetBuffer());                
-                    }
-                    else if (listBox_ClientList.SelectedIndex > 1)
-                    {
-                        PrivateChatMsg privateMsg = new PrivateChatMsg();
-
-                        privateMsg.msg = textBox_Input.Text;
-                        privateMsg.destination = currentClientList[listBox_ClientList.SelectedIndex];
-                        MemoryStream outStream = privateMsg.WriteData();
-                        clientSocket.Send(outStream.GetBuffer());                
-                    }
+                     SendDungeonMessage(textBox_Input.Text);
                     
                 }
                 catch (System.Exception)
@@ -390,26 +307,11 @@ namespace Winform_Client
             catch { }
         }
 
-        private void SendAttackMessage(String Message)
-        {
-            if (bConnected)
-            {
-                AttackMessage attMsg = new AttackMessage();
-                attMsg.action = Message;
-                attMsg.opponent = currentClientList[listBox_ClientList.SelectedIndex];
-                MemoryStream outStream = attMsg.WriteData();
-                try
-                {
-                    clientSocket.Send(outStream.GetBuffer());
-                }
-                catch { }
-            }
-        }
-
         public void SendNameChangeMessage(String name)
         {
-            ClientNameMsg nameMsg = new ClientNameMsg();
+            LoginMessage nameMsg = new LoginMessage();
             nameMsg.name = ClientName;
+            nameMsg.password = " ";
             MemoryStream outStream = nameMsg.WriteData();
             try
             {
@@ -471,64 +373,6 @@ namespace Winform_Client
             }
         }
 
-        private void ChangeNameClick(object sender, EventArgs e)
-        {
-            if ((NameBox.Text.Length > 0) && (clientSocket != null))
-            {
-                try
-                {
-                    SendNameChangeMessage(NameBox.Text);
-                }
-                catch (System.Exception)
-                {
-
-                }
-
-                NameBox.Text = "";
-
-            }
-        }
-
-        private void AttackSend(object sender, EventArgs e)
-        {
-            SendAttackMessage("attack");
-        }
-
-        private void DefendSend(object sender, EventArgs e)
-        {
-            SendAttackMessage("defend");
-        }
-
-        private void WildAttackSend(object sender, EventArgs e)
-        {
-            SendAttackMessage("wildattack");
-        }
-
-        private void listBox_ClientList_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void textBox_ClientName_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void textBox_Input_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void textBox1_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void textBox2_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
         private void Form1_Load(object sender, EventArgs e)
         {
 
@@ -540,19 +384,10 @@ namespace Winform_Client
             DGD.Draw();
         }
 
-        private void DungeonGraphic_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void TextboxDungeon_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
             OnExit();
+            Environment.Exit(Environment.ExitCode);
             Application.Exit();
         }
     }

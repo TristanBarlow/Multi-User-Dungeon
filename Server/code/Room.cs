@@ -15,20 +15,18 @@ namespace Dungeon
         public int RoomIndex { set; get; } = -1;
         public String name = "";
         private String desc = "";
-        private List<Player> Players;
         public List<String> graffitiList;
         public Inventory inventory;
-       private int north = -1;
-       private int east = -1;
-       private int south = -1;
-       private int west = -1;
-       private bool Used = false;
+        private int north = -1;
+        private int east = -1;
+        private int south = -1;
+        private int west = -1;
+        private bool Used = false;
     
 
         public Room()
         {
             graffitiList = new List<string>();
-            Players = new List<Player>();
         }
 
         public Room(String Name, int index)
@@ -85,22 +83,16 @@ namespace Dungeon
         private void Init()
         {
             graffitiList = new List<string>();
-            Players = new List<Player>();
             inventory = new Inventory();
         }
 
         public void AddGraf(String graff){ graffitiList.Add(graff);}
-                    
-        public void AddPlayer(Player p) {Players.Add(p); }
-
-        public void RemovePlayer(Player p) {Players.Remove(p);}
         
-        public String GetDescription(List<Room> Map)
+        public String GetDescription()
         {
             String returnString;
             returnString = U.NewLineS(name) +
                            U.NewLineS(desc)+
-                           U.NewLineS("//")+
                            ("Exits Are:");
 
             if (Used)
@@ -115,24 +107,8 @@ namespace Dungeon
                 returnString = "no exits oh no";
             }
             returnString += U.NewLineS(" ");
-            returnString += ("Players In room : ");
-
-            if (Players.Count() > 1)
-            {
-                foreach (Player iter in Players)
-                {
-                    returnString += iter.GetPlayerName() + "  ";
-                }
-                
-            }
-            else
-            {
-                returnString +=U.NewLineS("You are alone") ;
-            }
 
             returnString += inventory.GetIventoryDescription();
-
-            returnString += U.NewLineS("//");
 
             returnString += U.NewLineS("Graffiti: ");
             if (graffitiList.Count() != 0)
@@ -167,8 +143,6 @@ namespace Dungeon
                 return U.NewLineS("no Graffiti");
             }
         }
-
-        public List<Player> GetPlayersInRoom() { return Players; }
 
     }
 }

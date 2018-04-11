@@ -25,20 +25,11 @@ namespace MessageTypes
 
             switch (id)
             {
-                case PublicChatMsg.ID:
-                    m = new PublicChatMsg();
+                case RoomMessage.ID:
+                    m = new RoomMessage();
                     break;
-
-                case PrivateChatMsg.ID:
-                    m = new PrivateChatMsg();
-                    break;
-
-                case ClientListMsg.ID:
-                    m = new ClientListMsg();
-                    break;
-
-                case ClientNameMsg.ID:
-                    m = new ClientNameMsg();
+                case LoginMessage.ID:
+                    m = new LoginMessage();
                     break;
 
                 case DungeonCommand.ID:
@@ -49,16 +40,10 @@ namespace MessageTypes
                     m = new DungeonResponse();
                     break;
 
-                case HealthMessage.ID:
-                    m = new HealthMessage();
-                    break;
-
-                case AttackMessage.ID:
-                    m = new AttackMessage();
-                    break;
                 case MapLayout.ID:
                     m = new MapLayout();
                     break;
+
                 case PlayerLocations.ID:
                     m = new PlayerLocations();
                     break;
@@ -77,13 +62,13 @@ namespace MessageTypes
         }
     };
 
-    public class PublicChatMsg : Msg
+    public class RoomMessage : Msg
     {
         public const int ID = 1;
 
         public String msg;
 
-        public PublicChatMsg() { mID = ID; }
+        public RoomMessage() { mID = ID; }
 
         public override MemoryStream WriteData()
         {
@@ -104,87 +89,15 @@ namespace MessageTypes
         }
     };
 
-    public class PrivateChatMsg : Msg
+    public class LoginMessage : Msg
     {
         public const int ID = 2;
 
-        public String msg;
-
-        public String destination;
-
-        public PrivateChatMsg() { mID = ID; }
-
-        public override MemoryStream WriteData()
-        {
-            MemoryStream stream = new MemoryStream();
-            BinaryWriter write = new BinaryWriter(stream);
-            write.Write(ID);
-            write.Write(msg);
-            write.Write(destination);
-
-            write.Close();
-
-            return stream;
-        }
-
-        public override void ReadData(BinaryReader read)
-        {
-            msg = read.ReadString();
-            destination = read.ReadString();
-        }
-    };
-
-    public class ClientListMsg : Msg
-    {
-        public const int ID = 3;
-
-        public List<String> clientList;
-
-        public ClientListMsg() 
-        { 
-            mID = ID;
-
-            clientList = new List<String>();
-        }
-
-        public override MemoryStream WriteData()
-        {
-            
-            MemoryStream stream = new MemoryStream();
-            BinaryWriter write = new BinaryWriter(stream);
-
-            write.Write(ID);
-            write.Write(clientList.Count);
-            foreach (String s in clientList)
-            {
-                write.Write(s);
-            }
-
-            write.Close();
-
-            return stream;
-        }
-
-        public override void ReadData(BinaryReader read)
-        {
-            int count = read.ReadInt32();
-
-            clientList.Clear();
-
-            for (int i = 0; i < count; i++)
-            {
-                clientList.Add(read.ReadString());
-            }
-        }
-    };
-
-    public class ClientNameMsg : Msg
-    {
-        public const int ID = 4;
-
         public String name;
 
-        public ClientNameMsg() { mID = ID; }
+        public String password;
+
+        public LoginMessage() { mID = ID; }
 
         public override MemoryStream WriteData()
         {
@@ -192,6 +105,7 @@ namespace MessageTypes
             BinaryWriter write = new BinaryWriter(stream);
             write.Write(ID);
             write.Write(name);
+            write.Write(password);
 
             write.Close();
 
@@ -206,14 +120,9 @@ namespace MessageTypes
 
     public class DungeonCommand : Msg
     {
-        public const int ID = 5;
+        public const int ID = 3;
 
         public String command;
-
-        public String getCommand()
-       {
-            return command;
-        }
  
         public DungeonCommand() { mID = ID; }
 
@@ -224,7 +133,7 @@ namespace MessageTypes
             write.Write(ID);
             write.Write(command);
 
-            Console.Write(command);
+            Console.Write(" Sending Dungeon COmmand");
 
             write.Close();
 
@@ -239,7 +148,7 @@ namespace MessageTypes
 
     public class DungeonResponse : Msg
     {
-        public const int ID = 6;
+        public const int ID = 4;
 
         public String response;
 
@@ -264,71 +173,9 @@ namespace MessageTypes
         }
     }
 
-    public class HealthMessage : Msg
-    {
-        public const int ID = 7;
-
-        public int health;
-
-        public HealthMessage() { mID = ID; }
-
-        public override MemoryStream WriteData()
-        {
-            String healthString = "h" + health;
-            MemoryStream stream = new MemoryStream();
-            BinaryWriter write = new BinaryWriter(stream);
-            write.Write(ID);
-            write.Write(healthString);
-
-            Console.Write("sending: " + healthString);
-
-            write.Close();
-            return stream;
-        }
-
-        public override void ReadData(BinaryReader read)
-        {
-           String temp = read.ReadString();
-           var index = temp.Split('h');
-
-           if (int.TryParse(index[1], out health)) { }
-           else { health = 1; }
-        }
-    }
-
-    public class AttackMessage : Msg
-    {
-        public const int ID = 8;
-
-        public String action;
-
-        public String opponent;
-
-        public AttackMessage() { mID = ID; }
-
-        public override MemoryStream WriteData()
-        {
-            MemoryStream stream = new MemoryStream();
-            BinaryWriter write = new BinaryWriter(stream);
-            write.Write(ID);
-            write.Write(action);
-            write.Write(opponent);
-
-            Console.Write("sending: " + action + opponent);
-
-            write.Close();
-            return stream;
-        }
-
-        public override void ReadData(BinaryReader read)
-        {
-            action = read.ReadString();
-            opponent = read.ReadString();
-        }
-    }
     public class MapLayout : Msg
     {
-        public const int ID = 9;
+        public const int ID = 5;
 
         public String mapInfo;
 
@@ -352,9 +199,10 @@ namespace MessageTypes
             mapInfo = read.ReadString();
         }
     }
+
     public class PlayerLocations : Msg
     {
-        public const int ID = 10;
+        public const int ID = 6;
 
         public String LocationString = " "; 
 

@@ -37,8 +37,6 @@ namespace Dungeon
 
         private void MovePlayer(Player p, Room newRoom)
         {
-            p.currentRoom.RemovePlayer(p);
-            newRoom.AddPlayer(p);
             p.currentRoom = newRoom;
         }
 
@@ -73,7 +71,7 @@ namespace Dungeon
                 case "look":
                     //loop straight back
                     returnString = U.NewLineS("you look around") +
-                                   U.NewLineS(player.currentRoom.GetDescription(RoomList));
+                                   U.NewLineS(player.currentRoom.GetDescription());
                     break;
 
                 case "graf":
@@ -157,7 +155,7 @@ namespace Dungeon
                             }
                         }
                     }
-                    returnString = U.NewLineS(player.currentRoom.GetDescription(RoomList));
+                    returnString = U.NewLineS(player.currentRoom.GetDescription());
                     break;
 
                 default:
