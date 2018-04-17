@@ -19,7 +19,7 @@ namespace Server
 {
     class Program
     {
-        static private Dictionary<String,Socket> clientDictionary = new Dictionary<String,Socket>();
+        static private Dictionary<Player,Socket> clientDictionary = new Dictionary<Player,Socket>();
 
         static private int clientID = 1;
 
@@ -27,105 +27,19 @@ namespace Server
 
         static private RequestHandler RequestHandle;
 
-        static private PlayerHandler PlayerHandle;
-
-        static void SendClientName(Socket s, String clientName)
-        {
-            ClientNameMsg nameMsg = new ClientNameMsg();
-            nameMsg.name = clientName;
-
-            MemoryStream outStream = nameMsg.WriteData();
-
-            try { s.Send(outStream.GetBuffer()); }
-            catch (System.Exception)
-            {
-                RemoveClientBySocket(s);
-            }
-        }
-
         static void SendDungeonInfo(Socket s)
         {
             MapLayout ML = new MapLayout();
-            ML.mapInfo = Dungeon.DungeonStr;
+            lock (Dungeon)
+            {
+                ML.mapInfo = Dungeon.DungeonStr;
+            }
             MemoryStream outStream = ML.WriteData();
 
             try { s.Send(outStream.GetBuffer()); }
             catch
             {
                 Console.Write("problem sending");
-                RemoveClientBySocket(s);
-            }
-        }
-
-        static void SendRoomMessage(String msg, String clientChat)
-        {
-            PublicChatMsg chatMsg = new PublicChatMsg();
-
-            chatMsg.msg = msg;
-
-            Room pR = RequestHandle.GetPlayerRoom(clientChat);
-
-
-            MemoryStream outStream = chatMsg.WriteData();
-
-            lock (clientDictionary)
-            {            
-                foreach (KeyValuePair<String,Socket> s in clientDictionary)
-                {
-                    if (pR == RequestHandle.GetPlayerRoom(clientChat))
-                    {
-                        try
-                        {
-                            s.Value.Send(outStream.GetBuffer());
-                        }
-                        catch (System.Exception)
-                        {
-                            RemoveClientBySocket(s.Value);
-                        }
-                    }
-                }
-            }
-        }
-
-        static void SendChatMessage(String msg)
-        {
-            PublicChatMsg chatMsg = new PublicChatMsg();
-
-            chatMsg.msg = msg;
-
-
-            MemoryStream outStream = chatMsg.WriteData();
-
-            lock (clientDictionary)
-            {
-                foreach (KeyValuePair<String, Socket> s in clientDictionary)
-                {
-                    try
-                    {
-                        s.Value.Send(outStream.GetBuffer());
-                    }
-                    catch (System.Exception)
-                    {
-
-                    }
-                }
-                
-            }
-        }
-
-        static void SendPrivateMessage(Socket s, String from, String msg)
-        {
-            PrivateChatMsg chatMsg = new PrivateChatMsg();
-            chatMsg.msg = msg;
-            chatMsg.destination = from;
-            MemoryStream outStream = chatMsg.WriteData();
-
-            try
-            {
-                s.Send(outStream.GetBuffer());
-            }
-            catch (System.Exception)
-            {
                 RemoveClientBySocket(s);
             }
         }
@@ -146,47 +60,19 @@ namespace Server
             }
         }
 
-        static Socket GetSocketFromName(String name)
+        static Socket GetSocketFromName(Player p)
         {
             lock (clientDictionary)
             {
-                return clientDictionary[name];
+                return clientDictionary[p];
             }
         }
 
-        static void AttackFunction(AttackMessage attmsg, Socket chatClient)
-        {
-
-            RequestHandle.SetPlayerStance(attmsg.action, GetNameFromSocket(chatClient));
-
-            Socket tempS = null;
-            try { tempS = GetSocketFromName(attmsg.opponent); }
-            catch { SendPrivateMessage(chatClient, "Server: ", "Client does not exsist, select one from the drop menu"); return; }
-
-            if (tempS != null)
-            {
-                if (attmsg.opponent == GetNameFromSocket(chatClient))
-                {
-                    SendPrivateMessage(chatClient, "Server:", " Self harm is bad");
-                }
-                else
-                {
-                    SendPrivateMessage(chatClient, "", U.NewLineS("Server:" + RequestHandle.StartFight(GetNameFromSocket(chatClient), attmsg.opponent)) + attmsg.opponent + " health:  " + RequestHandle.GetPlayer(attmsg.opponent).GetHealth());
-                    SendPrivateMessage(tempS, "Server: ", U.NewLineS(GetNameFromSocket(chatClient) + " atatcked you, Your health is now" + RequestHandle.GetPlayer(attmsg.opponent).GetHealth()));
-                }
-            }
-            else
-            {
-                SendPrivateMessage(chatClient, "Server:", attmsg.opponent + " Is no longer a part of this world.");
-            }
-            SendPrivateMessage(chatClient, " ", U.NewLineS("Server: Stance Changed to " + RequestHandle.GetPlayer(GetNameFromSocket(chatClient)).GetStance()));
-        }
-
-        static String GetNameFromSocket(Socket s)
+        static Player GetPlayerFromSocket(Socket s)
         {
             lock (clientDictionary)
             {
-                foreach (KeyValuePair<String, Socket> o in clientDictionary)
+                foreach (KeyValuePair<Player, Socket> o in clientDictionary)
                 {
                     if (o.Value == s)
                     {
@@ -198,16 +84,27 @@ namespace Server
             return null;
         }
 
+        static bool ExisitngName(String s)
+        {
+            foreach (KeyValuePair<Player, Socket> ps in clientDictionary)
+            {
+                if (ps.Key.PlayerName == s)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         static void RemoveClientBySocket(Socket s)
         {
-            string name = GetNameFromSocket(s);
+            Player p = GetPlayerFromSocket(s);
 
-            if (name != null)
+            if (p != null)
             {
                 lock (clientDictionary)
                 {
-                    RequestHandle.RemovePlayer(name);
-                    clientDictionary.Remove(name);
+                    clientDictionary.Remove(p);
                 }
             }
         }
@@ -221,79 +118,18 @@ namespace Server
 
             Msg m = Msg.DecodeStream(read);
 
-            if (m != null && !RequestHandle.GetPlayer(GetNameFromSocket(chatClient)).isDead)
+            if (m != null)
             {
 
                 switch (m.mID)
                 {
-                    case ClientNameMsg.ID:
-                        {
-                            ClientNameMsg clientName = (ClientNameMsg)m;
-
-                            String oldName = GetNameFromSocket(chatClient);
-
-                            lock (clientDictionary)
-                            {
-
-                                if (!clientDictionary.ContainsKey(clientName.name))
-                                {
-
-                                    RequestHandle.PlayerNameChange(oldName, clientName.name);
-                                    SendPrivateMessage(chatClient, " ", ("SERVER:" + clientName.name + " Logged In."));
-
-
-                                    clientDictionary.Remove(oldName);
-                                    clientDictionary.Add(clientName.name, chatClient);
-                                }
-                                else
-                                {
-                                    SendPrivateMessage(chatClient, " ", ("SERVER: oi you sneaky no-do-well, you cant have the two people with the same name"));
-                                }
-                            }
-
-
-                        }
-                        break;
-
-                    case PublicChatMsg.ID:
-
-                        {
-                            PublicChatMsg publicMsg = (PublicChatMsg)m;
-
-                            String formattedMsg = GetNameFromSocket(chatClient) + " says to the room " + publicMsg.msg;
-
-
-                            SendRoomMessage(formattedMsg, GetNameFromSocket(chatClient));
-                        }
-                        break;
-
-                    case PrivateChatMsg.ID:
-                        {
-                            PrivateChatMsg privateMsg = (PrivateChatMsg)m;
-
-                            String formattedMsg = "PRIVATE <" + GetNameFromSocket(chatClient) + "> " + privateMsg.msg;
-
-                            Console.WriteLine("private chat - " + formattedMsg + "to " + privateMsg.destination);
-
-                            SendPrivateMessage(GetSocketFromName(privateMsg.destination), GetNameFromSocket(chatClient), formattedMsg);
-
-                            formattedMsg = "<" + GetNameFromSocket(chatClient) + "> --> <" + privateMsg.destination + "> " + privateMsg.msg;
-                            SendPrivateMessage(chatClient, "", formattedMsg);
-                        }
-                        break;
-
                     case DungeonCommand.ID:
                         {
                             DungeonCommand dungMsg = (DungeonCommand)m;
-
-                            SendDungeonResponse(chatClient, RequestHandle.PlayerAction(dungMsg.command, GetNameFromSocket(chatClient)));
-                        }
-                        break;
-
-                    case AttackMessage.ID:
-                        {
-                            AttackMessage attmsg = (AttackMessage)m;
-                            AttackFunction(attmsg, chatClient);
+                            lock (clientDictionary)
+                            {
+                                SendDungeonResponse(chatClient, RequestHandle.PlayerAction(dungMsg.command, GetPlayerFromSocket(chatClient)));
+                            }
                         }
                         break;
                     case MapLayout.ID:
@@ -304,25 +140,16 @@ namespace Server
                         break;
                 }
             }
-            else
-            {
-                SendPrivateMessage(chatClient, "", "Server: You are dead, there is nothing you can do");
-            }
         }
 
         static void ReceiveClientProcess(Object o)
         {
             bool bQuit = false;
 
+            bool LoggedIn = false;
+
             Socket chatClient = (Socket)o;
-
-            SendDungeonInfo(chatClient);
-
-            Console.WriteLine("client receive thread for " + GetNameFromSocket(chatClient));
-
-            RequestHandle.AddPlayer(GetNameFromSocket(chatClient));
             /// do command
-            SendDungeonResponse(chatClient, RequestHandle.PlayerAction("look", GetNameFromSocket(chatClient)));
             
             while (bQuit == false)
             {
@@ -333,19 +160,53 @@ namespace Server
 
                     result = chatClient.Receive(buffer);
 
-                    if (result > 0)
+                    if (result > 0 && LoggedIn)
                     {
                         Task task = new Task(() => ProcessBuffer(buffer, o));
                         task.Start();
-                    }                   
+                    }
+                    else
+                    {
+                        if (result > 0)
+                        {
+                            MemoryStream stream = new MemoryStream(buffer);
+                            BinaryReader read = new BinaryReader(stream);
+
+                            Msg m = Msg.DecodeStream(read);
+                            if (m.mID == LoginMessage.ID)
+                            {
+                                Player oldPlayer = GetPlayerFromSocket(chatClient);
+                                LoginMessage login = (LoginMessage)m;
+                                lock (clientDictionary)
+                                {
+
+                                    if (!ExisitngName(login.name))
+                                    {
+                                        clientDictionary.Remove(oldPlayer);
+                                        Player p = new Player(login.name, RequestHandle.GetPlayerRandomRoom());
+
+                                        clientDictionary.Add(p, chatClient);
+
+                                        Console.WriteLine("client receive thread for " + GetPlayerFromSocket(chatClient).PlayerName);
+
+                                        SendDungeonInfo(chatClient);
+                                        Thread.Sleep(100);
+
+                                        SendDungeonResponse(chatClient, p.currentRoom.GetDescription());
+                                        LoggedIn = true;
+                                    }
+                                }
+                                
+                            }
+                        }
+                    }
                 }
                 catch (Exception)
                 {
                     bQuit = true;
 
-                    String output = "Lost client: " + GetNameFromSocket(chatClient);
+                    String output = "Lost client: " + GetPlayerFromSocket(chatClient);
                     Console.WriteLine(output);
-                    SendChatMessage(output);
 
                     RemoveClientBySocket(chatClient);
                 }
@@ -360,11 +221,14 @@ namespace Server
                 String rStr = "&";
                 lock (clientDictionary)
                 {
-                    foreach (KeyValuePair<String, Socket> s in clientDictionary)
+                    foreach (KeyValuePair<Player, Socket> s in clientDictionary)
                     {
-                        if (RequestHandle.GetPlayer(s.Key) != null)
+                        lock (Dungeon)
                         {
-                            rStr += s.Key + " " + RequestHandle.GetPlayerRoom(s.Key).RoomIndex + "&";
+                            if (s.Key.currentRoom != null)
+                            {
+                                rStr += s.Key.PlayerName + " " + s.Key.currentRoom.RoomIndex + "&";
+                            }
                         }
                     }
                 }
@@ -379,7 +243,7 @@ namespace Server
                     OldString = rStr;
                     lock (clientDictionary)
                     {
-                        foreach (KeyValuePair<String, Socket> s in clientDictionary)
+                        foreach (KeyValuePair<Player, Socket> s in clientDictionary)
                         {
                             try
                             {
@@ -411,9 +275,7 @@ namespace Server
             Dungeon = new DungeonS();
             Dungeon.Init(40,10);
 
-            PlayerHandle = new PlayerHandler();
-
-            RequestHandle = new RequestHandler(ref Dungeon, ref PlayerHandle);
+            RequestHandle = new RequestHandler(ref Dungeon);
 
 
             {
@@ -432,10 +294,8 @@ namespace Server
 
                 lock (clientDictionary)
                 {
-                    clientDictionary.Add(clientName, serverClient);
+                    clientDictionary.Add(new Player(clientName), serverClient);
                 }
-
-                SendClientName(serverClient, clientName);
 
                 clientID++;
 

@@ -25,7 +25,8 @@ namespace Winform_Client
         {
             if (this.NameTextBox.Text.Count() > 0)
             {
-                Form1 frm = new Form1(this.NameTextBox.Text, " ");
+                String temp = this.NameTextBox.Text;
+                Form1 frm = new Form1(temp, " ");
                 this.Visible = false;
                 frm.ShowDialog();
                 this.Close();
