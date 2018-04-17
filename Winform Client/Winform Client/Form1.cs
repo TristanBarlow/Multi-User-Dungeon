@@ -461,13 +461,13 @@ namespace Winform_Client
                 case Keys.Right:
                     DGD.MoveX(-MapMoveSpeed);
                     break;
-                //case Keys.S:
-                //    DGD.ChangeScale(-1);
-                //    break;
-                //case Keys.W:
-                //    DGD.ChangeScale(1);
-                //    break;
-                    
+                case Keys.S:
+                    DGD.ChangeScale(-1);
+                    break;
+                case Keys.W:
+                    DGD.ChangeScale(1);
+                    break;
+
             }
         }
 
