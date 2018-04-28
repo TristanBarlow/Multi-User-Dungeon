@@ -142,7 +142,7 @@
             this.ChatBox.Name = "ChatBox";
             this.ChatBox.ReadOnly = true;
             this.ChatBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.ChatBox.Size = new System.Drawing.Size(384, 82);
+            this.ChatBox.Size = new System.Drawing.Size(394, 82);
             this.ChatBox.TabIndex = 17;
             // 
             // Form1
@@ -151,7 +151,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Black;
-            this.ClientSize = new System.Drawing.Size(1075, 417);
+            this.ClientSize = new System.Drawing.Size(969, 418);
             this.Controls.Add(this.ChatBox);
             this.Controls.Add(this.DungeonGraphic);
             this.Controls.Add(this.ButtonWest);

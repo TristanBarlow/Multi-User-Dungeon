@@ -14,7 +14,7 @@ namespace Dungeon
         //private Dictionary<String, Room> roomMap;
         private List<Room> RoomList;
 
-        public String DungeonStr { set; get; } = "&n1e2s3w4&s0&w0&n0&e0w5&e4&";
+		public String DungeonStr { set; get; }
 
         public void Init(int size, int spread)
         {

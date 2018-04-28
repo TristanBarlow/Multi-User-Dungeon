@@ -22,25 +22,16 @@ namespace Request
 
         public String PlayerAction(String action, Player p)
         {
-            lock (dungeon)
-            {
-                    return dungeon.PlayerAction(action,p );
-            }
+            return dungeon.PlayerAction(action,p );
         }
 
         public void SetPlayerRandomRoom(Player p)
         { 
-                lock (dungeon)
-                {
                     p.currentRoom = dungeon.GetRandomRoom();
-                }
         }
         public Room GetPlayerRandomRoom()
         {
-            lock (dungeon)
-            {
-                return dungeon.GetRandomRoom();
-            }
+             return dungeon.GetRandomRoom();
         }
     }
 }

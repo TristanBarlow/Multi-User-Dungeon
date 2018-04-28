@@ -12,7 +12,7 @@ namespace Dungeon
 {
     public class Room
     {
-        public int RoomIndex { set; get; } = -1;
+        public int RoomIndex { set; get; }
         public String name = "";
         private String desc = "";
         public List<String> graffitiList;
@@ -45,6 +45,7 @@ namespace Dungeon
             this.name = name;
             Init();
             Item newItem = new Item("cheese", "this is a block of chese");
+			RoomIndex = -1;
             inventory.AddItem(newItem);
             inventory.AddItem(newItem);
 

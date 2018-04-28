@@ -6,6 +6,7 @@ using System.Threading;
 using System.ComponentModel;
 
 using Dungeon;
+using System.Net.Sockets;
 
 namespace PlayerN
 {
@@ -27,7 +28,18 @@ namespace PlayerN
 
         public String GetStance() { return Stance;}
 
+        public Socket socket { set; get; }
+
         public void SetStance(String newStance) {Stance = newStance;}
+
+        public Player(String clientName, Socket s, Room startRoom)
+        {
+            PlayerName = clientName;
+            socket = s;
+            currentRoom = startRoom;
+            inventory = new Inventory();
+            isDead = false;
+        }
 
         public Player(String name)
         {
@@ -52,12 +64,6 @@ namespace PlayerN
 
         public void SetPlayerName(String newName) { PlayerName = newName;}
 
-        public Player(String clientName, Room startRoom)
-        {
-            PlayerName = clientName;
-            currentRoom = startRoom;
-            inventory = new Inventory();
-            isDead = false;
-        }
+
     }
 }

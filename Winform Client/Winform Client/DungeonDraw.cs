@@ -190,7 +190,7 @@ namespace Winform_Client
                     foreach (KeyValuePair<String, User> u in ClientDrawDict)
                     {
                         RoomSlot rs = currentMap[u.Value.RoomNum].GetNextRoomSlot(3 * Scale);
-                        if (rs != null && u.Key != LocalClient.Name)
+                        if (rs != null &&  u.Key != LocalClient.Name)
                         {
                             //u.Value.DrawMeExact(GU, rs.XPos + XOffset, rs.YPos+YOffset, Scale * 3);
                             u.Value.MoveUser(rs, Scale);
@@ -336,7 +336,6 @@ namespace Winform_Client
                         {
                             u = new User(ClientName, Room, Scale, true);
                             LocalClient = u;
-
                         }
                         else
                         {
