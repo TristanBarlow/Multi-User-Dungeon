@@ -51,7 +51,7 @@ namespace DungeonNamespace
 
         private void MovePlayer(Player p, Room newRoom)
         {
-            p.currentRoom = newRoom;
+            p.SetRoom(newRoom);
         }
 
         public String PlayerAction(String action,Player player)
@@ -66,6 +66,8 @@ namespace DungeonNamespace
                 returnString = U.NewLineS("Not in list you do not exsist");
                 return returnString;
             }
+
+            Room currentRoom = RoomList[player.roomIndex];
 
             switch (input[0].ToLower())
             {
@@ -85,20 +87,20 @@ namespace DungeonNamespace
                 case "look":
                     //loop straight back
                     returnString = U.NewLineS("you look around") +
-                                   U.NewLineS(player.currentRoom.GetDescription());
+                                   U.NewLineS(currentRoom.GetDescription());
                     break;
 
                 case "graf":
                     int index = action.IndexOf(' ');
                     String second = action.Substring(index + 1);
-                    player.currentRoom.AddGraf(second);
+                    currentRoom.AddGraf(second);
                     returnString = U.NewLineS("You added a graffiti");
                     break;
 
                 case "pickup":
                     {
                         String itemName = input[1];
-                        Item tempItem = player.currentRoom.inventory.TransfereItem(itemName);
+                        Item tempItem = currentRoom.inventory.TransfereItem(itemName);
                         if (tempItem != null)
                         {
                             player.inventory.AddItem(tempItem);
@@ -117,8 +119,8 @@ namespace DungeonNamespace
                         Item tempItem = player.inventory.TransfereItem(itemName);
                         if (tempItem != null)
                         {
-                            player.currentRoom.inventory.AddItem(tempItem);
-                            returnString += " You droped " + player.currentRoom.inventory.GetFirstItemFromName(itemName).itemName;
+                            currentRoom.inventory.AddItem(tempItem);
+                            returnString += " You droped " + currentRoom.inventory.GetFirstItemFromName(itemName).itemName;
                         }
                         else
                         {
@@ -134,7 +136,7 @@ namespace DungeonNamespace
 
                 case "go":
                     // is arg[1] sensible?
-                    int[] indexs = player.currentRoom.GetExitIndexs();
+                    int[] indexs = currentRoom.GetExitIndexs();
                     if ((input[1].ToLower() == "north") && (indexs[0] != -1))
                     {
                         MovePlayer(player, RoomList[indexs[0]]);
@@ -169,7 +171,7 @@ namespace DungeonNamespace
                             }
                         }
                     }
-                    returnString = U.NewLineS(player.currentRoom.GetDescription());
+                    returnString = U.NewLineS(currentRoom.GetDescription());
                     break;
 
                 default:

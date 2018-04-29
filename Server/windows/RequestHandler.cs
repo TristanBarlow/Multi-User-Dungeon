@@ -24,11 +24,6 @@ namespace Request
         {
             return dungeon.PlayerAction(action,p );
         }
-
-        public void SetPlayerRandomRoom(Player p)
-        { 
-                    p.currentRoom = dungeon.GetRandomRoom();
-        }
         public Room GetPlayerRandomRoom()
         {
              return dungeon.GetRandomRoom();

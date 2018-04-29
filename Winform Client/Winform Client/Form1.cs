@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
+using System.Collections.Concurrent;
 
 
 using System.Net;
@@ -32,6 +28,10 @@ namespace Winform_Client
 
         List<int> numberOfClients = new List<int>();
 
+        ConcurrentQueue<Action> DrawQueue = new ConcurrentQueue<Action>();
+
+        private delegate void AddTextDelegate(String s);
+
         LoginScreen loginScreen;
 
         int MapMoveSpeed = 10;
@@ -39,6 +39,28 @@ namespace Winform_Client
         public String ClientName { set; get; } = " ";
 
         DungeonDraw DGD;
+
+        public Form1()
+        {
+            InitializeComponent();
+
+            DGD = new DungeonDraw(this.DungeonGraphic);
+
+            Application.ApplicationExit += delegate { OnExit(); };
+        }
+
+        private void ProcessDrawQueue()
+        {
+            while (true)
+            {
+                if (!DrawQueue.IsEmpty)
+                {
+                    Action action;
+                    DrawQueue.TryDequeue(out action);
+                    action.Invoke();
+                }
+            }
+        }
 
         private void ClientProcess(Object o)
 
@@ -53,9 +75,10 @@ namespace Winform_Client
                     {
                         form.clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                         //form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("46.101.88.130"), 8500));
-                        form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8500));
-                        //form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("192.168.1.153"), 8500));
+                        //form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8500));
+                        form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("192.168.1.153"), 8500));
                         form.bConnected = true;
+
                         receiveThread = new Thread(ClientReceive);
                         receiveThread.IsBackground = true;
                         receiveThread.Start(o);
@@ -63,7 +86,7 @@ namespace Winform_Client
                     }
                     while ((form.bQuit == false) && (form.bConnected == true))
                     {
-                        loginScreen.Connected();
+                        form.loginScreen.Connected("Connected");
                         if (form.IsDisposed == true)
                         {
 
@@ -71,6 +94,7 @@ namespace Winform_Client
                             form.bQuit = true;
                             form.clientSocket.Close();
                         }
+
                     }
                 }
                 catch (System.Exception)
@@ -88,8 +112,6 @@ namespace Winform_Client
 
             form.AddText("Connected to server");
 
-
-
             while (form.bConnected == true)
             {
                 try
@@ -101,86 +123,84 @@ namespace Winform_Client
 
                     if (result > 0)
                     {
-                        Task task = new Task(() => ProcessBuffer(buffer, form));
-                        task.Start();
+                        MemoryStream stream = new MemoryStream(buffer);
+                        BinaryReader read = new BinaryReader(stream);
+
+                        Msg m = Msg.DecodeStream(read);
+
+                        if (m != null)
+                        {
+                            Console.Write("Got a message: ");
+                            switch (m.mID)
+                            {
+                                case DungeonResponse.ID:
+                                    {
+                                        DungeonResponse dSponse = (DungeonResponse)m;
+
+                                        form.AddDungeonText(dSponse.response);
+                                    }
+                                    break;
+                                case MapLayout.ID:
+                                    {
+                                        MapLayout ML = (MapLayout)m;
+                                        DrawQueue.Enqueue(() => ParseMap(ML.mapInfo));
+
+                                        break;
+                                    }
+                                case LoginMessage.ID:
+                                    {
+                                        LoginMessage LM = (LoginMessage)m;
+                                        if (LM.password == "1")
+                                        {
+                                            loginScreen.LoginResponse(LM.name, true);
+                                        }
+                                        else
+                                        {
+                                            loginScreen.LoginResponse(LM.name, false);
+                                        }
+                                    }
+                                    break;
+                                case PlayerLocations.ID:
+                                    {
+                                        PlayerLocations PL = (PlayerLocations)m;
+                                        DrawQueue.Enqueue(() => UpdatePlayerLocations(PL.LocationString));
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
                     }
                 }
                 catch (Exception)
                 {
                     form.bConnected = false;
                     Console.WriteLine(U.NewLineS("Lost server!"));
+                    Application.Restart();
+                    Environment.Exit(0);
 
                 }
 
             }
+
         }
 
-        private void ProcessBuffer(byte[] buffer, Object o)
+        private void UpdatePlayerLocations(String s)
         {
-
-            Form1 form = (Form1)o;
-
-            MemoryStream stream = new MemoryStream(buffer);
-            BinaryReader read = new BinaryReader(stream);
-
-            Msg m = Msg.DecodeStream(read);
-
-            if (m != null)
+            if (DGD.IsInUse == false)
             {
-                Console.Write("Got a message: ");
-                switch (m.mID)
-                {
-                    case DungeonResponse.ID:
-                        {
-                            DungeonResponse dSponse = (DungeonResponse)m;
+                RequestMapLayout("r");
+            }
+            else
+            {
 
-                            form.AddDungeonText(dSponse.response);
-                        }
-                        break;
-                    case MapLayout.ID:
-                        {
-                            MapLayout ML = (MapLayout)m;
-                            lock (DGD)
-                            {
-                                DGD.MapParser(ML.mapInfo);
-                                DGD.IsInUse = true;
-                                if (DGD.HasUsers) DGD.UpdateClientPositions();
-                            }
-                        }
-                        break;
-                    case PlayerLocations.ID:
-                        {
-                            if (DGD.IsInUse == false)
-                            {
-                                RequestMapLayout("r");
-                            }
-                            else
-                            {
-                                PlayerLocations PL = (PlayerLocations)m;
-                                lock (DGD)
-                                {
-                                    DGD.HasUsers = true;
-                                    DGD.DrawClients(PL.LocationString, ClientName);
-                                }
-                            }
-                        }
-                        break;
-                    default:
-                        break;
+                lock (DGD)
+                {
+                    DGD.HasUsers = true;
+                    DGD.DrawClients(s, ClientName);
                 }
             }
         }
-
-        public Form1()
-        {
-            InitializeComponent();
-
-            DGD = new DungeonDraw(this.DungeonGraphic);
-
-            Application.ApplicationExit += delegate { OnExit(); };
-        }
-
-        private delegate void AddTextDelegate(String s);
 
         private void AddText(String s)
         {
@@ -306,18 +326,39 @@ namespace Winform_Client
             catch { }
         }
 
-        public void SendNameChangeMessage(String name)
+        public void SendLoginMessage(String name, String password)
         {
             LoginMessage nameMsg = new LoginMessage();
             ClientName = name;
-            nameMsg.name = name;
-            nameMsg.password = " ";
+            nameMsg.SetName(name);
+            nameMsg.SetPassword(password);
             MemoryStream outStream = nameMsg.WriteData();
             try
             {
                 clientSocket.Send(outStream.GetBuffer());
             }
             catch { }
+        }
+
+        public void SendCreateUserMessage(String name, String password)
+        {
+            CreateUser nameMsg = new CreateUser();
+            ClientName = name;
+            nameMsg.SetName(name);
+            nameMsg.SetPassword(password);
+            MemoryStream outStream = nameMsg.WriteData();
+            try
+            {
+                clientSocket.Send(outStream.GetBuffer());
+            }
+            catch { }
+        }
+
+        private void ParseMap(String s)
+        {
+            DGD.MapParser(s);
+            DGD.IsInUse = true;
+            if (DGD.HasUsers) DGD.UpdateClientPositions();
         }
 
         private void ButtonNorth_Click(object sender, EventArgs e)
@@ -379,10 +420,13 @@ namespace Winform_Client
             myThread = new Thread(ClientProcess);
             myThread.IsBackground = true;
             myThread.Start(this);
-
             DialogResult result;
             loginScreen = new LoginScreen(this);
             result = loginScreen.ShowDialog();
+
+            Task drawTask = new Task(ProcessDrawQueue);
+            drawTask.Start();
+
             if (result != DialogResult.OK)
             {
                 bQuit = true;
@@ -391,11 +435,14 @@ namespace Winform_Client
             }
 
         }
-
-        private void DungeonPaint(object sender, PaintEventArgs e)
+        private void DrawDungeon()
         {
             DGD.ClientNumberList = numberOfClients;
             DGD.Draw();
+        }
+        private void DungeonPaint(object sender, PaintEventArgs e)
+        {
+            DrawQueue.Enqueue(() => DrawDungeon());
         }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)

@@ -88,27 +88,23 @@ namespace DungeonNamespace
                            U.NewLineS(desc)+
                            ("Exits Are:");
 
-            if (Used)
-            {
-                if (north != -1) returnString += "North ";
-                if (east != -1) returnString += "East ";
-                if (south != -1) returnString += "South ";
-                if (west != -1) returnString += "West ";
-            }
-            else
-            {
-                returnString = "no exits oh no";
-            }
+            if (north != -1) returnString += "North ";
+            if (east != -1) returnString += "East ";
+            if (south != -1) returnString += "South ";
+            if (west != -1) returnString += "West ";
+
             returnString += U.NewLineS(" ");
 
             returnString += inventory.GetIventoryDescription();
 
-            returnString += U.NewLineS("Graffiti: ");
+            returnString += U.NewLineS(" ");
+
+            returnString += ("Graffiti: ");
             if (graffitiList.Count() != 0)
             {
                 foreach (String iter in graffitiList)
                 {
-                    returnString += iter;
+                    returnString += U.NewLineS(iter);
                 }
             }
             else

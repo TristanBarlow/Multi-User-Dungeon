@@ -18,9 +18,11 @@ namespace PlayerN
 
         public bool isInCombat;
 
-        public bool isDead;
+        public bool isDead = false;
 
-        public Room currentRoom;
+        private Room currentRoom;
+
+        public int roomIndex = -1;
 
         public Inventory inventory;
 
@@ -28,24 +30,29 @@ namespace PlayerN
 
         public String GetStance() { return Stance;}
 
+        public Room GetRoom() { return currentRoom; }
+        public void SetRoom(Room r) { roomIndex = r.RoomIndex; currentRoom = r; }
+
         public Socket socket { set; get; }
 
         public void SetStance(String newStance) {Stance = newStance;}
 
-        public Player(String clientName, Socket s, Room startRoom)
+        public Player(String clientName, Socket s)
         {
             PlayerName = clientName;
             socket = s;
-            currentRoom = startRoom;
             inventory = new Inventory();
-            isDead = false;
         }
 
         public Player(String name)
         {
             PlayerName = name;
             inventory = new Inventory();
-            isDead = true;
+        }
+
+        public Player(Socket s)
+        {
+            socket = s;
         }
 
         public int GetHealth(){ return health;}

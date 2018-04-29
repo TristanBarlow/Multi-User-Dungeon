@@ -62,20 +62,20 @@ namespace DungeonNamespace
         public String GetIventoryDescription()
         {
             String returnString = "";
-            returnString += U.NewLineS("//");
+            returnString += U.NewLineS(" ");
 
             if (itemList.Count() > 0)
             { 
             
                 foreach (Item iter in itemList)
                 {
-                    returnString += U.NewLineS(iter.Inspect() + "  ");
+                    returnString += (iter.Inspect() + "  ");
                 }
 
             }
             else
             {
-                returnString += U.NewLineS("there are no items here");
+                returnString += ("there are no items here");
             }
             return returnString;
    

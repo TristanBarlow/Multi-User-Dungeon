@@ -59,8 +59,6 @@ namespace Winform_Client
 
         public bool IsInUse = false;
 
-        public bool SlowDraw = false;
-
         public bool HasUsers = true;
 
         private List<Room> currentMap = new List<Room>();
@@ -100,41 +98,10 @@ namespace Winform_Client
                 foreach (DrawObject d in MapObjects)
                 {
                     d.DrawMe(G, XOffset, YOffset);
-                    if (SlowDraw)
-                    {
-                        Thread.Sleep(25);
-                    }
                 }
-                if (SlowDraw) SlowDraw = false;
 
             }
             //UpdateClientPositions();
-        }
-
-        public void SplitDraw()
-        {
-                List<DrawObject> t;
-                lock (MapObjects)
-                {
-                    t = new List<DrawObject>(MapObjects);
-
-                }
-            lock (G)
-            {
-                G.Clear(FillColor);
-                int count = t.Count;
-                Task task = new Task(() => DrawHalf(t.Take(count / 2).ToArray(), G2, XOffset, YOffset));
-                task.Start();
-                DrawObject[] tb = t.Skip(count / 2).ToArray();
-                foreach (DrawObject d in tb)
-                {
-                    d.DrawMe(G, XOffset, YOffset);
-                }
-                task.Wait();
-            }
-
-
-            UpdateClientPositions();
         }
 
         private void UpdateScale()

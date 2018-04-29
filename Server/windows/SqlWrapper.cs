@@ -24,8 +24,8 @@ namespace Server
 {
     class SqlWrapper
     {
-        SQLiteConnection DungeonDatabase = null;
-        SQLiteConnection PlayerDatabase = null;
+		sqliteConnection DungeonDatabase = null;
+        sqliteConnection PlayerDatabase = null;
 
         String DungeonName = "DungeonTable";
         String PlayersName = "PlayerTable";
@@ -78,7 +78,7 @@ namespace Server
                     sqlString += ", ";
                     sqlString += "'" + password + "' ";
                     sqlString += ", ";
-                    sqlString += "'" + tempPlayer.currentRoom.RoomIndex + "' ";
+                    sqlString += "'" + tempPlayer.roomIndex + "' ";
                     sqlString += ")";
                     command = new sqliteCommand(sqlString, PlayerDatabase);
                     command.ExecuteNonQuery();
@@ -96,8 +96,28 @@ namespace Server
             }
         }
 
-        public bool GetPlayerLogin()
+        public bool GetPlayerLogin(ref Player p, String Username, String password)
         {
+            
+            new sqliteCommand("create table if not exists " + PlayersName + " (name varchar(30), " +
+                              "password varchar(150), rIndex int)", PlayerDatabase).ExecuteNonQuery();
+
+            var command = new sqliteCommand("select * from " + PlayersName + " where name == '" + Username + "'", PlayerDatabase);
+            var reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                if (password != reader["password"].ToString())
+                {
+                    return false;
+                }
+                else
+                {
+                    p.PlayerName = reader["name"].ToString();
+                    p.roomIndex = Int32.Parse(reader["rIndex"].ToString());
+                    return true;
+                }
+            }
             return false;
         }
 

@@ -47,6 +47,9 @@ namespace MessageTypes
                 case PlayerLocations.ID:
                     m = new PlayerLocations();
                     break;
+                case CreateUser.ID:
+                    m = new CreateUser();
+                    break;
 
                 default:
                     throw (new Exception());
@@ -94,17 +97,32 @@ namespace MessageTypes
         public const int ID = 2;
 
         public String name;
+        private int nameLength = 0;
 
         public String password;
+        private int passLength = 0;
 
         public LoginMessage() { mID = ID; }
 
+        public void SetPassword(String p)
+        {
+            passLength = p.Length;
+            password = p;
+        }
+
+        public void SetName(String n)
+        {
+            nameLength = n.Length;
+            name = n;
+        }
         public override MemoryStream WriteData()
         {
             MemoryStream stream = new MemoryStream();
             BinaryWriter write = new BinaryWriter(stream);
             write.Write(ID);
+            write.Write(nameLength);
             write.Write(name);
+            write.Write(passLength);
             write.Write(password);
 
             write.Close();
@@ -114,16 +132,68 @@ namespace MessageTypes
 
         public override void ReadData(BinaryReader read)
         {
+            nameLength = read.ReadInt32();
             name = read.ReadString();
+            passLength = read.ReadInt32();
+            password = read.ReadString();
+
         }
     };
+
+    public class CreateUser : Msg
+    {
+        public const int ID = 7;
+
+        public String name;
+        private int nameLength = 0;
+
+        public String password;
+        private int passLength = 0;
+
+        public CreateUser() { mID = ID; }
+
+        public void SetPassword(String p)
+        {
+            passLength = p.Length;
+            password = p;
+        }
+
+        public void SetName(String n)
+        {
+            nameLength = n.Length;
+            name = n;
+        }
+        public override MemoryStream WriteData()
+        {
+            MemoryStream stream = new MemoryStream();
+            BinaryWriter write = new BinaryWriter(stream);
+            write.Write(ID);
+            write.Write(nameLength);
+            write.Write(name);
+            write.Write(passLength);
+            write.Write(password);
+
+            write.Close();
+
+            return stream;
+        }
+
+        public override void ReadData(BinaryReader read)
+        {
+            nameLength = read.ReadInt32();
+            name = read.ReadString();
+            passLength = read.ReadInt32();
+            password = read.ReadString();
+
+        }
+    }
 
     public class DungeonCommand : Msg
     {
         public const int ID = 3;
 
         public String command;
- 
+
         public DungeonCommand() { mID = ID; }
 
         public override MemoryStream WriteData()
@@ -204,7 +274,7 @@ namespace MessageTypes
     {
         public const int ID = 6;
 
-        public String LocationString = " "; 
+        public String LocationString = " ";
 
         public PlayerLocations() { mID = ID; }
 

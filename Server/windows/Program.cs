@@ -30,6 +30,8 @@ namespace Server
 
         static private ConcurrentQueue<Action> RequestQueue = new ConcurrentQueue<Action>();
 
+        static private ConcurrentQueue<Action> LoginQueue = new ConcurrentQueue<Action>();
+
         static private SqlWrapper sqlWrapper;
 
 
@@ -88,10 +90,10 @@ namespace Server
 
         static void DungeonAction(String dungMsg, Player player)
         {
-            int RoomNum = 1; 
+            int RoomNum = player.roomIndex; 
             String dungeonResponse  = RequestHandle.PlayerAction(dungMsg, player);
 
-            if (RoomNum != player.currentRoom.RoomIndex)
+            if (RoomNum != player.GetRoom().RoomIndex)
             {
                 SendLocations();
             }
@@ -101,9 +103,111 @@ namespace Server
 
         static void AddNewPlayer(Player p)
         {
+            if (p.roomIndex == -1)
+            {
+                p.SetRoom(Dungeon.GetRandomRoom());
+            }
+            else
+            {
+                p.SetRoom(Dungeon.GetRoomList()[p.roomIndex]);
+            }
             clientList.Add(p);
         }
 
+        static bool LoginSequence(Socket chatClient, ref Player player, ref bool bQuit)
+        {
+            try
+            {
+                byte[] buffer = new byte[4096];
+                int result;
+
+                result = chatClient.Receive(buffer);
+
+                if (result > 0)
+                {
+                    MemoryStream stream = new MemoryStream(buffer);
+                    BinaryReader read = new BinaryReader(stream);
+
+                    Msg m = Msg.DecodeStream(read);
+
+                    if (m.mID == LoginMessage.ID)
+                    {
+                        LoginMessage LM = (LoginMessage)m;
+                        player = new Player(chatClient);
+                        Console.WriteLine("Login request from: " + LM.name);
+                        lock (sqlWrapper)
+                        {
+                            if (sqlWrapper.GetPlayerLogin(ref player, LM.name, LM.password))
+                            {
+                                Console.WriteLine("Player: " + LM.name + "Logged in");
+                                SendLoginResponse(chatClient, "Success", true);
+                                return true;
+                            }
+                            else
+                            {
+                                Console.WriteLine("Player: " + LM.name + "Failed Login");
+                                SendLoginResponse(chatClient, "Failed to login", false);
+                                return false;
+                            }
+                        }
+
+                    }
+                    else if (m.mID == CreateUser.ID)
+                    {
+                        CreateUser CM = (CreateUser)m;
+                        player = new Player(CM.name, chatClient);
+                        Console.WriteLine("Create User recieved: " + CM.name);
+                        lock (sqlWrapper)
+                        {
+                            if (sqlWrapper.AddPlayer(player, CM.password))
+                            {
+                                Console.Write(" created new player");
+                                SendLoginResponse(chatClient, "Success", true);
+                                return true;
+                            }
+                            else
+                            {
+                                Console.Write("Failed to create player");
+                                SendLoginResponse(chatClient, "Failed to Create player", false);
+                                return false;
+                            }
+                        }
+                    }
+                }
+                return false;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error loggin in: " + e);
+                bQuit = true;
+                return false;
+            }
+        }
+
+        static bool SendLoginResponse(Socket socket, String error, bool success)
+        {
+            LoginMessage response = new LoginMessage();
+            response.name = error;
+            if (success)
+            {
+                response.password = "1";
+            }
+            else
+            {
+                response.password = "0";
+            }
+            MemoryStream outStream = response.WriteData();
+
+            try
+            {
+                socket.Send(outStream.GetBuffer());
+                return true;
+            }
+            catch (System.Exception)
+            {
+                return false;
+            }
+        }
 
         static void ReceiveClientProcess(Object o)
         {
@@ -113,59 +217,22 @@ namespace Server
 
             bool LoggedIn = false;
 
-            String ClientName = " ";
-
             Player player = null;
 
             while (!LoggedIn && bQuit == false)
             {
-                try
-                {
-                    byte[] buffer = new byte[4096];
-                    int result;
-
-                    result = chatClient.Receive(buffer);
-
-                    if (result > 0)
-                    {
-                        MemoryStream stream = new MemoryStream(buffer);
-                        BinaryReader read = new BinaryReader(stream);
-
-                        Msg m = Msg.DecodeStream(read);
-
-                        if (m.mID == LoginMessage.ID)
-                        {
-                            LoginMessage LM = (LoginMessage)m;
-                            player = new Player(LM.name, chatClient, RequestHandle.GetPlayerRandomRoom());
-                            Console.WriteLine("login recieved" + LM.name);
-                            lock (sqlWrapper)
-                            {
-                                if (sqlWrapper.AddPlayer(player, LM.password))
-                                {
-                                    Console.Write(" created new player");
-                                    LoggedIn = true;
-                                }
-                                else
-                                {
-                                    Console.Write("Failed to create player");
-                                }
-                            }
-                        }
-                    }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Error loggin in: " + e);
-                    bQuit = true;
-                    return;
-                }
+                LoggedIn = LoginSequence(chatClient,ref player, ref bQuit);
             }
+
+            if (bQuit == true) return;
 
             RequestQueue.Enqueue(() => AddNewPlayer(player));
 
             RequestQueue.Enqueue(() => DungeonAction("look", player));
 
             RequestQueue.Enqueue(() => SendDungeonInfo(player));
+
+            RequestQueue.Enqueue(() => SendLocations());
 
             RequestQueue.Enqueue(() => SendLocations());
             /// do command
@@ -242,9 +309,9 @@ namespace Server
                 String rStr = "&";
                 foreach (Player p in clientList)
                 {
-                        if (p.currentRoom != null)
+                        if (p.GetRoom() != null)
                         {
-                            rStr += p.PlayerName + " " + p.currentRoom.RoomIndex + "&";
+                            rStr += p.PlayerName + " " + p.GetRoom().RoomIndex + "&";
                         }
                     
                 }
@@ -269,8 +336,8 @@ namespace Server
             Socket serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
             //serverSocket.Bind(new IPEndPoint(IPAddress.Parse("46.101.88.130"), 8500));
-            serverSocket.Bind(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8500));
-			//serverSocket.Bind(new IPEndPoint(IPAddress.Parse("192.168.1.153"), 8500));
+            //serverSocket.Bind(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8500));
+			serverSocket.Bind(new IPEndPoint(IPAddress.Parse("192.168.1.153"), 8500));
             serverSocket.Listen(32);
 
             bool bQuit = false;
@@ -308,6 +375,7 @@ namespace Server
                 Socket serverClient = serverSocket.Accept();
 
                 Thread myThread = new Thread(ReceiveClientProcess);
+                myThread.IsBackground = true;
                 myThread.Start(serverClient);
  
                 clientID++;
