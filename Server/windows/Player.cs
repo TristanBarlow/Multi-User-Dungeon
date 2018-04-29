@@ -22,6 +22,8 @@ namespace PlayerN
 
         private Room currentRoom;
 
+        private bool moved = false;
+
         public int roomIndex = -1;
 
         public Inventory inventory;
@@ -31,8 +33,25 @@ namespace PlayerN
         public String GetStance() { return Stance;}
 
         public Room GetRoom() { return currentRoom; }
-        public void SetRoom(Room r) { roomIndex = r.RoomIndex; currentRoom = r; }
+        public void SetRoom(Room r)
+        {
+            roomIndex = r.RoomIndex;
+            currentRoom = r;
+            moved = true;
+        }
 
+        public bool GetHasMoved()
+        {
+            if (moved)
+            {
+                moved = false;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
         public Socket socket { set; get; }
 
         public void SetStance(String newStance) {Stance = newStance;}

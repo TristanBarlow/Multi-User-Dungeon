@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using DungeonNamespace;
-using System.Data.SQLite;
 using PlayerN;
+using System.Data;
 
 #if TARGET_LINUX
 using Mono.Data.Sqlite;
@@ -66,21 +66,20 @@ namespace Server
             new sqliteCommand("create table if not exists " + PlayersName + " (name varchar(30), " +
                   "password varchar(150), rIndex int)", PlayerDatabase).ExecuteNonQuery();
 
-            var command = new sqliteCommand("select * from " + PlayersName + " where name == '" + tempPlayer.PlayerName+ "'", PlayerDatabase);
+            var command = new sqliteCommand(PlayerDatabase);
+            command.CommandText = ("select * from " + PlayersName + " where name = '" + tempPlayer.PlayerName+ "'");
             var reader = command.ExecuteReader();
 
             if (reader.HasRows == false)
             {
                 try
                 {
-                    var sqlString = "insert into " + PlayersName + " (name, password, rIndex) values ";
-                    sqlString += "('" + tempPlayer.PlayerName + "' ";
-                    sqlString += ", ";
-                    sqlString += "'" + password + "' ";
-                    sqlString += ", ";
-                    sqlString += "'" + tempPlayer.roomIndex + "' ";
-                    sqlString += ")";
-                    command = new sqliteCommand(sqlString, PlayerDatabase);
+					command = new sqliteCommand("INSERT INTO " + PlayersName + 
+					                            " (name, password, rIndex) "+ 
+					                            "VALUES ($n, $p, $i) ",PlayerDatabase);
+                    command.Parameters.Add("$n", DbType.String).Value = tempPlayer.PlayerName;
+                    command.Parameters.Add("$p", DbType.String).Value = password;
+                    command.Parameters.Add("$i", DbType.Int32).Value = tempPlayer.roomIndex;
                     command.ExecuteNonQuery();
                     return true;
                 }
@@ -102,7 +101,7 @@ namespace Server
             new sqliteCommand("create table if not exists " + PlayersName + " (name varchar(30), " +
                               "password varchar(150), rIndex int)", PlayerDatabase).ExecuteNonQuery();
 
-            var command = new sqliteCommand("select * from " + PlayersName + " where name == '" + Username + "'", PlayerDatabase);
+            var command = new sqliteCommand("select * from " + PlayersName + " where name = '" + Username + "'", PlayerDatabase);
             var reader = command.ExecuteReader();
 
             while (reader.Read())
@@ -119,6 +118,22 @@ namespace Server
                 }
             }
             return false;
+        }
+
+        public void WritePlayer(Player p)
+        {
+            var command = new sqliteCommand(PlayerDatabase);
+            command.CommandText ="update " + PlayersName + " set rIndex = :i where name=:id";
+            command.Parameters.Add("i", DbType.Int32).Value = p.roomIndex;
+            command.Parameters.Add("id", DbType.String).Value = p.PlayerName;
+            try
+            {
+                command.ExecuteNonQuery();
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine("failed to write player: " + p.PlayerName + ex);
+            }
         }
 
         public void WriteDungeon(Dungeon d)
@@ -139,23 +154,16 @@ namespace Server
 
                 try
                 {
-                    var sqlString = "insert into " + DungeonName + " (name, description, rIndex, north, east, south, west) values ";
-                    sqlString += "('" + r.name + "' ";
-                    sqlString += ", ";
-                    sqlString += "'" + r.desc + "' ";
-                    sqlString += ", ";
-                    sqlString += "'" + r.RoomIndex + "' ";
-                    sqlString += ", ";
-                    sqlString += "'" + r.north + "' ";
-                    sqlString += ", ";
-                    sqlString += "'" + r.east + "' ";
-                    sqlString += ", ";
-                    sqlString += "'" + r.south + "' ";
-                    sqlString += ", ";
-                    sqlString += "'" + r.west + "' ";
-                    sqlString += ")";
-
-                    command = new sqliteCommand(sqlString, DungeonDatabase);
+                    command = new sqliteCommand("INSERT INTO " + DungeonName +
+                            "  (name, description, rIndex, north, east, south, west) " +
+                            "VALUES (?,?,?,?,?,?,?) ", DungeonDatabase);
+                    command.Parameters.Add("@name", DbType.String).Value = r.name;
+                    command.Parameters.Add("@password", DbType.String).Value = r.desc;
+                    command.Parameters.Add("@rIndex", DbType.Int32).Value = r.RoomIndex;
+                    command.Parameters.Add("@north", DbType.Int32).Value = r.north;
+                    command.Parameters.Add("@east", DbType.Int32).Value = r.east;
+                    command.Parameters.Add("@south", DbType.Int32).Value = r.south;
+                    command.Parameters.Add("@west", DbType.Int32).Value = r.west;
                     command.ExecuteNonQuery();
                 }
                 catch (Exception ex)

@@ -67,6 +67,7 @@ namespace Winform_Client
         {
             Form1 form = (Form1)o;
             Thread receiveThread;
+            Thread.Sleep(1000);
             while ((form.bConnected == false) && (form.bQuit == false))
             {
                 try
@@ -75,10 +76,10 @@ namespace Winform_Client
                     {
                         form.clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                         //form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("46.101.88.130"), 8500));
-                        //form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8500));
-                        form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("192.168.1.153"), 8500));
+                        form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8500));
+                        //form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("192.168.1.153"), 8500));
                         form.bConnected = true;
-
+                        form.loginScreen.Connected("Connected");
                         receiveThread = new Thread(ClientReceive);
                         receiveThread.IsBackground = true;
                         receiveThread.Start(o);
@@ -86,7 +87,6 @@ namespace Winform_Client
                     }
                     while ((form.bQuit == false) && (form.bConnected == true))
                     {
-                        form.loginScreen.Connected("Connected");
                         if (form.IsDisposed == true)
                         {
 
@@ -228,6 +228,7 @@ namespace Winform_Client
             }
             else
             {
+                TextboxDungeon.Clear();
                 TextboxDungeon.AppendText(U.NewLineS(s));
             }
         }

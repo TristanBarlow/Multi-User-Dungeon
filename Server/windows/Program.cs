@@ -24,6 +24,7 @@ namespace Server
 
         static private int clientID = 1;
 
+
         static private Dungeon Dungeon;
 
         static private RequestHandler RequestHandle;
@@ -84,20 +85,21 @@ namespace Server
         {
             if (p != null)
             {
+                lock (sqlWrapper)
+                {
+                    sqlWrapper.WritePlayer(p);
+                }
                 clientList.Remove(p);
             }
         }
 
         static void DungeonAction(String dungMsg, Player player)
-        {
-            int RoomNum = player.roomIndex; 
+        { 
             String dungeonResponse  = RequestHandle.PlayerAction(dungMsg, player);
-
-            if (RoomNum != player.GetRoom().RoomIndex)
+            if (player.GetHasMoved())
             {
                 SendLocations();
             }
-
             SendDungeonResponse(player, dungeonResponse);
         }
 
@@ -234,7 +236,6 @@ namespace Server
 
             RequestQueue.Enqueue(() => SendLocations());
 
-            RequestQueue.Enqueue(() => SendLocations());
             /// do command
 
             while (bQuit == false)
@@ -336,8 +337,8 @@ namespace Server
             Socket serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
             //serverSocket.Bind(new IPEndPoint(IPAddress.Parse("46.101.88.130"), 8500));
-            //serverSocket.Bind(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8500));
-			serverSocket.Bind(new IPEndPoint(IPAddress.Parse("192.168.1.153"), 8500));
+            serverSocket.Bind(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8500));
+			//serverSocket.Bind(new IPEndPoint(IPAddress.Parse("192.168.1.153"), 8500));
             serverSocket.Listen(32);
 
             bool bQuit = false;

@@ -85,7 +85,6 @@ namespace DungeonNamespace
                     break;
 
                 case "look":
-                    //loop straight back
                     returnString = U.NewLineS("you look around") +
                                    U.NewLineS(currentRoom.GetDescription());
                     break;
@@ -137,41 +136,30 @@ namespace DungeonNamespace
                 case "go":
                     // is arg[1] sensible?
                     int[] indexs = currentRoom.GetExitIndexs();
-                    if ((input[1].ToLower() == "north") && (indexs[0] != -1))
+                    if ((input[1].ToLower() == "north") && (currentRoom.north != -1))
                     {
-                        MovePlayer(player, RoomList[indexs[0]]);
+                        MovePlayer(player, RoomList[currentRoom.north]);
+                    }
+                     else if ((input[1].ToLower() == "east") && (currentRoom.east != -1))
+                    {
+                        MovePlayer(player, RoomList[currentRoom.east]);
+                    }
+                    else if ((input[1].ToLower() == "south") && (currentRoom.south != -1))
+                    {
+                        MovePlayer(player, RoomList[currentRoom.south]);
+                    }
+                    else if ((input[1].ToLower() == "west") && (currentRoom.west != -1))
+                    {       
+                        MovePlayer(player, RoomList[currentRoom.west]);           
                     }
                     else
                     {
-                        if ((input[1].ToLower() == "south") && (indexs[2] != -1))
-                        {
-                            MovePlayer(player, RoomList[indexs[2]]);
-                        }
-                        else
-                        {
-                            if ((input[1].ToLower() == "east") && (indexs[1] != -1))
-                            {
-                                MovePlayer(player, RoomList[indexs[1]]);
-                            }
-                            else
-                            {
-                                if ((input[1].ToLower() == "west") && (indexs[3] != -1))
-                                {
-                                   
-                                    MovePlayer(player, RoomList[indexs[3]]);
-                                    
-                                }
-                                else
-                                {
-                                    //handle error
-                                   returnString = U.NewLineS("\nERROR")+
-                                                  U.NewLineS("\nCan not go " + input[1] + " from here")+
-                                                  U.NewLineS("\nPress any key to continue");
-                                }
-                            }
-                        }
+                        //handle error
+                        returnString = U.NewLineS("\nERROR")+
+                                        U.NewLineS("\nCan not go " + input[1] + " from here")+
+                                        U.NewLineS("\nPress any key to continue");
                     }
-                    returnString = U.NewLineS(currentRoom.GetDescription());
+                    returnString = U.NewLineS(player.GetRoom().GetDescription());
                     break;
 
                 default:
