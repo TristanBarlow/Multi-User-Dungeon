@@ -33,11 +33,12 @@
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.PasswordTextBox = new System.Windows.Forms.TextBox();
+            this.ConnectionStatus = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(61, 166);
+            this.button1.Location = new System.Drawing.Point(45, 198);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(113, 34);
             this.button1.TabIndex = 0;
@@ -47,7 +48,7 @@
             // 
             // NameTextBox
             // 
-            this.NameTextBox.Location = new System.Drawing.Point(29, 56);
+            this.NameTextBox.Location = new System.Drawing.Point(13, 49);
             this.NameTextBox.Name = "NameTextBox";
             this.NameTextBox.Size = new System.Drawing.Size(178, 20);
             this.NameTextBox.TabIndex = 1;
@@ -58,7 +59,7 @@
             this.textBox1.BackColor = System.Drawing.SystemColors.Control;
             this.textBox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBox1.Location = new System.Drawing.Point(44, 19);
+            this.textBox1.Location = new System.Drawing.Point(28, 12);
             this.textBox1.Name = "textBox1";
             this.textBox1.ShortcutsEnabled = false;
             this.textBox1.Size = new System.Drawing.Size(140, 31);
@@ -71,7 +72,7 @@
             this.textBox2.BackColor = System.Drawing.SystemColors.Control;
             this.textBox2.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox2.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBox2.Location = new System.Drawing.Point(44, 92);
+            this.textBox2.Location = new System.Drawing.Point(28, 124);
             this.textBox2.Name = "textBox2";
             this.textBox2.ShortcutsEnabled = false;
             this.textBox2.Size = new System.Drawing.Size(140, 31);
@@ -81,16 +82,29 @@
             // 
             // PasswordTextBox
             // 
-            this.PasswordTextBox.Location = new System.Drawing.Point(29, 129);
+            this.PasswordTextBox.Location = new System.Drawing.Point(13, 161);
             this.PasswordTextBox.Name = "PasswordTextBox";
             this.PasswordTextBox.Size = new System.Drawing.Size(178, 20);
             this.PasswordTextBox.TabIndex = 3;
+            // 
+            // ConnectionStatus
+            // 
+            this.ConnectionStatus.BackColor = System.Drawing.SystemColors.Menu;
+            this.ConnectionStatus.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.ConnectionStatus.ForeColor = System.Drawing.Color.Red;
+            this.ConnectionStatus.Location = new System.Drawing.Point(13, 84);
+            this.ConnectionStatus.Name = "ConnectionStatus";
+            this.ConnectionStatus.Size = new System.Drawing.Size(178, 13);
+            this.ConnectionStatus.TabIndex = 5;
+            this.ConnectionStatus.Text = "No Server";
+            this.ConnectionStatus.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // LoginScreen
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(238, 217);
+            this.ClientSize = new System.Drawing.Size(216, 253);
+            this.Controls.Add(this.ConnectionStatus);
             this.Controls.Add(this.textBox2);
             this.Controls.Add(this.PasswordTextBox);
             this.Controls.Add(this.textBox1);
@@ -112,5 +126,6 @@
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.TextBox PasswordTextBox;
+        private System.Windows.Forms.TextBox ConnectionStatus;
     }
 }

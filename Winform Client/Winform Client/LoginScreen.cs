@@ -9,27 +9,57 @@ using System.Windows.Forms;
 
 namespace Winform_Client
 {
+
+
+
     public partial class LoginScreen : Form
     {
-        public LoginScreen()
+        Form1 form;
+
+        private delegate void AddTextDelegate(String s);
+
+        public bool IsConnected = false;
+
+        public LoginScreen(Form1 frm)
         {
             InitializeComponent();
+            form = frm;
         }
 
         private void LoginScreen_FormClosed(object sender, FormClosedEventArgs e)
         {
-            Application.Exit();
+
+        }
+
+        public void Connected()
+        {
+            IsConnected = true;
+            AddText("Connected");
         }
 
         private void LoginClick(object sender, EventArgs e)
         {
-            if (this.NameTextBox.Text.Count() > 0)
+            if (this.NameTextBox.Text.Count() > 0 && IsConnected && !NameTextBox.Text.Contains(" "))
             {
-                String temp = this.NameTextBox.Text;
-                Form1 frm = new Form1(temp, " ");
-                this.Visible = false;
-                frm.ShowDialog();
-                this.Close();
+                form.SendNameChangeMessage(this.NameTextBox.Text);
+
+                DialogResult = DialogResult.OK;
+            }
+        }
+
+        private void AddText(String s)
+        {
+            if (ConnectionStatus.InvokeRequired)
+            {
+
+                 Invoke(new AddTextDelegate(AddText), new object[] { s });
+
+            }
+            else
+            {
+
+                ConnectionStatus.Text = "Connect";
+
             }
         }
 

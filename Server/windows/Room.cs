@@ -8,19 +8,19 @@ using MessageTypes;
 using Utilities;
 using PlayerN;
 
-namespace Dungeon
+namespace DungeonNamespace
 {
     public class Room
     {
         public int RoomIndex { set; get; }
         public String name = "";
-        private String desc = "";
-        public List<String> graffitiList;
-        public Inventory inventory;
-        private int north = -1;
-        private int east = -1;
-        private int south = -1;
-        private int west = -1;
+        public String desc = " A description";
+        public List<String> graffitiList = new List<String>();
+        public Inventory inventory = new Inventory();
+        public int north = -1;
+        public int east = -1;
+        public int south = -1;
+        public int west = -1;
         private bool Used = false;
     
 
@@ -33,8 +33,7 @@ namespace Dungeon
         {
             name = Name;
             RoomIndex = index;
-            Init();
-            Item newItem = new Item("cheese", "this is a block of chese");
+            Item newItem = new Cheese();
             inventory.AddItem(newItem);
             inventory.AddItem(newItem);
         }
@@ -43,8 +42,7 @@ namespace Dungeon
         {
             this.desc = desc;
             this.name = name;
-            Init();
-            Item newItem = new Item("cheese", "this is a block of chese");
+            Item newItem = new Cheese();
 			RoomIndex = -1;
             inventory.AddItem(newItem);
             inventory.AddItem(newItem);
@@ -79,12 +77,6 @@ namespace Dungeon
                 }
             }
             return false;
-        }
-
-        private void Init()
-        {
-            graffitiList = new List<string>();
-            inventory = new Inventory();
         }
 
         public void AddGraf(String graff){ graffitiList.Add(graff);}

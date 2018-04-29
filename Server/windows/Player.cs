@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading;
 using System.ComponentModel;
 
-using Dungeon;
+using DungeonNamespace;
 using System.Net.Sockets;
 
 namespace PlayerN
@@ -44,6 +44,7 @@ namespace PlayerN
         public Player(String name)
         {
             PlayerName = name;
+            inventory = new Inventory();
             isDead = true;
         }
 

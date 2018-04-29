@@ -7,14 +7,14 @@ using System.Threading;
 using Utilities;
 using PlayerN;
 
-namespace Dungeon
+namespace DungeonNamespace
 {
-    public class DungeonS
+    public class Dungeon
     {        
         //private Dictionary<String, Room> roomMap;
-        private List<Room> RoomList;
+        private List<Room> RoomList= new List<Room>();
 
-		public String DungeonStr { set; get; }
+        private String DungeonStr = " ";
 
         public void Init(int size, int spread)
         {
@@ -25,6 +25,20 @@ namespace Dungeon
                // roomMap.Add(r.name, r);
             }
             DungeonStr = GenerateDungeonString(RoomList);
+        }
+
+        public String GetDungeonString()
+        {
+            if (DungeonStr == " ")
+            {
+                return GenerateDungeonString(RoomList);
+            }
+            else { return DungeonStr; }
+        }
+
+        public List<Room> GetRoomList()
+        {
+            return RoomList;
         }
 
         public Room GetRandomRoom()

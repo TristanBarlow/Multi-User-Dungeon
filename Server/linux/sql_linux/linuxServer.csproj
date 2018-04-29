@@ -73,6 +73,9 @@
     <Compile Include="..\..\windows\Room.cs">
       <Link>Room.cs</Link>
     </Compile>
+    <Compile Include="..\..\windows\SqlWrapper.cs">
+      <Link>SqlWrapper.cs</Link>
+    </Compile>
     <Compile Include="..\..\windows\Utilities.cs">
       <Link>Utilities.cs</Link>
     </Compile>

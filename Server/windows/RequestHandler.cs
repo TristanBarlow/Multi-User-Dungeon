@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 
-using Dungeon;
+using DungeonNamespace;
 using PlayerN;
 using Utilities;
 
@@ -13,9 +13,9 @@ namespace Request
 {
     class RequestHandler
     {
-        DungeonS dungeon;
+        Dungeon dungeon;
 
-        public RequestHandler(ref DungeonS d)
+        public RequestHandler(ref Dungeon d)
         {
             dungeon = d;
         }

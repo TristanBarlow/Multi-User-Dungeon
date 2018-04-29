@@ -5,7 +5,7 @@ using System.Text;
 
 using Utilities;
 
-namespace Dungeon
+namespace DungeonNamespace
 {
 
     public class Inventory
@@ -83,16 +83,19 @@ namespace Dungeon
         public List<Item> GetItemList() { if (itemList.Count() > 0) return itemList; else return null;}
     }
 
-    public class Item
+    public abstract class Item
     {
         public String itemName = "item";
 
+        public static int ID = 0;
+
         private String description = "Its an Item, not particularly useful";
 
-        public  Item(String name, String ndescription)
+        public void  Init(String name, String ndescription, int id)
         {
             itemName = name;
             description = ndescription;
+            ID = id;
         }
         public Item()
         { 
@@ -110,13 +113,33 @@ namespace Dungeon
 
     }
 
-    public class Weapon : Item
+    public abstract class Weapon : Item
     {
+        public static int wID = 1;
+
         public int damage = 1;
-        public Weapon(String name, String description, int Damage):base(name, description)
+
+        public Weapon(String name, String description, int Damage)
         {
+            Init(name, description, wID);
             damage = Damage;
         }
     }
 
+    public class Cheese : Item
+    {
+        public int mID = 2;
+        public Cheese()
+        {
+            Init("Cheese", "This is a block of cheese", 2);
+        }
+    }
+    public class Rock : Item
+    {
+        public int mID = 3;
+        public Rock()
+        {
+            Init("Rock", "This is a Rock", 2);
+        }
+    }
 }

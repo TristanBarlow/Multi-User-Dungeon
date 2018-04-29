@@ -12,23 +12,9 @@ using System.Collections.Concurrent;
 
 using MessageTypes;
 using Request;
-using Dungeon;
+using DungeonNamespace;
 using PlayerN;
 using Utilities;
-
-#if TARGET_LINUX
-using Mono.Data.Sqlite;
-using sqliteConnection = Mono.Data.Sqlite.SqliteConnection;
-using sqliteCommand = Mono.Data.Sqlite.SqliteCommand;
-using sqliteDataReader = Mono.Data.Sqlite.SqliteDataReader;
-#endif
-
-#if TARGET_WINDOWS
-using System.Data.SQLite;
-using sqliteConnection = System.Data.SQLite.SQLiteConnection;
-using sqliteCommand = System.Data.SQLite.SQLiteCommand;
-using sqliteDataReader = System.Data.SQLite.SQLiteDataReader;
-#endif
 
 namespace Server
 {
@@ -38,17 +24,19 @@ namespace Server
 
         static private int clientID = 1;
 
-        static private DungeonS Dungeon;
+        static private Dungeon Dungeon;
 
         static private RequestHandler RequestHandle;
 
         static private ConcurrentQueue<Action> RequestQueue = new ConcurrentQueue<Action>();
 
+        static private SqlWrapper sqlWrapper;
+
 
         static void SendDungeonInfo(Player player)
         {
             MapLayout ML = new MapLayout();
-            ML.mapInfo = Dungeon.DungeonStr;
+            ML.mapInfo = Dungeon.GetDungeonString();
             MemoryStream outStream = ML.WriteData();
 
             try
@@ -58,7 +46,7 @@ namespace Server
             catch
             {
                 Console.Write("problem sending");
-                RequestQueue.Enqueue(() => RemoveClientByPlayer(player));
+                RemoveClientByPlayer(player);
             }
         }
 
@@ -74,7 +62,7 @@ namespace Server
             }
             catch (System.Exception)
             {
-                RequestQueue.Enqueue(() => RemoveClientByPlayer(player));
+                RemoveClientByPlayer(player);
             }
         }
 
@@ -127,9 +115,9 @@ namespace Server
 
             String ClientName = " ";
 
-            Player player;
+            Player player = null;
 
-            while (!LoggedIn)
+            while (!LoggedIn && bQuit == false)
             {
                 try
                 {
@@ -148,18 +136,30 @@ namespace Server
                         if (m.mID == LoginMessage.ID)
                         {
                             LoginMessage LM = (LoginMessage)m;
-                            ClientName = LM.name;
-                            LoggedIn = true;
+                            player = new Player(LM.name, chatClient, RequestHandle.GetPlayerRandomRoom());
+                            Console.WriteLine("login recieved" + LM.name);
+                            lock (sqlWrapper)
+                            {
+                                if (sqlWrapper.AddPlayer(player, LM.password))
+                                {
+                                    Console.Write(" created new player");
+                                    LoggedIn = true;
+                                }
+                                else
+                                {
+                                    Console.Write("Failed to create player");
+                                }
+                            }
                         }
                     }
                 }
                 catch (Exception e)
                 {
+                    Console.WriteLine("Error loggin in: " + e);
+                    bQuit = true;
                     return;
                 }
             }
-
-            player = new Player(ClientName, chatClient, RequestHandle.GetPlayerRandomRoom());
 
             RequestQueue.Enqueue(() => AddNewPlayer(player));
 
@@ -269,16 +269,33 @@ namespace Server
             Socket serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
             //serverSocket.Bind(new IPEndPoint(IPAddress.Parse("46.101.88.130"), 8500));
-            //serverSocket.Bind(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8500));
-			serverSocket.Bind(new IPEndPoint(IPAddress.Parse("192.168.1.153"), 8500));
+            serverSocket.Bind(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8500));
+			//serverSocket.Bind(new IPEndPoint(IPAddress.Parse("192.168.1.153"), 8500));
             serverSocket.Listen(32);
 
             bool bQuit = false;
 
-            Console.WriteLine("Server");
+            Console.WriteLine("Should Create new Map?");
+            var response = Console.ReadLine();
 
-            Dungeon = new DungeonS();
-            Dungeon.Init(40,10);
+            sqlWrapper = new SqlWrapper();
+
+            if (response.ToLower() == "yes")
+            {
+                Dungeon = new Dungeon();
+                Dungeon.Init(40, 10);
+                sqlWrapper.WriteDungeon(Dungeon);
+            }
+            else
+            {
+                Dungeon = sqlWrapper.GetDungeon();
+                if (Dungeon.GetRoomList().Count < 1)
+                {
+                    Dungeon = new Dungeon();
+                    Dungeon.Init(40, 10);
+                    sqlWrapper.WriteDungeon(Dungeon);
+                }
+            }
 
             RequestHandle = new RequestHandler(ref Dungeon);
 
@@ -287,6 +304,7 @@ namespace Server
 
             while (!bQuit)
             {
+                Console.WriteLine("Waitting for a client");
                 Socket serverClient = serverSocket.Accept();
 
                 Thread myThread = new Thread(ReceiveClientProcess);

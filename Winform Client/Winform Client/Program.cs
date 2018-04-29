@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
+using System.Net;
+using System.Net.Sockets;
 
 namespace Winform_Client
 {
@@ -13,12 +15,12 @@ namespace Winform_Client
         [STAThread]
         static void Main()
         {
-
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            LoginScreen loginFrm = new LoginScreen();
-            loginFrm.Show();
-            Application.Run();
+            Form1 form = new Form1();
+       
+            Application.Run(form);
+
         }
     }
 }

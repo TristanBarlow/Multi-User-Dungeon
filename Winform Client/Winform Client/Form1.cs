@@ -25,12 +25,14 @@ namespace Winform_Client
         private Thread myThread;
 
         bool bQuit = false;
-        bool bConnected = false;
+        public bool bConnected = false;
         bool TestTheStress = false;
 
         List<String> currentClientList = new List<String>();
 
         List<int> numberOfClients = new List<int>();
+
+        LoginScreen loginScreen;
 
         int MapMoveSpeed = 10;
 
@@ -51,19 +53,20 @@ namespace Winform_Client
                     {
                         form.clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                         //form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("46.101.88.130"), 8500));
-                        //form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8500));
-                        form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("192.168.1.153"), 8500));
+                        form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8500));
+                        //form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("192.168.1.153"), 8500));
                         form.bConnected = true;
                         receiveThread = new Thread(ClientReceive);
+                        receiveThread.IsBackground = true;
                         receiveThread.Start(o);
-                        Thread.Sleep(100);
-                        SendNameChangeMessage("");
 
                     }
                     while ((form.bQuit == false) && (form.bConnected == true))
                     {
+                        loginScreen.Connected();
                         if (form.IsDisposed == true)
                         {
+
 
                             form.bQuit = true;
                             form.clientSocket.Close();
@@ -168,14 +171,9 @@ namespace Winform_Client
             }
         }
 
-        public Form1(String Name, String Password)
+        public Form1()
         {
             InitializeComponent();
-
-            myThread = new Thread(ClientProcess);
-            myThread.Start(this);
-
-            ClientName = Name;
 
             DGD = new DungeonDraw(this.DungeonGraphic);
 
@@ -311,7 +309,8 @@ namespace Winform_Client
         public void SendNameChangeMessage(String name)
         {
             LoginMessage nameMsg = new LoginMessage();
-            nameMsg.name = ClientName;
+            ClientName = name;
+            nameMsg.name = name;
             nameMsg.password = " ";
             MemoryStream outStream = nameMsg.WriteData();
             try
@@ -377,6 +376,20 @@ namespace Winform_Client
         private void Form1_Load(object sender, EventArgs e)
         {
 
+            myThread = new Thread(ClientProcess);
+            myThread.IsBackground = true;
+            myThread.Start(this);
+
+            DialogResult result;
+            loginScreen = new LoginScreen(this);
+            result = loginScreen.ShowDialog();
+            if (result != DialogResult.OK)
+            {
+                bQuit = true;
+                OnExit();
+                Application.Exit();
+            }
+
         }
 
         private void DungeonPaint(object sender, PaintEventArgs e)
@@ -388,7 +401,6 @@ namespace Winform_Client
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
             OnExit();
-            Environment.Exit(Environment.ExitCode);
             Application.Exit();
         }
     }
