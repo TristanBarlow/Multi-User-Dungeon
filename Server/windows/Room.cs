@@ -21,9 +21,28 @@ namespace DungeonNamespace
         public int east = -1;
         public int south = -1;
         public int west = -1;
+        private Random r = new Random();
+        public bool HasMoves = true;
+
+        public List<Vector2D> availableDirections = new List<Vector2D>();
 
         public Vector2D Position { set; get; }
-    
+
+        public Vector2D GetAvailableDirection()
+        {
+            if (availableDirections.Count < 1)
+            {
+                HasMoves = false;
+                return new Vector2D(0, 0);
+            }
+            else
+            {
+                Vector2D v = availableDirections[(r.Next(availableDirections.Count))];
+                availableDirections.Remove(v);
+                return v;
+            }
+
+        }
 
         public Room()
         {
@@ -34,22 +53,27 @@ namespace DungeonNamespace
         {
             name = Name;
             RoomIndex = index;
-            Item newItem = new Cheese();
-            inventory.AddItem(newItem);
-            inventory.AddItem(newItem);
-            Position = new Vector2D();
+            Init();
         }
 
         public Room(String name, String desc)
         {
             this.desc = desc;
             this.name = name;
+            Init();
+        }
+
+        public void Init()
+        {
             Item newItem = new Cheese();
-			RoomIndex = -1;
             inventory.AddItem(newItem);
             inventory.AddItem(newItem);
             Position = new Vector2D();
-    }
+            availableDirections.Add(Dungeon.NORTH);
+            availableDirections.Add(Dungeon.EAST);
+            availableDirections.Add(Dungeon.SOUTH);
+            availableDirections.Add(Dungeon.WEST);
+        }
 
         public int[] GetExitIndexs()
         {

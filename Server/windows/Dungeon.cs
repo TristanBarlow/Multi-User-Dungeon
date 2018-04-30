@@ -48,14 +48,11 @@ namespace DungeonNamespace
         public static Vector2D SOUTH = new Vector2D(0, -1);
         public static Vector2D WEST = new Vector2D(-1, 0);
 
-        public void Init(int size, int spread)
+        private static Random rand = new Random(); 
+
+        public void Init(int size, int spread, int minConnections)
         {
-           // roomMap = new Dictionary<string, Room>();
-            RoomList = GenerateDungeon(size, spread);
-            foreach (Room r in RoomList)
-            {
-               // roomMap.Add(r.name, r);
-            }
+            RoomList = GenerateDungeon(size, spread, minConnections);
             DungeonStr = GenerateDungeonString(RoomList);
         }
 
@@ -99,7 +96,7 @@ namespace DungeonNamespace
                 return returnString;
             }
 
-            Room currentRoom = RoomList[player.roomIndex];
+           Room currentRoom = RoomList[player.roomIndex];
 
             switch (input[0].ToLower())
             {
@@ -246,49 +243,24 @@ namespace DungeonNamespace
             return rStr;
         }
 
-        public static void MakeConnections(ref int i, int RoomLength, Vector2D direction, ref List<Room> rRooms, ref List<Vector2D> positions)
+        public static void MakeBranch(Room startRoom, Room endRoom, Vector2D direction, List<Room> usedRooms, List<Room> rRooms,  List<Vector2D> positions)
         {
             Vector2D opposite = direction.GetOpposite();
-            rRooms[0].AddConection(direction, i);
-            rRooms[i].AddConection(opposite, 0);
-
-            Vector2D pos = Vector2D.AddVectors(rRooms[0].Position, direction);
-            positions.Add(pos);
-            rRooms[i].Position = pos;
-            
-
-            int max = i + RoomLength;
-            while (i < max)
-            {
-                int ti = i - 1;
-                rRooms[i].AddConection(opposite, ti);
-                pos = Vector2D.AddVectors(rRooms[i].Position, direction);
-                positions.Add(pos);
-                rRooms[i+1].Position = pos;
-                rRooms[i].AddConection(direction, i + 1);
-                i++;
-            }
-
-            rRooms[i].AddConection(opposite, i - 1);
-            i++;
-        }
-
-        public static void MakeBranch(ref int i, int BranchStart, int NumberOfRooms, Vector2D direction, ref List<Room> rRooms, ref List<Vector2D> positions)
-        {
-            Vector2D opposite = direction.GetOpposite();
-            Vector2D pos = Vector2D.AddVectors(rRooms[BranchStart].Position, direction);
+            Vector2D pos = Vector2D.AddVectors(startRoom.Position, direction);
             if (!positions.Contains(pos))
             {
-                if (rRooms[BranchStart].AddConection(direction, i))
+                if (startRoom.AddConection(direction, endRoom.RoomIndex))
                 {
                     positions.Add(pos);
-                    rRooms[i].AddConection(opposite, BranchStart);
-                    i++;
+                    endRoom.Position = pos;
+                    endRoom.AddConection(opposite, startRoom.RoomIndex);
+                    usedRooms.Add(endRoom);
+                    rRooms.Remove(endRoom);
                 }
             }
         }
 
-        public static List<Room> GenerateDungeon(int size, int spread)
+        public static List<Room> GenerateDungeon(int size, int spread, int minConnections)
         {
             if (size < 4)
             {
@@ -296,8 +268,8 @@ namespace DungeonNamespace
             }
             size += 1;
             List<Room> rRooms = new List<Room>();
-            Random rand = new Random();
             List<Vector2D> usedPositions = new List<Vector2D>();
+            List<Room> usedRooms = new List<Room>();
 
 
             int iter = 0;
@@ -306,26 +278,35 @@ namespace DungeonNamespace
                 rRooms.Add(new Room("Room" + iter, iter));
                 iter++;
             }
-            int dungeonSize = (int)(size / spread) - 1;
 
-            int i = 1;
-            rRooms[0].Position = new Vector2D(0, 0);
-
-            MakeConnections(ref i, dungeonSize, NORTH, ref rRooms,ref usedPositions);
-            MakeConnections(ref i, dungeonSize, EAST, ref rRooms , ref usedPositions);
-            MakeConnections(ref i, dungeonSize, SOUTH, ref rRooms, ref usedPositions);
-            MakeConnections(ref i, dungeonSize, WEST, ref rRooms, ref usedPositions);
-
-            int RoomsLeftOver = rRooms.Count - i;
             Vector2D[] Dir = {NORTH, EAST, SOUTH, WEST};
 
-            while (i < rRooms.Count)
+            Room origin = rRooms[0];
+            rRooms.Remove(origin);
+            origin.Position = new Vector2D(0, 0);
+            usedRooms.Add(origin);
+
+            //MakeBranch(origin, rRooms[0], NORTH, usedRooms, rRooms, usedPositions);
+            //MakeBranch(origin, rRooms[0], EAST, usedRooms, rRooms, usedPositions);
+            //MakeBranch(origin, rRooms[0], SOUTH, usedRooms, rRooms, usedPositions);
+            //MakeBranch(origin, rRooms[0], WEST, usedRooms, rRooms, usedPositions);
+
+            int i = 0;
+            Vector2D badVec = new Vector2D(0, 0);
+            while (rRooms.Count > 1)
             {
-                MakeBranch(ref i, rand.Next(0, i), 0, Dir[rand.Next(0, 4)], ref rRooms,ref usedPositions);
+                int roomIndex = rand.Next(usedRooms.Count);
+
+                Vector2D dir = usedRooms[roomIndex].GetAvailableDirection();
+                if (!dir.Equals(badVec) && rand.NextDouble() >= 0.4)
+                {
+                    MakeBranch(usedRooms[roomIndex], rRooms[0], dir, usedRooms, rRooms, usedPositions);
+                }
             }
 
+
             // Console.Write(U.GenerateDungeonString(rRooms));
-            return rRooms;
+            return usedRooms;
         }
     }
 }

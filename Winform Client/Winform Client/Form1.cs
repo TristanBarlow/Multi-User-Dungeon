@@ -24,6 +24,9 @@ namespace Winform_Client
         public bool bConnected = false;
         bool TestTheStress = false;
 
+        private static String[] IP = { "127.0.0.1", "46.101.88.130", "192.168.1.153" };
+        private static int ipIndex = 0;
+
         List<String> currentClientList = new List<String>();
 
         List<int> numberOfClients = new List<int>();
@@ -75,9 +78,7 @@ namespace Winform_Client
                     if (bConnected == false)
                     {
                         form.clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                        //form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("46.101.88.130"), 8500));
-                        //form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8500));
-                        form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("192.168.1.153"), 8500));
+                        form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse(IP[ipIndex]), 8500));
                         form.bConnected = true;
                         form.loginScreen.Connected("Connected");
                         receiveThread = new Thread(ClientReceive);
