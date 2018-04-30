@@ -13,13 +13,13 @@ namespace DungeonNamespace
     {
         public int X { set; get; }
         public int Y { set; get; }
-        public Vector2D(int a, int b)
+		public Vector2D(int a, int b):this()
         {
             X = a;
             Y = b;
 
         }
-        public Vector2D(Vector2D v)
+        public Vector2D(Vector2D v):this()
         {
             X = v.X;
             Y = v.Y;

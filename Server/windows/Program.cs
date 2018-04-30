@@ -337,8 +337,8 @@ namespace Server
             Socket serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
             //serverSocket.Bind(new IPEndPoint(IPAddress.Parse("46.101.88.130"), 8500));
-            serverSocket.Bind(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8500));
-			//serverSocket.Bind(new IPEndPoint(IPAddress.Parse("192.168.1.153"), 8500));
+            //serverSocket.Bind(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8500));
+			serverSocket.Bind(new IPEndPoint(IPAddress.Parse("192.168.1.153"), 8500));
             serverSocket.Listen(32);
 
             bool bQuit = false;

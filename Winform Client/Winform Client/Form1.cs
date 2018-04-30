@@ -76,8 +76,8 @@ namespace Winform_Client
                     {
                         form.clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                         //form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("46.101.88.130"), 8500));
-                        form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8500));
-                        //form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("192.168.1.153"), 8500));
+                        //form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8500));
+                        form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse("192.168.1.153"), 8500));
                         form.bConnected = true;
                         form.loginScreen.Connected("Connected");
                         receiveThread = new Thread(ClientReceive);
