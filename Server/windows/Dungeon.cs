@@ -50,9 +50,9 @@ namespace DungeonNamespace
 
         private static Random rand = new Random(); 
 
-        public void Init(int size, int spread, int minConnections)
+        public void Init(int size)
         {
-            RoomList = GenerateDungeon(size, spread, minConnections);
+            RoomList = GenerateDungeon(size);
             DungeonStr = GenerateDungeonString(RoomList);
         }
 
@@ -260,7 +260,7 @@ namespace DungeonNamespace
             }
         }
 
-        public static List<Room> GenerateDungeon(int size, int spread, int minConnections)
+        public static List<Room> GenerateDungeon(int size)
         {
             if (size < 4)
             {
@@ -286,13 +286,12 @@ namespace DungeonNamespace
             origin.Position = new Vector2D(0, 0);
             usedRooms.Add(origin);
 
-            //MakeBranch(origin, rRooms[0], NORTH, usedRooms, rRooms, usedPositions);
-            //MakeBranch(origin, rRooms[0], EAST, usedRooms, rRooms, usedPositions);
-            //MakeBranch(origin, rRooms[0], SOUTH, usedRooms, rRooms, usedPositions);
-            //MakeBranch(origin, rRooms[0], WEST, usedRooms, rRooms, usedPositions);
+            MakeBranch(origin, rRooms[0], NORTH, usedRooms, rRooms, usedPositions);
+            MakeBranch(origin, rRooms[0], EAST, usedRooms, rRooms, usedPositions);
+            MakeBranch(origin, rRooms[0], SOUTH, usedRooms, rRooms, usedPositions);
+            MakeBranch(origin, rRooms[0], WEST, usedRooms, rRooms, usedPositions);
 
-            int i = 0;
-            Vector2D badVec = new Vector2D(0, 0);
+                Vector2D badVec = new Vector2D(0, 0);
             while (rRooms.Count > 1)
             {
                 int roomIndex = rand.Next(usedRooms.Count);

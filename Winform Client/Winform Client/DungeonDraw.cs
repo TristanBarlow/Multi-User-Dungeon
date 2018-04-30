@@ -278,10 +278,7 @@ namespace Winform_Client
 
         public void DrawClients(String str, String PlayerName)
         {
-            if (str == CurrentClientLocations)
-            {
-                return;
-            }
+
             CurrentClientLocations = str;
 
             String[] ClientLocations = str.Split('&');

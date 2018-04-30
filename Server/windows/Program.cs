@@ -36,6 +36,7 @@ namespace Server
         static private SqlWrapper sqlWrapper;
 
         private static String[] IP = { "127.0.0.1", "46.101.88.130", "192.168.1.153" };
+
         private static int ipIndex = 0;
 
 
@@ -237,6 +238,8 @@ namespace Server
 
             RequestQueue.Enqueue(() => SendDungeonInfo(player));
 
+            Thread.Sleep(300);
+
             RequestQueue.Enqueue(() => SendLocations());
 
             /// do command
@@ -351,7 +354,7 @@ namespace Server
             if (response.ToLower() == "yes")
             {
                 Dungeon = new Dungeon();
-                Dungeon.Init(100, 30, 2);
+                Dungeon.Init(100);
                 sqlWrapper.WriteDungeon(Dungeon);
             }
             else
@@ -360,7 +363,7 @@ namespace Server
                 if (Dungeon.GetRoomList().Count < 1)
                 {
                     Dungeon = new Dungeon();
-                    Dungeon.Init(100, 30, 2);
+                    Dungeon.Init(100);
                     sqlWrapper.WriteDungeon(Dungeon);
                 }
             }
