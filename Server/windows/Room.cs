@@ -21,7 +21,8 @@ namespace DungeonNamespace
         public int east = -1;
         public int south = -1;
         public int west = -1;
-        private bool Used = false;
+
+        public Vector2D Position { set; get; }
     
 
         public Room()
@@ -36,6 +37,7 @@ namespace DungeonNamespace
             Item newItem = new Cheese();
             inventory.AddItem(newItem);
             inventory.AddItem(newItem);
+            Position = new Vector2D();
         }
 
         public Room(String name, String desc)
@@ -46,8 +48,8 @@ namespace DungeonNamespace
 			RoomIndex = -1;
             inventory.AddItem(newItem);
             inventory.AddItem(newItem);
-
-        }
+            Position = new Vector2D();
+    }
 
         public int[] GetExitIndexs()
         {
@@ -55,26 +57,14 @@ namespace DungeonNamespace
             return rInt;
         }
 
-        public bool AddConection(int Direction, int indexOfRoom)
+        public bool AddConection(Vector2D Direction, int indexOfRoom)
         {
             if (indexOfRoom >= 0)
             {
-                switch (Direction)
-                {
-                    case 1:
-                        if (north == -1) { north = indexOfRoom; Used = true; return true; }
-                        break;
-                    case 2:
-                        if (east == -1) { east = indexOfRoom; Used = true; return true; }
-                        break;
-                    case -1:
-                        if (south == -1) { south = indexOfRoom; Used = true; return true; }
-                        break;
-                    case -2:
-                        if (west == -1) { west = indexOfRoom; Used = true; return true; }
-                        break;
-
-                }
+                if (Direction.Equals(Dungeon.NORTH) && north == -1) { north = indexOfRoom; return true; }
+                else if (Direction.Equals(Dungeon.EAST) && east == -1) { east = indexOfRoom; return true; }
+                else if (Direction.Equals(Dungeon.SOUTH) && south == -1) { south = indexOfRoom; return true; }
+                else if (Direction.Equals(Dungeon.WEST) && west == -1) { west = indexOfRoom; return true; }
             }
             return false;
         }
