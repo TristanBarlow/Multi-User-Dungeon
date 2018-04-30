@@ -97,10 +97,12 @@ namespace DungeonNamespace
         
         public String GetDescription()
         {
-            String returnString;
-            returnString = U.NewLineS(name) +
-                           U.NewLineS(desc)+
-                           ("Exits Are:");
+            String returnString = U.NewLineS(" ");
+            returnString =  U.NewLineS(name) +
+                            U.NewLineS(" ")+
+                            U.NewLineS(desc)+
+                            U.NewLineS(" ")+ 
+                            ("Exits Are:");
 
             if (north != -1) returnString += "North ";
             if (east != -1) returnString += "East ";
@@ -109,7 +111,7 @@ namespace DungeonNamespace
 
             returnString += U.NewLineS(" ");
 
-            returnString += inventory.GetIventoryDescription();
+            returnString += U.NewLineS(inventory.GetIventoryDescription());
 
             returnString += U.NewLineS(" ");
 

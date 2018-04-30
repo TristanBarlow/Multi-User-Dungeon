@@ -31,12 +31,7 @@
             this.buttonSend = new System.Windows.Forms.Button();
             this.textBox_Input = new System.Windows.Forms.TextBox();
             this.TextboxDungeon = new System.Windows.Forms.TextBox();
-            this.ButtonNorth = new System.Windows.Forms.Button();
-            this.ButtonEast = new System.Windows.Forms.Button();
-            this.ButtonSouth = new System.Windows.Forms.Button();
-            this.ButtonWest = new System.Windows.Forms.Button();
             this.DungeonGraphic = new System.Windows.Forms.PictureBox();
-            this.ChatBox = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.DungeonGraphic)).BeginInit();
             this.SuspendLayout();
             // 
@@ -44,9 +39,9 @@
             // 
             this.buttonSend.BackColor = System.Drawing.Color.Black;
             this.buttonSend.ForeColor = System.Drawing.Color.Lime;
-            this.buttonSend.Location = new System.Drawing.Point(726, 390);
+            this.buttonSend.Location = new System.Drawing.Point(352, 471);
             this.buttonSend.Name = "buttonSend";
-            this.buttonSend.Size = new System.Drawing.Size(90, 21);
+            this.buttonSend.Size = new System.Drawing.Size(90, 40);
             this.buttonSend.TabIndex = 0;
             this.buttonSend.Text = "Send";
             this.buttonSend.UseVisualStyleBackColor = false;
@@ -55,95 +50,38 @@
             // textBox_Input
             // 
             this.textBox_Input.BackColor = System.Drawing.Color.Black;
+            this.textBox_Input.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBox_Input.ForeColor = System.Drawing.Color.White;
-            this.textBox_Input.Location = new System.Drawing.Point(325, 390);
+            this.textBox_Input.Location = new System.Drawing.Point(11, 471);
+            this.textBox_Input.Multiline = true;
             this.textBox_Input.Name = "textBox_Input";
-            this.textBox_Input.Size = new System.Drawing.Size(384, 20);
+            this.textBox_Input.Size = new System.Drawing.Size(334, 40);
             this.textBox_Input.TabIndex = 2;
             // 
             // TextboxDungeon
             // 
             this.TextboxDungeon.BackColor = System.Drawing.SystemColors.InfoText;
-            this.TextboxDungeon.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.TextboxDungeon.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.TextboxDungeon.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.TextboxDungeon.ForeColor = System.Drawing.Color.White;
-            this.TextboxDungeon.Location = new System.Drawing.Point(578, 3);
+            this.TextboxDungeon.Location = new System.Drawing.Point(11, 8);
             this.TextboxDungeon.Multiline = true;
             this.TextboxDungeon.Name = "TextboxDungeon";
             this.TextboxDungeon.ReadOnly = true;
-            this.TextboxDungeon.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.TextboxDungeon.Size = new System.Drawing.Size(384, 290);
+            this.TextboxDungeon.Size = new System.Drawing.Size(431, 457);
             this.TextboxDungeon.TabIndex = 7;
-            // 
-            // ButtonNorth
-            // 
-            this.ButtonNorth.BackColor = System.Drawing.Color.Black;
-            this.ButtonNorth.ForeColor = System.Drawing.Color.Lime;
-            this.ButtonNorth.Location = new System.Drawing.Point(1, 388);
-            this.ButtonNorth.Name = "ButtonNorth";
-            this.ButtonNorth.Size = new System.Drawing.Size(75, 23);
-            this.ButtonNorth.TabIndex = 8;
-            this.ButtonNorth.Text = "North";
-            this.ButtonNorth.UseVisualStyleBackColor = false;
-            this.ButtonNorth.Click += new System.EventHandler(this.ButtonNorth_Click);
-            // 
-            // ButtonEast
-            // 
-            this.ButtonEast.BackColor = System.Drawing.Color.Black;
-            this.ButtonEast.ForeColor = System.Drawing.Color.Lime;
-            this.ButtonEast.Location = new System.Drawing.Point(163, 388);
-            this.ButtonEast.Name = "ButtonEast";
-            this.ButtonEast.Size = new System.Drawing.Size(75, 23);
-            this.ButtonEast.TabIndex = 9;
-            this.ButtonEast.Text = "East";
-            this.ButtonEast.UseVisualStyleBackColor = false;
-            this.ButtonEast.Click += new System.EventHandler(this.ButtonEast_Click);
-            // 
-            // ButtonSouth
-            // 
-            this.ButtonSouth.BackColor = System.Drawing.Color.Black;
-            this.ButtonSouth.ForeColor = System.Drawing.Color.Lime;
-            this.ButtonSouth.Location = new System.Drawing.Point(244, 388);
-            this.ButtonSouth.Name = "ButtonSouth";
-            this.ButtonSouth.Size = new System.Drawing.Size(75, 23);
-            this.ButtonSouth.TabIndex = 10;
-            this.ButtonSouth.Text = "South";
-            this.ButtonSouth.UseVisualStyleBackColor = false;
-            this.ButtonSouth.Click += new System.EventHandler(this.ButtonSouth_Click);
-            // 
-            // ButtonWest
-            // 
-            this.ButtonWest.BackColor = System.Drawing.Color.Black;
-            this.ButtonWest.ForeColor = System.Drawing.Color.Lime;
-            this.ButtonWest.Location = new System.Drawing.Point(82, 388);
-            this.ButtonWest.Name = "ButtonWest";
-            this.ButtonWest.Size = new System.Drawing.Size(75, 23);
-            this.ButtonWest.TabIndex = 11;
-            this.ButtonWest.Text = "West";
-            this.ButtonWest.UseVisualStyleBackColor = false;
-            this.ButtonWest.Click += new System.EventHandler(this.ButtonWest_Click);
             // 
             // DungeonGraphic
             // 
             this.DungeonGraphic.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.DungeonGraphic.Location = new System.Drawing.Point(1, 3);
+            this.DungeonGraphic.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.DungeonGraphic.ErrorImage = null;
+            this.DungeonGraphic.Location = new System.Drawing.Point(448, 8);
             this.DungeonGraphic.Name = "DungeonGraphic";
-            this.DungeonGraphic.Size = new System.Drawing.Size(561, 378);
+            this.DungeonGraphic.Size = new System.Drawing.Size(624, 503);
             this.DungeonGraphic.TabIndex = 16;
             this.DungeonGraphic.TabStop = false;
             this.DungeonGraphic.Paint += new System.Windows.Forms.PaintEventHandler(this.DungeonPaint);
-            // 
-            // ChatBox
-            // 
-            this.ChatBox.BackColor = System.Drawing.SystemColors.GrayText;
-            this.ChatBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.ChatBox.ForeColor = System.Drawing.Color.White;
-            this.ChatBox.Location = new System.Drawing.Point(568, 299);
-            this.ChatBox.Multiline = true;
-            this.ChatBox.Name = "ChatBox";
-            this.ChatBox.ReadOnly = true;
-            this.ChatBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.ChatBox.Size = new System.Drawing.Size(394, 82);
-            this.ChatBox.TabIndex = 17;
             // 
             // Form1
             // 
@@ -151,13 +89,8 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Black;
-            this.ClientSize = new System.Drawing.Size(969, 418);
-            this.Controls.Add(this.ChatBox);
+            this.ClientSize = new System.Drawing.Size(1082, 518);
             this.Controls.Add(this.DungeonGraphic);
-            this.Controls.Add(this.ButtonWest);
-            this.Controls.Add(this.ButtonSouth);
-            this.Controls.Add(this.ButtonEast);
-            this.Controls.Add(this.ButtonNorth);
             this.Controls.Add(this.TextboxDungeon);
             this.Controls.Add(this.textBox_Input);
             this.Controls.Add(this.buttonSend);
@@ -179,12 +112,7 @@
         private System.Windows.Forms.Button buttonSend;
         private System.Windows.Forms.TextBox textBox_Input;
         private System.Windows.Forms.TextBox TextboxDungeon;
-        private System.Windows.Forms.Button ButtonNorth;
-        private System.Windows.Forms.Button ButtonEast;
-        private System.Windows.Forms.Button ButtonSouth;
-        private System.Windows.Forms.Button ButtonWest;
         private System.Windows.Forms.PictureBox DungeonGraphic;
-        private System.Windows.Forms.TextBox ChatBox;
     }
 }
 

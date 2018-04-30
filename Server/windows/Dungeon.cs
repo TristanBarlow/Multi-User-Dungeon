@@ -83,6 +83,19 @@ namespace DungeonNamespace
             p.SetRoom(newRoom);
         }
 
+        private String HelpMessage()
+        {
+        return U.NewLineS("Commands are ....") +
+               U.NewLineS("help - for this screen") +
+               U.NewLineS("look - to look around") +
+               U.NewLineS("go [north | south | east | west]  - to travel between locations") +
+               U.NewLineS("graf [mesage] to add grafiti to your current room") +
+               U.NewLineS("pickup [name] to pick up the item of that name in the room") +
+               U.NewLineS("drop [name] to drop the item of that name into the room") +
+               U.NewLineS("inventory will look at the items you have collected") +
+               U.NewLineS("Press any key to continue");
+        }
+
         public String PlayerAction(String action,Player player)
 
         {
@@ -102,15 +115,7 @@ namespace DungeonNamespace
             {
                 case "help":
                     Console.Clear();
-                    returnString = U.NewLineS("Commands are ....") +
-                                   U.NewLineS("help - for this screen") +
-                                   U.NewLineS("look - to look around") +
-                                   U.NewLineS("go [north | south | east | west]  - to travel between locations") +
-                                   U.NewLineS("graf [mesage] to add grafiti to your current room") +
-                                   U.NewLineS("pickup [name] to pick up the item of that name in the room")+
-                                   U.NewLineS("drop [name] to drop the item of that name into the room")+
-                                   U.NewLineS("inventory will look at the items you have collected")+
-                                   U.NewLineS("Press any key to continue");
+                    returnString = HelpMessage();
                     break;
 
                 case "look":
@@ -193,9 +198,7 @@ namespace DungeonNamespace
 
                 default:
                     //handle error
-                    returnString = U.NewLineS("\nERROR")+
-                                   U.NewLineS("\nCan not " + input)+
-                                   U.NewLineS("\nPress any key to continue");
+                    returnString = U.NewLineS("\nERROR") + HelpMessage();
                     break;
             }
             if (returnString != "")

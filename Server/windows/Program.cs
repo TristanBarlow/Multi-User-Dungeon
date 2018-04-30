@@ -234,11 +234,15 @@ namespace Server
 
             RequestQueue.Enqueue(() => AddNewPlayer(player));
 
+            Thread.Sleep(100);
+
             RequestQueue.Enqueue(() => DungeonAction("look", player));
+
+            Thread.Sleep(100);
 
             RequestQueue.Enqueue(() => SendDungeonInfo(player));
 
-            Thread.Sleep(300);
+            Thread.Sleep(100);
 
             RequestQueue.Enqueue(() => SendLocations());
 

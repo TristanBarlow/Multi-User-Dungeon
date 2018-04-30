@@ -100,8 +100,7 @@ namespace Winform_Client
                 }
                 catch (System.Exception)
                 {
-                    try { form.AddText(U.NewLineS("No server!")); }
-                    catch { }
+                    
                 }
                 Thread.Sleep(500);
             }
@@ -110,8 +109,6 @@ namespace Winform_Client
         private void ClientReceive(Object o)
         {
             Form1 form = (Form1)o;
-
-            form.AddText("Connected to server");
 
             while (form.bConnected == true)
             {
@@ -200,24 +197,6 @@ namespace Winform_Client
                     DGD.HasUsers = true;
                     DGD.DrawClients(s, ClientName);
                 }
-            }
-        }
-
-        private void AddText(String s)
-        {
-
-            if (ChatBox.InvokeRequired)
-            {
-
-                try { Invoke(new AddTextDelegate(AddText), new object[] { s }); }
-                catch { Application.Exit(); }
-
-            }
-            else
-            {
-
-                ChatBox.AppendText(U.NewLineS(s));
-
             }
         }
 
@@ -391,28 +370,30 @@ namespace Winform_Client
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
-            String m;
-            switch (e.KeyCode)
+            if (!textBox_Input.ContainsFocus)
             {
-                case Keys.Up:
-                    DGD.MoveY(MapMoveSpeed);
-                    break;
-                case Keys.Left:
-                    DGD.MoveX(MapMoveSpeed);
-                    break;
-                case Keys.Down:
-                    DGD.MoveY(-MapMoveSpeed);
-                    break;
-                case Keys.Right:
-                    DGD.MoveX(-MapMoveSpeed);
-                    break;
-                case Keys.S:
-                    DGD.ChangeScale(-1);
-                    break;
-                case Keys.W:
-                    DGD.ChangeScale(1);
-                    break;
+                switch (e.KeyCode)
+                {
+                    case Keys.Up:
+                        DGD.MoveY(MapMoveSpeed);
+                        break;
+                    case Keys.Left:
+                        DGD.MoveX(MapMoveSpeed);
+                        break;
+                    case Keys.Down:
+                        DGD.MoveY(-MapMoveSpeed);
+                        break;
+                    case Keys.Right:
+                        DGD.MoveX(-MapMoveSpeed);
+                        break;
+                    case Keys.S:
+                        DGD.ChangeScale(-1);
+                        break;
+                    case Keys.W:
+                        DGD.ChangeScale(1);
+                        break;
 
+                }
             }
         }
 

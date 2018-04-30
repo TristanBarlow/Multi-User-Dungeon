@@ -58,11 +58,13 @@
             // 
             // textBox1
             // 
+            this.textBox1.AccessibleRole = System.Windows.Forms.AccessibleRole.None;
             this.textBox1.BackColor = System.Drawing.SystemColors.Control;
             this.textBox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textBox1.Location = new System.Drawing.Point(28, 12);
             this.textBox1.Name = "textBox1";
+            this.textBox1.ReadOnly = true;
             this.textBox1.ShortcutsEnabled = false;
             this.textBox1.Size = new System.Drawing.Size(140, 31);
             this.textBox1.TabIndex = 2;
@@ -76,6 +78,7 @@
             this.textBox2.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textBox2.Location = new System.Drawing.Point(28, 124);
             this.textBox2.Name = "textBox2";
+            this.textBox2.ReadOnly = true;
             this.textBox2.ShortcutsEnabled = false;
             this.textBox2.Size = new System.Drawing.Size(140, 31);
             this.textBox2.TabIndex = 4;
@@ -96,6 +99,7 @@
             this.ConnectionStatus.ForeColor = System.Drawing.Color.Red;
             this.ConnectionStatus.Location = new System.Drawing.Point(13, 84);
             this.ConnectionStatus.Name = "ConnectionStatus";
+            this.ConnectionStatus.ReadOnly = true;
             this.ConnectionStatus.Size = new System.Drawing.Size(178, 13);
             this.ConnectionStatus.TabIndex = 5;
             this.ConnectionStatus.Text = "No Server";
@@ -108,6 +112,7 @@
             this.LoginError.ForeColor = System.Drawing.Color.Red;
             this.LoginError.Location = new System.Drawing.Point(13, 103);
             this.LoginError.Name = "LoginError";
+            this.LoginError.ReadOnly = true;
             this.LoginError.Size = new System.Drawing.Size(178, 13);
             this.LoginError.TabIndex = 6;
             this.LoginError.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
