@@ -109,6 +109,7 @@ namespace Server
             if (player.GetHasMoved())
             {
                 SendLocations();
+                DatabaseQueue.Enqueue(() => sqlWrapper.WritePlayer(player));
             }
             
             SendDungeonResponse(player, dungeonResponse);

@@ -279,9 +279,20 @@ namespace DungeonNamespace
             while (rRooms.Count < size)
             {
                 Room r = new Room("Room" + iter, iter);
-                r.GetInventory().AddItem(gol.GetRandomItem());
-                r.GetInventory().AddItem(gol.GetRandomItem());
-                r.GetInventory().AddItem(gol.GetRandomWeapon());
+
+                KeyValuePair<String, String> RoomDesc = gol.GetRandomRoom();
+
+                r.name = RoomDesc.Key;
+                r.desc = RoomDesc.Value;
+
+                while (rand.NextDouble() <= 0.4)
+                {
+                    r.GetInventory().AddItem(gol.GetRandomItem());
+                }
+                while (rand.NextDouble() <= 0.2)
+                {
+                    r.GetInventory().AddItem(gol.GetRandomWeapon());
+                }
                 rRooms.Add(r);
                 iter++;
             }

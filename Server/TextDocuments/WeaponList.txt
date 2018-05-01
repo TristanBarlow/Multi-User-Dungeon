@@ -9,4 +9,6 @@
 
 &Gold Sword, its a Nice Gold sword, 15, w4 &
 
+&Lizzys Witt, The sharpest thing in exsistance, 200, w5 &
+
 

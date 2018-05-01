@@ -147,8 +147,8 @@ namespace Server
 
            new sqliteCommand("drop table if exists " + DungeonName, DungeonDatabase).ExecuteNonQuery();
 
-            new sqliteCommand("create table "+ DungeonName + " (name varchar(30), " +
-                  "description varchar(150), rIndex int , north int , " +
+            new sqliteCommand("create table "+ DungeonName + " (name varchar(50), " +
+                  "description varchar(300), rIndex int , north int , " +
                   "east int, south int, west int, inventory varchar(300))", DungeonDatabase).ExecuteNonQuery();
 
 
@@ -216,9 +216,9 @@ namespace Server
         public void WriteRoom(Room r)
         {
             var command = new sqliteCommand(DungeonDatabase);
-            command.CommandText = "update " + DungeonName + " set inventory = :inv where name=:id";
+            command.CommandText = "update " + DungeonName + " set inventory = :inv where rIndex=:id";
             command.Parameters.Add("inv", DbType.String).Value = r.GetInventory().GetInventoryID();
-            command.Parameters.Add("id", DbType.String).Value = r.name;
+            command.Parameters.Add("id", DbType.String).Value = r.RoomIndex;
             try
             {
                 command.ExecuteNonQuery();

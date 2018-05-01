@@ -11,6 +11,8 @@ namespace DungeonNamespace
         private Dictionary<String, Item> AllAvailableItems = new Dictionary<String, Item>();
         private Dictionary<String, Weapon> AllAvailableWeapons = new Dictionary<String, Weapon>();
 
+        private Dictionary<String, String> RoomsAndDescriptions = new Dictionary<String, String>();
+
         private Random rand = new Random();
 
         public GameObjectList()
@@ -35,6 +37,17 @@ namespace DungeonNamespace
             {
                 ParseWeaponFile(weaponPath);
             }
+
+            String roomPath = "RoomList.txt";
+            if (!File.Exists(roomPath))
+            {
+                Console.WriteLine("Could not find weapon list");
+            }
+            else
+            {
+                ParseRoomFile(roomPath);
+            }
+
 
         }
         private void ParseWeaponFile(String path)
@@ -72,6 +85,31 @@ namespace DungeonNamespace
                     }
                 }
             }
+        }
+
+        private void ParseRoomFile(String path)
+        {
+            // Open the file to read from.
+            string readText = File.ReadAllText(path);
+            readText = readText.Replace("\r\n", "");
+
+            String[] items = readText.Split('&');
+            {
+                for (int i = 1; i < items.Length; i++)
+                {
+                    String[] w = items[i].Split(',');
+                    if (w.Length > 1)
+                    {
+                        RoomsAndDescriptions.Add(w[0],w[1]);
+                    }
+                }
+            }
+        }
+
+        public KeyValuePair<String, String> GetRandomRoom()
+        {
+            int index = rand.Next(0, RoomsAndDescriptions.Count);
+            return RoomsAndDescriptions.ElementAt(index);
         }
 
         public Weapon GetWeapon(String wID)
