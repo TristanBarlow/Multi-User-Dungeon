@@ -34,6 +34,9 @@ namespace Server
        public SqlWrapper(GameObjectList objectList)
         {
             gameObjectList = objectList;
+			sqliteCommand cmd = new sqliteCommand ();
+			String disableRollback  = "PRAGMA journal_mode = OFF";
+
 
             DungeonDatabase = new sqliteConnection("Data Source=Dungeon" + ";Version=3;FailIfMissing=True");
             try
@@ -47,8 +50,11 @@ namespace Server
                 DungeonDatabase = new sqliteConnection("Data Source=Dungeon" + ";Version=3;FailIfMissing=True");
                 DungeonDatabase.Open();
             }
+			cmd.Connection = DungeonDatabase;
+			cmd.CommandText = disableRollback;
+			cmd.ExecuteNonQuery ();
 
-
+			cmd = new sqliteCommand();
             PlayerDatabase = new sqliteConnection("Data Source=Players" + ";Version=3;FailIfMissing=True");
             try
             {
@@ -61,6 +67,9 @@ namespace Server
                 PlayerDatabase = new sqliteConnection("Data Source=Players" + ";Version=3;FailIfMissing=True");
                 PlayerDatabase.Open();
             }
+			cmd.Connection = PlayerDatabase;
+			cmd.CommandText = disableRollback;
+			cmd.ExecuteNonQuery ();
 
         }
 

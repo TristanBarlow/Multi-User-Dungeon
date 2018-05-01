@@ -25,7 +25,7 @@ namespace Winform_Client
         bool TestTheStress = false;
 
         private static String[] IP = { "127.0.0.1", "46.101.88.130", "192.168.1.153" };
-        private static int ipIndex = 0;
+        private static int ipIndex = 1;
 
         List<String> currentClientList = new List<String>();
 
@@ -33,7 +33,7 @@ namespace Winform_Client
 
         ConcurrentQueue<Action> DrawQueue = new ConcurrentQueue<Action>();
 
-        private delegate void AddTextDelegate(String s);
+        private delegate void AddTextDelegate(String s, bool newMessage);
 
         LoginScreen loginScreen;
 
@@ -136,7 +136,7 @@ namespace Winform_Client
                                     {
                                         DungeonResponse dSponse = (DungeonResponse)m;
 
-                                        form.AddDungeonText(dSponse.response);
+                                        form.AddDungeonText(dSponse.response, true);
                                     }
                                     break;
                                 case MapLayout.ID:
@@ -165,6 +165,12 @@ namespace Winform_Client
                                         DrawQueue.Enqueue(() => UpdatePlayerLocations(PL.LocationString));
                                     }
                                     break;
+                                case UpdateChat.ID:
+                                    {
+                                        UpdateChat UC = (UpdateChat)m;
+                                        form.AddDungeonText(UC.message, false);
+                                    }
+                                    break;
                                 default:
                                     break;
                             }
@@ -177,7 +183,7 @@ namespace Winform_Client
                     Console.WriteLine(U.NewLineS("Lost server!"));
                     Application.Restart();
                     Environment.Exit(0);
-
+                    
                 }
 
             }
@@ -201,15 +207,15 @@ namespace Winform_Client
             }
         }
 
-        private void AddDungeonText(String s)
+        private void AddDungeonText(String s, bool newMessage)
         {
             if (TextboxDungeon.InvokeRequired)
             {
-                Invoke(new AddTextDelegate(AddDungeonText), new object[] { s });
+                Invoke(new AddTextDelegate(AddDungeonText), new object[] { s, newMessage });
             }
             else
             {
-                TextboxDungeon.Clear();
+                if(newMessage)TextboxDungeon.Clear();
                 TextboxDungeon.AppendText(U.NewLineS(s));
             }
         }
@@ -257,6 +263,7 @@ namespace Winform_Client
             if (TestTheStress)
             {
                 Thread stressThread = new Thread(StressTest);
+                stressThread.IsBackground = true;
                 stressThread.Start();
             }
             if ( (textBox_Input.Text.Length > 0) && (clientSocket != null))

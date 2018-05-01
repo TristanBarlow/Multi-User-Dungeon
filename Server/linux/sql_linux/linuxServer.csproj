@@ -55,6 +55,9 @@
     <Compile Include="..\..\windows\Dungeon.cs">
       <Link>Dungeon.cs</Link>
     </Compile>
+    <Compile Include="..\..\windows\GameObjectLoader.cs">
+      <Link>GameObjectLoader.cs</Link>
+    </Compile>
     <Compile Include="..\..\windows\Item.cs">
       <Link>Item.cs</Link>
     </Compile>

@@ -41,7 +41,7 @@ namespace DungeonNamespace
             String roomPath = "RoomList.txt";
             if (!File.Exists(roomPath))
             {
-                Console.WriteLine("Could not find weapon list");
+                Console.WriteLine("Could not find room list");
             }
             else
             {

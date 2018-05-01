@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using MessageTypes;
 using Utilities;
 using PlayerN;
+using System.IO;
 
 namespace DungeonNamespace
 {
@@ -17,6 +18,7 @@ namespace DungeonNamespace
         public String desc = " A description";
         public List<String> graffitiList = new List<String>();
         private Inventory inventory = new Inventory();
+        private List<Player> players = new List<Player>();
         public int north = -1;
         public int east = -1;
         public int south = -1;
@@ -99,6 +101,46 @@ namespace DungeonNamespace
         }
 
         public void AddGraf(String graff){ graffitiList.Add(graff);}
+
+        public void AddPlayer(Player p)
+        {
+            players.Add(p);
+            UpdatePlayers();
+        }
+
+        private void SendBufferToPlayers(MemoryStream ms)
+        {
+            foreach (Player p in players)
+            {
+                try
+                {
+                    p.socket.Send(ms.GetBuffer());
+                }
+                catch (System.Exception ex)
+                {
+                    Console.WriteLine("Error sending chat message to player: " + p.PlayerName + ex);
+                }
+
+            }
+        }
+
+        public void UpdatePlayers()
+        {
+            DungeonResponse update = new DungeonResponse();
+            update.response = GetDescription();
+            MemoryStream outStream = update.WriteData();
+            SendBufferToPlayers(outStream);
+           
+        }
+
+        public void RemovePlayer(Player p)
+        {
+            if (players.Contains(p))
+            {
+                players.Remove(p);
+                UpdatePlayers();
+            }
+        }
         
         public String GetDescription()
         {
@@ -131,7 +173,26 @@ namespace DungeonNamespace
                 returnString += U.NewLineS("no Graffiti Be the first!!!");
             }
 
+            returnString += U.NewLineS("");
+
+            if (players.Count > 0)
+            {
+                returnString += U.NewLineS("Players in Room: ");
+                foreach (Player p in players)
+                {
+                    returnString += p.PlayerName + "  ";
+                }
+            }
+
             return returnString;
+        }
+
+        public void PlayerSpoke(Player player, String msg)
+        {
+            UpdateChat said = new UpdateChat();
+            said.message = player.PlayerName + " said : " + msg;
+            MemoryStream outStream = said.WriteData();
+            SendBufferToPlayers(outStream);
         }
 
         public String GetGraff()

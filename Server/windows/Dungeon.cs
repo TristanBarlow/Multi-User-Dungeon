@@ -80,7 +80,9 @@ namespace DungeonNamespace
 
         private void MovePlayer(Player p, Room newRoom)
         {
+            p.GetRoom().RemovePlayer(p);
             p.SetRoom(newRoom);
+            p.GetRoom().AddPlayer(p);
         }
 
         private String HelpMessage()
@@ -148,7 +150,7 @@ namespace DungeonNamespace
 
                 case "drop":
                     {
-                        String itemName = input[1];
+                        String itemName = action.Remove(0, input[0].Count() + 1).ToLower();
                         Item tempItem = player.GetInventory().TransfereItem(itemName);
                         if (tempItem != null)
                         {
@@ -166,6 +168,12 @@ namespace DungeonNamespace
                     returnString += U.NewLineS("Inventory:");
                     returnString += player.GetInventory().GetIventoryDescription();
                     break;
+
+                case "say":
+                    player.GetRoom().PlayerSpoke(player, action.Remove(0, input[0].Count() + 1).ToLower());
+                    returnString = "";
+                    break;
+                    
 
                 case "go":
                     // is arg[1] sensible?
@@ -201,15 +209,7 @@ namespace DungeonNamespace
                     returnString = U.NewLineS("\nERROR") + HelpMessage();
                     break;
             }
-            if (returnString != "")
-            {
-                return returnString;
-            }
-            else
-            {
-                returnString = U.NewLineS("welp");
-                return returnString;
-            }
+            return returnString;
 
         }
 
@@ -285,13 +285,17 @@ namespace DungeonNamespace
                 r.name = RoomDesc.Key;
                 r.desc = RoomDesc.Value;
 
-                while (rand.NextDouble() <= 0.4)
+				double i = rand.NextDouble ();
+                while (i <= 0.6)
                 {
                     r.GetInventory().AddItem(gol.GetRandomItem());
+					i = rand.NextDouble ();
                 }
-                while (rand.NextDouble() <= 0.2)
+				i = rand.NextDouble ();
+                while (i <= 0.2)
                 {
                     r.GetInventory().AddItem(gol.GetRandomWeapon());
+					i = rand.NextDouble ();
                 }
                 rRooms.Add(r);
                 iter++;

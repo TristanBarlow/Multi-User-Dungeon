@@ -24,7 +24,6 @@ namespace PlayerN
 
         private bool moved = false;
 
-        private bool hasSpoken = false;
         private String say = "&";
 
         public int roomIndex = -1;
@@ -48,24 +47,6 @@ namespace PlayerN
             if (moved)
             {
                 moved = false;
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        public void SetHasSpoken(String speech)
-        {
-            say = speech;
-            hasSpoken = true;
-        }
-        public bool GetHasSpoken()
-        {
-            if (hasSpoken)
-            {
-                hasSpoken = false;
                 return true;
             }
             else

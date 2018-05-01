@@ -39,7 +39,7 @@ namespace Server
 
         private static String[] IP = { "127.0.0.1", "46.101.88.130", "192.168.1.153" };
 
-        private static int ipIndex = 0;
+        private static int ipIndex = 1;
 
 
         static void SendDungeonInfo(Player player)
@@ -89,6 +89,7 @@ namespace Server
 
         static void RemoveClientByPlayer(Player p)
         {
+            p.GetRoom().RemovePlayer(p);
             if (p != null)
             {
                 lock (sqlWrapper)
@@ -102,9 +103,12 @@ namespace Server
         static void DungeonAction(String dungMsg, Player player)
         { 
             String dungeonResponse  = RequestHandle.PlayerAction(dungMsg, player);
+            if (dungeonResponse == "") return;
+
             if (player.GetRoom().GetHasChanged())
             {
                 DatabaseQueue.Enqueue(() => sqlWrapper.WriteRoom(player.GetRoom().Copy()));
+				DatabaseQueue.Enqueue(() => sqlWrapper.WritePlayer(player));
             }
             if (player.GetHasMoved())
             {
@@ -117,14 +121,17 @@ namespace Server
 
         static void AddNewPlayer(Player p)
         {
+            Room r;
             if (p.roomIndex == -1)
             {
-                p.SetRoom(Dungeon.GetRandomRoom());
+                r = Dungeon.GetRandomRoom();
             }
             else
             {
-                p.SetRoom(Dungeon.GetRoomList()[p.roomIndex]);
+                r = Dungeon.GetRoomList()[p.roomIndex];
             }
+            p.SetRoom(r);
+            r.AddPlayer(p);
             clientList.Add(p);
         }
 
@@ -240,6 +247,8 @@ namespace Server
 
             if (bQuit == true) return;
 
+            player.socket = chatClient;
+
             RequestQueue.Enqueue(() => AddNewPlayer(player));
 
             Thread.Sleep(100);
@@ -281,7 +290,6 @@ namespace Server
                                     {
                                         DungeonCommand dungMsg = (DungeonCommand)m;
                                         RequestQueue.Enqueue(() => DungeonAction(dungMsg.command, player));
-                                        Console.Write("message recieved");
                                     }
                                     break;
                                 case MapLayout.ID:
@@ -410,9 +418,9 @@ namespace Server
 
             while (!bQuit)
             {
-                Console.WriteLine("Waitting for a client");
+                Console.WriteLine("Waitting for a client" + clientID);
                 Socket serverClient = serverSocket.Accept();
-
+            
                 Thread myThread = new Thread(ReceiveClientProcess);
                 myThread.IsBackground = true;
                 myThread.Start(serverClient);
