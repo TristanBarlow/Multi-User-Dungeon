@@ -16,13 +16,15 @@ namespace DungeonNamespace
         public String name = "";
         public String desc = " A description";
         public List<String> graffitiList = new List<String>();
-        public Inventory inventory = new Inventory();
+        private Inventory inventory = new Inventory();
         public int north = -1;
         public int east = -1;
         public int south = -1;
         public int west = -1;
         private Random r = new Random();
         public bool HasMoves = true;
+
+        private bool HasChanged = false;
 
         public List<Vector2D> availableDirections = new List<Vector2D>();
 
@@ -63,11 +65,14 @@ namespace DungeonNamespace
             Init();
         }
 
+        public Inventory GetInventory()
+        {
+            HasChanged = true;
+            return inventory;
+        }
+
         public void Init()
         {
-            Item newItem = new Cheese();
-            inventory.AddItem(newItem);
-            inventory.AddItem(newItem);
             Position = new Vector2D();
             availableDirections.Add(Dungeon.NORTH);
             availableDirections.Add(Dungeon.EAST);
@@ -109,11 +114,9 @@ namespace DungeonNamespace
             if (south != -1) returnString += "South ";
             if (west != -1) returnString += "West ";
 
-            returnString += U.NewLineS(" ");
+            returnString += U.NewLineS("");
 
             returnString += U.NewLineS(inventory.GetIventoryDescription());
-
-            returnString += U.NewLineS(" ");
 
             returnString += ("Graffiti: ");
             if (graffitiList.Count() != 0)
@@ -147,6 +150,29 @@ namespace DungeonNamespace
             {
                 return U.NewLineS("no Graffiti");
             }
+        }
+
+        public Room Copy()
+        {
+            Room r = new Room(name, RoomIndex);
+            r.name = name;
+            r.desc = desc;
+            r.north = north;
+            r.east = east;
+            r.south = south;
+            r.west = west;
+            r.inventory = inventory;
+            return r;
+        }
+
+        public bool GetHasChanged()
+        {
+            if (HasChanged)
+            {
+                HasChanged = false;
+                return true;
+            }
+            else { return false; }
         }
 
     }

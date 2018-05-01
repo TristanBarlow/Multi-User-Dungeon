@@ -1,0 +1,12 @@
+%Items%
+%Name, Inspect, ID%
+
+&Rock, its a rock, i1 &
+
+&Cheese, its a cheese, i2 &
+
+&Door Hanlde, its a door handle, i3 &
+
+&Laptop, its a laptop , i4 &
+
+

@@ -24,14 +24,17 @@ namespace Server
 {
     class SqlWrapper
     {
-		sqliteConnection DungeonDatabase = null;
-        sqliteConnection PlayerDatabase = null;
+		private sqliteConnection DungeonDatabase = null;
+        private sqliteConnection PlayerDatabase = null;
 
-        String DungeonName = "DungeonTable";
-        String PlayersName = "PlayerTable";
+        private String DungeonName = "DungeonTable";
+        private String PlayersName = "PlayerTable";
+        private GameObjectList gameObjectList;
 
-       public SqlWrapper()
+       public SqlWrapper(GameObjectList objectList)
         {
+            gameObjectList = objectList;
+
             DungeonDatabase = new sqliteConnection("Data Source=Dungeon" + ";Version=3;FailIfMissing=True");
             try
             {
@@ -64,7 +67,7 @@ namespace Server
         public bool AddPlayer(Player tempPlayer, String password)
         {
             new sqliteCommand("create table if not exists " + PlayersName + " (name varchar(30), " +
-                  "password varchar(150), rIndex int)", PlayerDatabase).ExecuteNonQuery();
+                  "password varchar(150), rIndex int, inventory varchar(300))", PlayerDatabase).ExecuteNonQuery();
 
             var command = new sqliteCommand(PlayerDatabase);
             command.CommandText = ("select * from " + PlayersName + " where name = '" + tempPlayer.PlayerName+ "'");
@@ -80,6 +83,7 @@ namespace Server
                     command.Parameters.Add("$n", DbType.String).Value = tempPlayer.PlayerName;
                     command.Parameters.Add("$p", DbType.String).Value = password;
                     command.Parameters.Add("$i", DbType.Int32).Value = tempPlayer.roomIndex;
+                    command.Parameters.Add("@inventory", DbType.String).Value = tempPlayer.GetInventory().GetInventoryID();
                     command.ExecuteNonQuery();
                     return true;
                 }
@@ -99,7 +103,7 @@ namespace Server
         {
             
             new sqliteCommand("create table if not exists " + PlayersName + " (name varchar(30), " +
-                              "password varchar(150), rIndex int)", PlayerDatabase).ExecuteNonQuery();
+                              "password varchar(150), rIndex int, inventory varchar(300))", PlayerDatabase).ExecuteNonQuery();
 
             var command = new sqliteCommand("select * from " + PlayersName + " where name = '" + Username + "'", PlayerDatabase);
             var reader = command.ExecuteReader();
@@ -114,6 +118,7 @@ namespace Server
                 {
                     p.PlayerName = reader["name"].ToString();
                     p.roomIndex = Int32.Parse(reader["rIndex"].ToString());
+                    p.GetInventory().MakeInventory(reader["inventory"].ToString(), gameObjectList);
                     return true;
                 }
             }
@@ -123,8 +128,9 @@ namespace Server
         public void WritePlayer(Player p)
         {
             var command = new sqliteCommand(PlayerDatabase);
-            command.CommandText ="update " + PlayersName + " set rIndex = :i where name=:id";
+            command.CommandText ="update " + PlayersName + " set rIndex = :i, inventory = :inv where name=:id";
             command.Parameters.Add("i", DbType.Int32).Value = p.roomIndex;
+            command.Parameters.Add("inv", DbType.String).Value = p.GetInventory().GetInventoryID();
             command.Parameters.Add("id", DbType.String).Value = p.PlayerName;
             try
             {
@@ -136,14 +142,14 @@ namespace Server
             }
         }
 
-        public void WriteDungeon(Dungeon d)
+        public void AddDungeon(Dungeon d)
         {
 
            new sqliteCommand("drop table if exists " + DungeonName, DungeonDatabase).ExecuteNonQuery();
 
             new sqliteCommand("create table "+ DungeonName + " (name varchar(30), " +
                   "description varchar(150), rIndex int , north int , " +
-                  "east int, south int, west int)", DungeonDatabase).ExecuteNonQuery();
+                  "east int, south int, west int, inventory varchar(300))", DungeonDatabase).ExecuteNonQuery();
 
 
             List <Room> roomList =  d.GetRoomList();
@@ -155,8 +161,8 @@ namespace Server
                 try
                 {
                     command = new sqliteCommand("INSERT INTO " + DungeonName +
-                            "  (name, description, rIndex, north, east, south, west) " +
-                            "VALUES (?,?,?,?,?,?,?) ", DungeonDatabase);
+                            "  (name, description, rIndex, north, east, south, west, inventory) " +
+                            "VALUES (?,?,?,?,?,?,?,?) ", DungeonDatabase);
                     command.Parameters.Add("@name", DbType.String).Value = r.name;
                     command.Parameters.Add("@password", DbType.String).Value = r.desc;
                     command.Parameters.Add("@rIndex", DbType.Int32).Value = r.RoomIndex;
@@ -164,6 +170,7 @@ namespace Server
                     command.Parameters.Add("@east", DbType.Int32).Value = r.east;
                     command.Parameters.Add("@south", DbType.Int32).Value = r.south;
                     command.Parameters.Add("@west", DbType.Int32).Value = r.west;
+                    command.Parameters.Add("@inventory", DbType.String).Value = r.GetInventory().GetInventoryID();
                     command.ExecuteNonQuery();
                 }
                 catch (Exception ex)
@@ -179,7 +186,7 @@ namespace Server
             Dungeon d = new Dungeon();
             try
             {
-                var command = new sqliteCommand("select * from " + "dungeonTable", DungeonDatabase);
+                var command = new sqliteCommand("select * from " + DungeonName, DungeonDatabase);
                 var reader = command.ExecuteReader();
 
                 while (reader.Read())
@@ -192,6 +199,7 @@ namespace Server
                     r.east = Int32.Parse(reader["east"].ToString());
                     r.south = Int32.Parse(reader["south"].ToString());
                     r.west = Int32.Parse(reader["west"].ToString());
+                    r.GetInventory().MakeInventory(reader["inventory"].ToString(), gameObjectList);
                     d.GetRoomList().Add(r);
                 }
 
@@ -205,5 +213,21 @@ namespace Server
             return d;
         }
 
+        public void WriteRoom(Room r)
+        {
+            var command = new sqliteCommand(DungeonDatabase);
+            command.CommandText = "update " + DungeonName + " set inventory = :inv where name=:id";
+            command.Parameters.Add("inv", DbType.String).Value = r.GetInventory().GetInventoryID();
+            command.Parameters.Add("id", DbType.String).Value = r.name;
+            try
+            {
+                command.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("failed to write Room: " + r.name + ex);
+            }
+            
+        }
     }
 }

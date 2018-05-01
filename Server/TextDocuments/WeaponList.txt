@@ -1,0 +1,12 @@
+%Weapons%
+%Name, Inspect, Damage, ID%
+
+&Iron Sword, its a standard sword, 5, w1 &
+
+&Bronze Sword, its a Bronze sword, 4, w2 &
+
+&Silver Sword, its a Silver sword, 10, w3 &
+
+&Gold Sword, its a Nice Gold sword, 15, w4 &
+
+

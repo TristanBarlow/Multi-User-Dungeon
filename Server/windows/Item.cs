@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -8,16 +9,28 @@ using Utilities;
 namespace DungeonNamespace
 {
 
+
+
     public class Inventory
     {
         private List<Item> itemList;
+
+        private String inventoryID = " ";
+
+        private static int MaxInventory = 70;
 
         public Inventory()
         {
             itemList = new List<Item>();
         }
 
-        public void AddItem(Item nItem){ if (nItem != null) { itemList.Add(nItem); } }
+        public void AddItem(Item nItem)
+        {
+            if (nItem != null && itemList.Count <= MaxInventory)
+            {
+                itemList.Add(nItem);
+            }
+        }
 
         public void RemoveItem(String itemName)
         {
@@ -41,11 +54,11 @@ namespace DungeonNamespace
         {
             foreach (Item iter in itemList)
             {
-                if (iter.itemName == itemName)
+                if (iter.itemName.ToLower() == itemName)
                 {
                     return iter;
                 }
-                else return null;
+                
             }
             return null;
         }
@@ -59,10 +72,11 @@ namespace DungeonNamespace
             }
             return tempItem;
         }
+
         public String GetIventoryDescription()
         {
             String returnString = "";
-            returnString += U.NewLineS(" ");
+            returnString += U.NewLineS("");
 
             if (itemList.Count() > 0)
             { 
@@ -70,6 +84,7 @@ namespace DungeonNamespace
                 foreach (Item iter in itemList)
                 {
                     returnString += (iter.Inspect() + "  ");
+                    returnString += U.NewLineS("");
                 }
 
             }
@@ -80,25 +95,44 @@ namespace DungeonNamespace
             return returnString;
    
         }
+
+        public String GetInventoryID()
+        {
+            inventoryID = "&";
+            foreach (Item i in itemList)
+            {
+                inventoryID += i.ID +"&";
+            }
+            return inventoryID;
+        }
+
+        public void MakeInventory(String idString, GameObjectList gol)
+        {
+            String[]ids = idString.Split('&');
+            foreach (String id in ids)
+            {
+                Item i = null;
+                i = gol.GetItem(id);
+                if (i == null) i = gol.GetWeapon(id);
+                if (i != null) itemList.Add(i);
+            }
+        }
+
         public List<Item> GetItemList() { if (itemList.Count() > 0) return itemList; else return null;}
     }
 
-    public abstract class Item
+    public class Item
     {
         public String itemName = "item";
 
-        public static int ID = 0;
+        public String ID = "i0";
 
         private String description = "Its an Item, not particularly useful";
-
-        public void  Init(String name, String ndescription, int id)
+        public Item(String name, String descr, String id)
         {
             itemName = name;
-            description = ndescription;
             ID = id;
-        }
-        public Item()
-        { 
+            description = descr;
         }
 
         public virtual String Inspect()
@@ -111,35 +145,16 @@ namespace DungeonNamespace
             return U.NewLineS("This item has no use");
         }
 
+
     }
 
-    public abstract class Weapon : Item
+    public class Weapon : Item
     {
-        public static int wID = 1;
-
         public int damage = 1;
 
-        public Weapon(String name, String description, int Damage)
+        public Weapon(String name, String description, int Damage, String id):base(name,description, id)
         {
-            Init(name, description, wID);
             damage = Damage;
-        }
-    }
-
-    public class Cheese : Item
-    {
-        public int mID = 2;
-        public Cheese()
-        {
-            Init("Cheese", "This is a block of cheese", 2);
-        }
-    }
-    public class Rock : Item
-    {
-        public int mID = 3;
-        public Rock()
-        {
-            Init("Rock", "This is a Rock", 2);
         }
     }
 }

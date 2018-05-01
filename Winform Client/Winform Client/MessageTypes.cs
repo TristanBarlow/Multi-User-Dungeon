@@ -193,7 +193,7 @@ namespace MessageTypes
         public const int ID = 3;
 
         public String command;
-
+ 
         public DungeonCommand() { mID = ID; }
 
         public override MemoryStream WriteData()
@@ -202,8 +202,6 @@ namespace MessageTypes
             BinaryWriter write = new BinaryWriter(stream);
             write.Write(ID);
             write.Write(command);
-
-            Console.Write(command);
 
             write.Close();
 
@@ -231,8 +229,6 @@ namespace MessageTypes
             write.Write(ID);
             write.Write(response);
 
-            Console.Write("sending: " + response);
-
             write.Close();
             return stream;
         }
@@ -258,8 +254,6 @@ namespace MessageTypes
             write.Write(ID);
             write.Write(mapInfo);
 
-            Console.Write("sending: " + mapInfo);
-
             write.Close();
             return stream;
         }
@@ -274,7 +268,7 @@ namespace MessageTypes
     {
         public const int ID = 6;
 
-        public String LocationString = " ";
+        public String LocationString = " "; 
 
         public PlayerLocations() { mID = ID; }
 

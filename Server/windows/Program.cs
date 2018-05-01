@@ -31,9 +31,11 @@ namespace Server
 
         static private ConcurrentQueue<Action> RequestQueue = new ConcurrentQueue<Action>();
 
-        static private ConcurrentQueue<Action> LoginQueue = new ConcurrentQueue<Action>();
+        static private ConcurrentQueue<Action> DatabaseQueue = new ConcurrentQueue<Action>();
 
         static private SqlWrapper sqlWrapper;
+
+        static private GameObjectList AllItems;
 
         private static String[] IP = { "127.0.0.1", "46.101.88.130", "192.168.1.153" };
 
@@ -100,10 +102,15 @@ namespace Server
         static void DungeonAction(String dungMsg, Player player)
         { 
             String dungeonResponse  = RequestHandle.PlayerAction(dungMsg, player);
+            if (player.GetRoom().GetHasChanged())
+            {
+                DatabaseQueue.Enqueue(() => sqlWrapper.WriteRoom(player.GetRoom().Copy()));
+            }
             if (player.GetHasMoved())
             {
                 SendLocations();
             }
+            
             SendDungeonResponse(player, dungeonResponse);
         }
 
@@ -315,6 +322,23 @@ namespace Server
              }
         }
 
+        static void ProcessDatabaseQueue()
+        {
+            while (true)
+            {
+                if (!DatabaseQueue.IsEmpty)
+                {
+                    Action action;
+                    DatabaseQueue.TryDequeue(out action);
+                    lock (sqlWrapper)
+                    {
+                        action.Invoke();
+                    }
+                }
+            }
+        }
+
+
         public static void SendLocations()
         {
                 String rStr = "&";
@@ -353,13 +377,16 @@ namespace Server
             Console.WriteLine("Should Create new Map?");
             var response = Console.ReadLine();
 
-            sqlWrapper = new SqlWrapper();
+
+            AllItems = new GameObjectList();
+
+            sqlWrapper = new SqlWrapper(AllItems);
 
             if (response.ToLower() == "yes")
             {
                 Dungeon = new Dungeon();
-                Dungeon.Init(100);
-                sqlWrapper.WriteDungeon(Dungeon);
+                Dungeon.Init(100, AllItems);
+                sqlWrapper.AddDungeon(Dungeon);
             }
             else
             {
@@ -367,8 +394,8 @@ namespace Server
                 if (Dungeon.GetRoomList().Count < 1)
                 {
                     Dungeon = new Dungeon();
-                    Dungeon.Init(100);
-                    sqlWrapper.WriteDungeon(Dungeon);
+                    Dungeon.Init(100, AllItems);
+                    sqlWrapper.AddDungeon(Dungeon);
                 }
             }
 
@@ -376,6 +403,9 @@ namespace Server
 
             Task RequestProcess = new Task(ProcessRequestQueue);
             RequestProcess.Start();
+
+            Task DatabaseProcess = new Task(ProcessDatabaseQueue);
+            DatabaseProcess.Start();
 
             while (!bQuit)
             {

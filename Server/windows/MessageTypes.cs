@@ -203,8 +203,6 @@ namespace MessageTypes
             write.Write(ID);
             write.Write(command);
 
-            Console.Write(command);
-
             write.Close();
 
             return stream;
@@ -231,8 +229,6 @@ namespace MessageTypes
             write.Write(ID);
             write.Write(response);
 
-            Console.Write("sending: " + response);
-
             write.Close();
             return stream;
         }
@@ -257,8 +253,6 @@ namespace MessageTypes
             BinaryWriter write = new BinaryWriter(stream);
             write.Write(ID);
             write.Write(mapInfo);
-
-            Console.Write("sending: " + mapInfo);
 
             write.Close();
             return stream;

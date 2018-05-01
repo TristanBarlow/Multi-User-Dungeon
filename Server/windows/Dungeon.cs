@@ -50,9 +50,9 @@ namespace DungeonNamespace
 
         private static Random rand = new Random(); 
 
-        public void Init(int size)
+        public void Init(int size, GameObjectList objectList)
         {
-            RoomList = GenerateDungeon(size);
+            RoomList = GenerateDungeon(size, objectList);
             DungeonStr = GenerateDungeonString(RoomList);
         }
 
@@ -132,12 +132,12 @@ namespace DungeonNamespace
 
                 case "pickup":
                     {
-                        String itemName = input[1];
-                        Item tempItem = currentRoom.inventory.TransfereItem(itemName);
+                        String itemName = action.Remove(0, input[0].Count()+1).ToLower();
+                        Item tempItem = currentRoom.GetInventory().TransfereItem(itemName);
                         if (tempItem != null)
                         {
-                            player.inventory.AddItem(tempItem);
-                            returnString += " You picked up " + player.inventory.GetFirstItemFromName(itemName).itemName;
+                            player.GetInventory().AddItem(tempItem);
+                            returnString += " You picked up " + itemName;
                         }
                         else
                         {
@@ -149,11 +149,11 @@ namespace DungeonNamespace
                 case "drop":
                     {
                         String itemName = input[1];
-                        Item tempItem = player.inventory.TransfereItem(itemName);
+                        Item tempItem = player.GetInventory().TransfereItem(itemName);
                         if (tempItem != null)
                         {
-                            currentRoom.inventory.AddItem(tempItem);
-                            returnString += " You droped " + currentRoom.inventory.GetFirstItemFromName(itemName).itemName;
+                            currentRoom.GetInventory().AddItem(tempItem);
+                            returnString += " You droped " + currentRoom.GetInventory().GetFirstItemFromName(itemName).itemName;
                         }
                         else
                         {
@@ -164,7 +164,7 @@ namespace DungeonNamespace
 
                 case "inventory":
                     returnString += U.NewLineS("Inventory:");
-                    returnString += player.inventory.GetIventoryDescription();
+                    returnString += player.GetInventory().GetIventoryDescription();
                     break;
 
                 case "go":
@@ -263,7 +263,7 @@ namespace DungeonNamespace
             }
         }
 
-        public static List<Room> GenerateDungeon(int size)
+        public static List<Room> GenerateDungeon(int size, GameObjectList gol)
         {
             if (size < 4)
             {
@@ -278,7 +278,11 @@ namespace DungeonNamespace
             int iter = 0;
             while (rRooms.Count < size)
             {
-                rRooms.Add(new Room("Room" + iter, iter));
+                Room r = new Room("Room" + iter, iter);
+                r.GetInventory().AddItem(gol.GetRandomItem());
+                r.GetInventory().AddItem(gol.GetRandomItem());
+                r.GetInventory().AddItem(gol.GetRandomWeapon());
+                rRooms.Add(r);
                 iter++;
             }
 

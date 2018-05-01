@@ -90,20 +90,21 @@ namespace Winform_Client
                     {
                         if (form.IsDisposed == true)
                         {
-
-
                             form.bQuit = true;
                             form.clientSocket.Close();
+                            
                         }
 
                     }
                 }
                 catch (System.Exception)
                 {
-                    
+
                 }
                 Thread.Sleep(500);
             }
+            Application.Restart();
+            Environment.Exit(0);
         }
 
         private void ClientReceive(Object o)
