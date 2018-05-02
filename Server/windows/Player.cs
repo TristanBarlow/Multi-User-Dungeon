@@ -96,6 +96,12 @@ namespace PlayerN
 
         public void SetPlayerName(String newName) { PlayerName = newName;}
 
-
+        public Player CopyPlayer()
+        {
+            Player p = new Player(PlayerName);
+            p.roomIndex = roomIndex;
+            p.inventory = inventory;
+            return p;
+        }
     }
 }

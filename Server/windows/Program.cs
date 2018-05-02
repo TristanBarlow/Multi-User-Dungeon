@@ -39,7 +39,7 @@ namespace Server
 
         private static String[] IP = { "127.0.0.1", "46.101.88.130", "192.168.1.153" };
 
-        private static int ipIndex = 1;
+        private static int ipIndex = 0;
 
 
         static void SendDungeonInfo(Player player)
@@ -108,14 +108,14 @@ namespace Server
             if (player.GetRoom().GetHasChanged())
             {
                 DatabaseQueue.Enqueue(() => sqlWrapper.WriteRoom(player.GetRoom().Copy()));
-				DatabaseQueue.Enqueue(() => sqlWrapper.WritePlayer(player));
+                DatabaseQueue.Enqueue(() => sqlWrapper.WritePlayer(player.CopyPlayer()));
             }
             if (player.GetHasMoved())
             {
                 SendLocations();
-                DatabaseQueue.Enqueue(() => sqlWrapper.WritePlayer(player));
+                DatabaseQueue.Enqueue(() => sqlWrapper.WritePlayer(player.CopyPlayer()));
+
             }
-            
             SendDungeonResponse(player, dungeonResponse);
         }
 

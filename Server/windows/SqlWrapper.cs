@@ -24,11 +24,10 @@ namespace Server
 {
     class SqlWrapper
     {
-		private sqliteConnection DungeonDatabase = null;
-        private sqliteConnection PlayerDatabase = null;
+		private sqliteConnection Database = null;
 
-        private String DungeonName = "DungeonTable";
-        private String PlayersName = "PlayerTable";
+        private String dungeonTableName = "DungeonTable";
+        private String playerTableName = "PlayerTable";
         private GameObjectList gameObjectList;
 
        public SqlWrapper(GameObjectList objectList)
@@ -38,61 +37,43 @@ namespace Server
 			String disableRollback  = "PRAGMA journal_mode = OFF";
 
 
-            DungeonDatabase = new sqliteConnection("Data Source=Dungeon" + ";Version=3;FailIfMissing=True");
+            Database = new sqliteConnection("Data Source=Dungeon" + ";Version=3;FailIfMissing=True");
             try
             {
-                DungeonDatabase.Open();
+                Database.Open();
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Open existing DB failed: So creating one");
                 sqliteConnection.CreateFile("Dungeon");
-                DungeonDatabase = new sqliteConnection("Data Source=Dungeon" + ";Version=3;FailIfMissing=True");
-                DungeonDatabase.Open();
+                Database = new sqliteConnection("Data Source=Dungeon" + ";Version=3;FailIfMissing=True");
+                Database.Open();
             }
-			cmd.Connection = DungeonDatabase;
+			cmd.Connection = Database;
 			cmd.CommandText = disableRollback;
 			cmd.ExecuteNonQuery ();
-
-			cmd = new sqliteCommand();
-            PlayerDatabase = new sqliteConnection("Data Source=Players" + ";Version=3;FailIfMissing=True");
-            try
-            {
-                PlayerDatabase.Open();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Open existing DB failed: So creating one");
-                sqliteConnection.CreateFile("Players");
-                PlayerDatabase = new sqliteConnection("Data Source=Players" + ";Version=3;FailIfMissing=True");
-                PlayerDatabase.Open();
-            }
-			cmd.Connection = PlayerDatabase;
-			cmd.CommandText = disableRollback;
-			cmd.ExecuteNonQuery ();
-
         }
 
         public bool AddPlayer(Player tempPlayer, String password)
         {
-            new sqliteCommand("create table if not exists " + PlayersName + " (name varchar(30), " +
-                  "password varchar(150), rIndex int, inventory varchar(300))", PlayerDatabase).ExecuteNonQuery();
 
-            var command = new sqliteCommand(PlayerDatabase);
-            command.CommandText = ("select * from " + PlayersName + " where name = '" + tempPlayer.PlayerName+ "'");
+            var command = new sqliteCommand(Database);
+            command.CommandText = ("select * from " + playerTableName + " where name = '" + tempPlayer.PlayerName+ "'");
             var reader = command.ExecuteReader();
 
             if (reader.HasRows == false)
             {
+                new sqliteCommand("create table if not exists " + playerTableName + " (name varchar(30), " +
+                                  "password varchar(150), rIndex int, inventory varchar(300))", Database).ExecuteNonQuery();
                 try
                 {
-					command = new sqliteCommand("INSERT INTO " + PlayersName + 
-					                            " (name, password, rIndex) "+ 
-					                            "VALUES ($n, $p, $i) ",PlayerDatabase);
+					command = new sqliteCommand("INSERT INTO " + playerTableName + 
+					                            " (name, password, rIndex, inventory) "+ 
+					                            "VALUES ($n, $p, $i, $invent) ", Database);
                     command.Parameters.Add("$n", DbType.String).Value = tempPlayer.PlayerName;
                     command.Parameters.Add("$p", DbType.String).Value = password;
                     command.Parameters.Add("$i", DbType.Int32).Value = tempPlayer.roomIndex;
-                    command.Parameters.Add("@inventory", DbType.String).Value = tempPlayer.GetInventory().GetInventoryID();
+                    command.Parameters.Add("$invent", DbType.String).Value = tempPlayer.GetInventory().GetInventoryID();
                     command.ExecuteNonQuery();
                     return true;
                 }
@@ -111,10 +92,10 @@ namespace Server
         public bool GetPlayerLogin(ref Player p, String Username, String password)
         {
             
-            new sqliteCommand("create table if not exists " + PlayersName + " (name varchar(30), " +
-                              "password varchar(150), rIndex int, inventory varchar(300))", PlayerDatabase).ExecuteNonQuery();
+            new sqliteCommand("create table if not exists " + playerTableName + " (name varchar(30), " +
+                              "password varchar(150), rIndex int, inventory varchar(300))", Database).ExecuteNonQuery();
 
-            var command = new sqliteCommand("select * from " + PlayersName + " where name = '" + Username + "'", PlayerDatabase);
+            var command = new sqliteCommand("select * from " + playerTableName + " where name = '" + Username + "'", Database);
             var reader = command.ExecuteReader();
 
             while (reader.Read())
@@ -136,8 +117,8 @@ namespace Server
 
         public void WritePlayer(Player p)
         {
-            var command = new sqliteCommand(PlayerDatabase);
-            command.CommandText ="update " + PlayersName + " set rIndex = :i, inventory = :inv where name=:id";
+            var command = new sqliteCommand(Database);
+            command.CommandText ="update " + playerTableName + " set rIndex = :i, inventory = :inv where name=:id";
             command.Parameters.Add("i", DbType.Int32).Value = p.roomIndex;
             command.Parameters.Add("inv", DbType.String).Value = p.GetInventory().GetInventoryID();
             command.Parameters.Add("id", DbType.String).Value = p.PlayerName;
@@ -154,11 +135,11 @@ namespace Server
         public void AddDungeon(Dungeon d)
         {
 
-           new sqliteCommand("drop table if exists " + DungeonName, DungeonDatabase).ExecuteNonQuery();
+           new sqliteCommand("drop table if exists " + dungeonTableName, Database).ExecuteNonQuery();
 
-            new sqliteCommand("create table "+ DungeonName + " (name varchar(50), " +
+            new sqliteCommand("create table "+ dungeonTableName + " (name varchar(50), " +
                   "description varchar(300), rIndex int , north int , " +
-                  "east int, south int, west int, inventory varchar(300))", DungeonDatabase).ExecuteNonQuery();
+                  "east int, south int, west int, inventory varchar(300))", Database).ExecuteNonQuery();
 
 
             List <Room> roomList =  d.GetRoomList();
@@ -169,9 +150,9 @@ namespace Server
 
                 try
                 {
-                    command = new sqliteCommand("INSERT INTO " + DungeonName +
+                    command = new sqliteCommand("INSERT INTO " + dungeonTableName +
                             "  (name, description, rIndex, north, east, south, west, inventory) " +
-                            "VALUES (?,?,?,?,?,?,?,?) ", DungeonDatabase);
+                            "VALUES (?,?,?,?,?,?,?,?) ", Database);
                     command.Parameters.Add("@name", DbType.String).Value = r.name;
                     command.Parameters.Add("@password", DbType.String).Value = r.desc;
                     command.Parameters.Add("@rIndex", DbType.Int32).Value = r.RoomIndex;
@@ -195,7 +176,7 @@ namespace Server
             Dungeon d = new Dungeon();
             try
             {
-                var command = new sqliteCommand("select * from " + DungeonName, DungeonDatabase);
+                var command = new sqliteCommand("select * from " + dungeonTableName, Database);
                 var reader = command.ExecuteReader();
 
                 while (reader.Read())
@@ -224,8 +205,8 @@ namespace Server
 
         public void WriteRoom(Room r)
         {
-            var command = new sqliteCommand(DungeonDatabase);
-            command.CommandText = "update " + DungeonName + " set inventory = :inv where rIndex=:id";
+            var command = new sqliteCommand(Database);
+            command.CommandText = "update " + dungeonTableName + " set inventory = :inv where rIndex=:id";
             command.Parameters.Add("inv", DbType.String).Value = r.GetInventory().GetInventoryID();
             command.Parameters.Add("id", DbType.String).Value = r.RoomIndex;
             try
