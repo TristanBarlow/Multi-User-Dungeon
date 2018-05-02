@@ -28,7 +28,6 @@ namespace DungeonNamespace
 
         private bool HasChanged = false;
 
-
         public List<Vector2D> availableDirections = new List<Vector2D>();
 
         public Vector2D Position { set; get; }

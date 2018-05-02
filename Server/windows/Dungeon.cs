@@ -92,6 +92,7 @@ namespace DungeonNamespace
                U.NewLineS("look - to look around") +
                U.NewLineS("go [north | south | east | west]  - to travel between locations") +
                U.NewLineS("graf [mesage] to add grafiti to your current room") +
+               U.NewLineS("say [mesage] will speak to your current room") +
                U.NewLineS("pickup [name] to pick up the item of that name in the room") +
                U.NewLineS("drop [name] to drop the item of that name into the room") +
                U.NewLineS("inventory will look at the items you have collected") +
