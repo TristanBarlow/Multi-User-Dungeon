@@ -24,8 +24,8 @@ namespace Winform_Client
         public bool bConnected = false;
         bool TestTheStress = false;
 
-        private static String[] IP = { "127.0.0.1", "46.101.88.130", "192.168.1.153" };
-        private static int ipIndex = 0;
+        private static String[] IP = { "127.0.0.1", "46.101.88.130", "192.168.1.101" };
+        private static int ipIndex = 2;
 
         List<String> currentClientList = new List<String>();
 
@@ -350,32 +350,6 @@ namespace Winform_Client
             if (DGD.HasUsers) DGD.UpdateClientPositions();
         }
 
-        private void ButtonNorth_Click(object sender, EventArgs e)
-        {
-            String m = "go north";
-
-            SendDungeonMessage(m);
-        }
-
-        private void ButtonEast_Click(object sender, EventArgs e)
-        {
-            String m = "go east";
-            SendDungeonMessage(m);
-        }
-
-        private void ButtonSouth_Click(object sender, EventArgs e)
-        {
-            String m = "go south";
-            SendDungeonMessage(m);
-        }
-
-        private void ButtonWest_Click(object sender, EventArgs e)
-        {
-            String m = "go west";
-
-            SendDungeonMessage(m);
-        }
-
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
             if (!textBox_Input.ContainsFocus)
@@ -426,11 +400,13 @@ namespace Winform_Client
             }
 
         }
+
         private void DrawDungeon()
         {
             DGD.ClientNumberList = numberOfClients;
             DGD.Draw();
         }
+
         private void DungeonPaint(object sender, PaintEventArgs e)
         {
             DrawQueue.Enqueue(() => DrawDungeon());

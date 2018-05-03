@@ -11,7 +11,6 @@ using System.IO;
 using System.Collections.Concurrent;
 
 using MessageTypes;
-using Request;
 using DungeonNamespace;
 using PlayerN;
 using Utilities;
@@ -27,19 +26,15 @@ namespace Server
 
         static private Dungeon Dungeon;
 
-        static private RequestHandler RequestHandle;
-
         static private ConcurrentQueue<Action> RequestQueue = new ConcurrentQueue<Action>();
-
-        static private ConcurrentQueue<Action> DatabaseQueue = new ConcurrentQueue<Action>();
 
         static private SqlWrapper sqlWrapper;
 
         static private GameObjectList AllItems;
 
-        private static String[] IP = { "127.0.0.1", "46.101.88.130", "192.168.1.153" };
+        private static String[] IP = { "127.0.0.1", "46.101.88.130", "192.168.1.101" };
 
-        private static int ipIndex = 0;
+        private static int ipIndex = 2;
 
 
         static void SendDungeonInfo(Player player)
@@ -89,34 +84,82 @@ namespace Server
 
         static void RemoveClientByPlayer(Player p)
         {
-            p.GetRoom().RemovePlayer(p);
             if (p != null)
             {
-                lock (sqlWrapper)
-                {
-                    sqlWrapper.WritePlayer(p);
-                }
+                sqlWrapper.RemoveActivePlayer(p.PlayerName);
                 clientList.Remove(p);
+            }
+        }
+
+        static void SendUpdateMessage(String str, Player p)
+        {
+            UpdateChat UC = new UpdateChat();
+            UC.message = str;
+            MemoryStream stream = UC.WriteData();
+            p.socket.Send(stream.GetBuffer());
+        }
+
+        static void JoinedPlayers(Player player)
+        {
+            foreach (Player p in clientList)
+            {
+                if (p != player && p.roomIndex == player.roomIndex)
+                {
+                    SendUpdateMessage(p.PlayerName + " entered", p);
+                }
+            }
+        }
+
+        static void PlayerSpoken(Player player, string message)
+        {
+            String str = player.PlayerName;
+            foreach (Player p in clientList)
+            {
+                if (p == player) str = "You ";
+                else { str = player.PlayerName; };
+
+                if (p.roomIndex == player.roomIndex)
+                {
+                    SendUpdateMessage(player.PlayerName + " Said:  " + message , p);
+                }
+            }
+        }
+
+        static void LeftPlayers(Player player, int room)
+        {
+            foreach (Player p in clientList)
+            {
+                if (p != player && p.roomIndex == room)
+                {
+                    SendUpdateMessage("Player: " + p.PlayerName + " left", p);
+                }
             }
         }
 
         static void DungeonAction(String dungMsg, Player player)
         { 
-            String dungeonResponse  = RequestHandle.PlayerAction(dungMsg, player);
-            if (dungeonResponse == "") return;
-
-            if (player.GetRoom().GetHasChanged())
+            ActionResponse response  = Dungeon.PlayerAction(dungMsg, player, sqlWrapper);
+            switch (response.ID)
             {
-                DatabaseQueue.Enqueue(() => sqlWrapper.WriteRoom(player.GetRoom().Copy()));
-                DatabaseQueue.Enqueue(() => sqlWrapper.WritePlayer(player.CopyPlayer()));
-            }
-            if (player.GetHasMoved())
-            {
-                SendLocations();
-                DatabaseQueue.Enqueue(() => sqlWrapper.WritePlayer(player.CopyPlayer()));
+                case ActionID.MOVE:
+                    JoinedPlayers(player);
+                    SendLocations();
+                    SendDungeonResponse(player, response.message);
+                    break;
 
+                case ActionID.UPDATE:
+                    SendUpdateMessage(response.message, player);
+                    break;
+
+                case ActionID.SAY:
+                    PlayerSpoken(player, response.message);
+                    break;
+
+                case ActionID.NORMAL:
+                    if (response.message == "") return;
+                    SendDungeonResponse(player, response.message);
+                    break;
             }
-            SendDungeonResponse(player, dungeonResponse);
         }
 
         static void AddNewPlayer(Player p)
@@ -131,7 +174,7 @@ namespace Server
                 r = Dungeon.GetRoomList()[p.roomIndex];
             }
             p.SetRoom(r);
-            r.AddPlayer(p);
+            sqlWrapper.UpdatePlayerPos(p);
             clientList.Add(p);
         }
 
@@ -331,23 +374,6 @@ namespace Server
              }
         }
 
-        static void ProcessDatabaseQueue()
-        {
-            while (true)
-            {
-                if (!DatabaseQueue.IsEmpty)
-                {
-                    Action action;
-                    DatabaseQueue.TryDequeue(out action);
-                    lock (sqlWrapper)
-                    {
-                        action.Invoke();
-                    }
-                }
-            }
-        }
-
-
         public static void SendLocations()
         {
                 String rStr = "&";
@@ -377,15 +403,8 @@ namespace Server
 
         static void Main(string[] args)
         {
-            Socket serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-			serverSocket.Bind(new IPEndPoint(IPAddress.Parse(IP[ipIndex]), 8500));
-            serverSocket.Listen(32);
-
-            bool bQuit = false;
-
             Console.WriteLine("Should Create new Map?");
             var response = Console.ReadLine();
-
 
             AllItems = new GameObjectList();
 
@@ -396,6 +415,7 @@ namespace Server
                 Dungeon = new Dungeon();
                 Dungeon.Init(100, AllItems);
                 sqlWrapper.AddDungeon(Dungeon);
+                sqlWrapper.AddItems(50, 20);
             }
             else
             {
@@ -405,16 +425,19 @@ namespace Server
                     Dungeon = new Dungeon();
                     Dungeon.Init(100, AllItems);
                     sqlWrapper.AddDungeon(Dungeon);
+                    sqlWrapper.AddItems(50, 20);
                 }
             }
+            int foo = 0;
 
-            RequestHandle = new RequestHandler(ref Dungeon);
+            Socket serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+			serverSocket.Bind(new IPEndPoint(IPAddress.Parse(IP[ipIndex]), 8500));
+            serverSocket.Listen(32);
+
+            bool bQuit = false;
 
             Task RequestProcess = new Task(ProcessRequestQueue);
             RequestProcess.Start();
-
-            Task DatabaseProcess = new Task(ProcessDatabaseQueue);
-            DatabaseProcess.Start();
 
             while (!bQuit)
             {

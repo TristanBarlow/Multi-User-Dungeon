@@ -9,7 +9,7 @@
 
 &Laptop, its a laptop , i4 &
 
-&Burrito, Vegan with no cheese, please , i5 &
+&Burrito, Vegan with no cheese please , i5 &
 
 &Hellfire Delux, An amazing discontinued burger from meat counter , i6 &
 

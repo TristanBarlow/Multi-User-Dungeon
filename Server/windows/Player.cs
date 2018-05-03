@@ -22,69 +22,41 @@ namespace PlayerN
 
         private Room currentRoom;
 
-        private bool moved = false;
-
-        private String say = "&";
-
         public int roomIndex = -1;
-
-        public Inventory inventory;
 
         private int health = 100;
 
         public String GetStance() { return Stance;}
 
         public Room GetRoom() { return currentRoom; }
+
         public void SetRoom(Room r)
         {
             roomIndex = r.RoomIndex;
             currentRoom = r;
-            moved = true;
-        }
-
-        public bool GetHasMoved()
-        {
-            if (moved)
-            {
-                moved = false;
-                return true;
-            }
-            else
-            {
-                return false;
-            }
         }
 
         public Socket socket { set; get; }
 
         public void SetStance(String newStance) {Stance = newStance;}
-        public Inventory GetInventory() { return inventory; }
 
         public Player(String clientName, Socket s)
         {
             PlayerName = clientName;
             socket = s;
-            inventory = new Inventory();
         }
 
         public Player(String name)
         {
             PlayerName = name;
-            inventory = new Inventory();
         }
 
         public Player(Socket s)
         {
             socket = s;
-            inventory = new Inventory();
         }
 
         public int GetHealth(){ return health;}
-
-        public void DropItem(String nItem)
-        {
-            currentRoom.GetInventory().AddItem(inventory.TransfereItem(nItem));
-        }
 
         public void ChangeHealth(int x)
         {
@@ -100,7 +72,6 @@ namespace PlayerN
         {
             Player p = new Player(PlayerName);
             p.roomIndex = roomIndex;
-            p.inventory = inventory;
             return p;
         }
     }

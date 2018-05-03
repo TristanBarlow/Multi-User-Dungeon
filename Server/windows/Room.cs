@@ -16,17 +16,15 @@ namespace DungeonNamespace
         public int RoomIndex { set; get; }
         public String name = "";
         public String desc = " A description";
+
+
         public List<String> graffitiList = new List<String>();
-        private Inventory inventory = new Inventory();
-        private List<Player> players = new List<Player>();
+
         public int north = -1;
         public int east = -1;
         public int south = -1;
         public int west = -1;
         private Random r = new Random();
-        public bool HasMoves = true;
-
-        private bool HasChanged = false;
 
         public List<Vector2D> availableDirections = new List<Vector2D>();
 
@@ -36,7 +34,6 @@ namespace DungeonNamespace
         {
             if (availableDirections.Count < 1)
             {
-                HasMoves = false;
                 return new Vector2D(0, 0);
             }
             else
@@ -67,12 +64,6 @@ namespace DungeonNamespace
             Init();
         }
 
-        public Inventory GetInventory()
-        {
-            HasChanged = true;
-            return inventory;
-        }
-
         public void Init()
         {
             Position = new Vector2D();
@@ -101,66 +92,10 @@ namespace DungeonNamespace
         }
 
         public void AddGraf(String graff){ graffitiList.Add(graff);}
-
-        public void AddPlayer(Player p)
-        {
-            players.Add(p);
-            UpdatePlayers();
-        }
-
-        private void SendBufferToPlayers(MemoryStream ms)
-        {
-            foreach (Player p in players)
-            {
-                try
-                {
-                    p.socket.Send(ms.GetBuffer());
-                }
-                catch (System.Exception ex)
-                {
-                    Console.WriteLine("Error sending chat message to player: " + p.PlayerName + ex);
-                }
-
-            }
-        }
-
-        public void UpdatePlayers()
-        {
-            DungeonResponse update = new DungeonResponse();
-            update.response = GetDescription();
-            MemoryStream outStream = update.WriteData();
-            SendBufferToPlayers(outStream);
-           
-        }
-
-        public void RemovePlayer(Player p)
-        {
-            if (players.Contains(p))
-            {
-                players.Remove(p);
-                UpdatePlayers();
-            }
-        }
         
-        public String GetDescription()
+        public String GetGrafitii()
         {
-            String returnString = U.NewLineS(" ");
-            returnString =  U.NewLineS(name) +
-                            U.NewLineS(" ")+
-                            U.NewLineS(desc)+
-                            U.NewLineS(" ")+ 
-                            ("Exits Are:");
-
-            if (north != -1) returnString += "North ";
-            if (east != -1) returnString += "East ";
-            if (south != -1) returnString += "South ";
-            if (west != -1) returnString += "West ";
-
-            returnString += U.NewLineS("");
-
-            returnString += U.NewLineS(inventory.GetIventoryDescription());
-
-            returnString += ("Graffiti: ");
+            String returnString = ("Graffiti: ");
             if (graffitiList.Count() != 0)
             {
                 foreach (String iter in graffitiList)
@@ -170,29 +105,9 @@ namespace DungeonNamespace
             }
             else
             {
-                returnString += U.NewLineS("no Graffiti Be the first!!!");
+                returnString += "No Graffiti, Be the first!!";
             }
-
-            returnString += U.NewLineS("");
-
-            if (players.Count > 0)
-            {
-                returnString += U.NewLineS("Players in Room: ");
-                foreach (Player p in players)
-                {
-                    returnString += p.PlayerName + "  ";
-                }
-            }
-
             return returnString;
-        }
-
-        public void PlayerSpoke(Player player, String msg)
-        {
-            UpdateChat said = new UpdateChat();
-            said.message = player.PlayerName + " said : " + msg;
-            MemoryStream outStream = said.WriteData();
-            SendBufferToPlayers(outStream);
         }
 
         public String GetGraff()
@@ -222,19 +137,9 @@ namespace DungeonNamespace
             r.east = east;
             r.south = south;
             r.west = west;
-            r.inventory = inventory;
             return r;
         }
 
-        public bool GetHasChanged()
-        {
-            if (HasChanged)
-            {
-                HasChanged = false;
-                return true;
-            }
-            else { return false; }
-        }
 
     }
 }

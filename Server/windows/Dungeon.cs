@@ -6,6 +6,7 @@ using System.Threading;
 
 using Utilities;
 using PlayerN;
+using Server;
 
 namespace DungeonNamespace
 {
@@ -78,13 +79,6 @@ namespace DungeonNamespace
             return randomRoom;
         }
 
-        private void MovePlayer(Player p, Room newRoom)
-        {
-            p.GetRoom().RemovePlayer(p);
-            p.SetRoom(newRoom);
-            p.GetRoom().AddPlayer(p);
-        }
-
         private String HelpMessage()
         {
         return U.NewLineS("Commands are ....") +
@@ -99,17 +93,23 @@ namespace DungeonNamespace
                U.NewLineS("Press any key to continue");
         }
 
-        public String PlayerAction(String action,Player player)
+        public ActionResponse PlayerAction(String action,Player player, SqlWrapper database)
 
         {
-            String returnString = "";
+            String[] input = action.Split(' ');
+            String subject = "";
+            ActionResponse rAction = new ActionResponse();
 
-            var input = action.Split(' ');
+            if (input.Length > 1)
+            {
+                subject = action.Remove(0, input[0].Count() + 1).ToLower();
+            }
 
             if (player == null)
             {
-                returnString = U.NewLineS("Not in list you do not exsist");
-                return returnString;
+                
+                rAction.message = U.NewLineS("Not in list you do not exsist");
+                return rAction;
             }
 
            Room currentRoom = RoomList[player.roomIndex];
@@ -118,61 +118,34 @@ namespace DungeonNamespace
             {
                 case "help":
                     Console.Clear();
-                    returnString = HelpMessage();
+                    rAction.Set(HelpMessage(), ActionID.NORMAL);
                     break;
 
                 case "look":
-                    returnString = U.NewLineS("you look around") +
-                                   U.NewLineS(currentRoom.GetDescription());
+                    String temp = database.GetRoomDescrption(currentRoom.RoomIndex);
+                    temp += player.GetRoom().GetGrafitii();
+                    rAction.Set(temp, ActionID.NORMAL);
                     break;
 
                 case "graf":
-                    int index = action.IndexOf(' ');
-                    String second = action.Substring(index + 1);
-                    currentRoom.AddGraf(second);
-                    returnString = U.NewLineS("You added a graffiti");
+                    currentRoom.AddGraf(subject);
+                    rAction.Set("You added Grafiti: " + subject, ActionID.UPDATE);
                     break;
 
                 case "pickup":
-                    {
-                        String itemName = action.Remove(0, input[0].Count()+1).ToLower();
-                        Item tempItem = currentRoom.GetInventory().TransfereItem(itemName);
-                        if (tempItem != null)
-                        {
-                            player.GetInventory().AddItem(tempItem);
-                            returnString += " You picked up " + itemName;
-                        }
-                        else
-                        {
-                            returnString += "Could Not Find Item";
-                        }
-                        break;
-                    }
+                    rAction.Set(database.MoveItem("room" + player.roomIndex, "player" + player.PlayerName, subject), ActionID.UPDATE);
+                    break;
 
                 case "drop":
-                    {
-                        String itemName = action.Remove(0, input[0].Count() + 1).ToLower();
-                        Item tempItem = player.GetInventory().TransfereItem(itemName);
-                        if (tempItem != null)
-                        {
-                            currentRoom.GetInventory().AddItem(tempItem);
-                            returnString += " You droped " + currentRoom.GetInventory().GetFirstItemFromName(itemName).itemName;
-                        }
-                        else
-                        {
-                            returnString += "Could Not Find Item to drop";
-                        }
-                        break;
-                    }
+                    rAction.Set(database.MoveItem("player" + player.PlayerName, "room" + player.roomIndex, subject) ,ActionID.UPDATE);
+                    break;
 
                 case "inventory":
-                    returnString += U.NewLineS("Inventory:");
-                    returnString += player.GetInventory().GetIventoryDescription();
+                    rAction.Set(database.GetOwnedItems("player" + player.PlayerName), ActionID.NORMAL);
                     break;
 
                 case "say":
-                    player.GetRoom().PlayerSpoke(player, action.Remove(0, input[0].Count() + 1).ToLower());
-                    returnString = "";
+                    rAction.Set(subject, ActionID.SAY);
                     break;
                     
 
@@ -181,36 +154,40 @@ namespace DungeonNamespace
                     int[] indexs = currentRoom.GetExitIndexs();
                     if ((input[1].ToLower() == "north") && (currentRoom.north != -1))
                     {
-                        MovePlayer(player, RoomList[currentRoom.north]);
+                         player.SetRoom(RoomList[currentRoom.north]);
+                        
                     }
                      else if ((input[1].ToLower() == "east") && (currentRoom.east != -1))
                     {
-                        MovePlayer(player, RoomList[currentRoom.east]);
+                       player.SetRoom(RoomList[currentRoom.east]);
                     }
                     else if ((input[1].ToLower() == "south") && (currentRoom.south != -1))
                     {
-                        MovePlayer(player, RoomList[currentRoom.south]);
+                        player.SetRoom(RoomList[currentRoom.south]);
                     }
                     else if ((input[1].ToLower() == "west") && (currentRoom.west != -1))
-                    {       
-                        MovePlayer(player, RoomList[currentRoom.west]);           
+                    {
+                        player.SetRoom(RoomList[currentRoom.west]);           
                     }
                     else
                     {
                         //handle error
-                        returnString = U.NewLineS("\nERROR")+
-                                        U.NewLineS("\nCan not go " + input[1] + " from here")+
-                                        U.NewLineS("\nPress any key to continue");
+                        rAction.Set(U.NewLineS("\nERROR") +
+                                    U.NewLineS("\nCan not go " + input[1] + 
+                                    " from here"), ActionID.UPDATE);
+                        return rAction;
                     }
-                    returnString = U.NewLineS(player.GetRoom().GetDescription());
+                    String str = U.NewLineS(database.UpdatePlayerPos(player));
+                    str += player.GetRoom().GetGrafitii();
+                    rAction.Set(str, ActionID.MOVE);
                     break;
 
                 default:
                     //handle error
-                    returnString = U.NewLineS("\nERROR") + HelpMessage();
+                    rAction.Set(U.NewLineS("\nERROR") + HelpMessage(), ActionID.NORMAL);
                     break;
             }
-            return returnString;
+            return rAction;
 
         }
 
@@ -285,19 +262,6 @@ namespace DungeonNamespace
 
                 r.name = RoomDesc.Key;
                 r.desc = RoomDesc.Value;
-
-				double i = rand.NextDouble ();
-                while (i <= 0.6)
-                {
-                    r.GetInventory().AddItem(gol.GetRandomItem());
-					i = rand.NextDouble ();
-                }
-				i = rand.NextDouble ();
-                while (i <= 0.2)
-                {
-                    r.GetInventory().AddItem(gol.GetRandomWeapon());
-					i = rand.NextDouble ();
-                }
                 rRooms.Add(r);
                 iter++;
             }

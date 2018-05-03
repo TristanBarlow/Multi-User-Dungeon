@@ -64,6 +64,7 @@ namespace DungeonNamespace
                     if (s.Length > 3)
                     {
                         AllAvailableWeapons.Add(s[3], new Weapon(s[0], s[1], Int32.Parse(s[2]), s[3]));
+                        AllAvailableItems.Add(s[3], new Weapon(s[0], s[1], Int32.Parse(s[2]), s[3]));
                     }
                 }
             }

@@ -52,6 +52,9 @@
     <Reference Include="Mono.Data.Sqlite" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\windows\ActionResponsecs.cs">
+      <Link>ActionResponsecs.cs</Link>
+    </Compile>
     <Compile Include="..\..\windows\Dungeon.cs">
       <Link>Dungeon.cs</Link>
     </Compile>
@@ -69,9 +72,6 @@
     </Compile>
     <Compile Include="..\..\windows\Program.cs">
       <Link>Program.cs</Link>
-    </Compile>
-    <Compile Include="..\..\windows\RequestHandler.cs">
-      <Link>RequestHandler.cs</Link>
     </Compile>
     <Compile Include="..\..\windows\Room.cs">
       <Link>Room.cs</Link>
