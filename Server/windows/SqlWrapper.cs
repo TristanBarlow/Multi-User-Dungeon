@@ -33,10 +33,12 @@ namespace Server
 
         private const String createTable = "create table if not exists ";
 
+        private const String itemColumns = "(name varchar(30), itemID varchar(10), uniqueID varchar(32), owner varchar(36))";
+        private const String playerColumns = " (name varchar(30), password varchar(150), salt varchar(64), rIndex int)";
+
         private GameObjectList gameObjectList;
 
         private List<String> ActivePlayers = new List<string>();
-
 
         private int DungeonSize = 0;
 
@@ -63,11 +65,9 @@ namespace Server
             cmd.CommandText = disableRollback;
             cmd.ExecuteNonQuery();
 
-            new sqliteCommand(createTable + itemTableName + " (name varchar(30), " +
-                              " itemID varchar(10), uniqueID varchar(32), owner varchar(36))", Database).ExecuteNonQuery();
+            new sqliteCommand(createTable + itemTableName + itemColumns, Database).ExecuteNonQuery();
 
-            new sqliteCommand(createTable + playerTableName + " (name varchar(30), " +
-                              "password varchar(150), rIndex int)", Database).ExecuteNonQuery();
+            new sqliteCommand(createTable + playerTableName + playerColumns ,  Database).ExecuteNonQuery();
         }
 
         public void AddItems(int numberOfItems, int numberOfWeapons)
@@ -174,10 +174,11 @@ namespace Server
                 try
                 {
 					command = new sqliteCommand("INSERT INTO " + playerTableName + 
-					                            " (name, password, rIndex) "+ 
-					                            "VALUES ($n, $p, $i) ", Database);
+					                            " (name, password, salt,  rIndex) "+ 
+					                            "VALUES ($n, $p, $s, $i) ", Database);
                     command.Parameters.Add("$n", DbType.String).Value = tempPlayer.PlayerName;
                     command.Parameters.Add("$p", DbType.String).Value = password;
+                    command.Parameters.Add("$s", DbType.String).Value = Encryption.GetSalt();
                     command.Parameters.Add("$i", DbType.Int32).Value = tempPlayer.roomIndex;
                     command.ExecuteNonQuery();
                     return true;
@@ -192,6 +193,13 @@ namespace Server
             {
                 return false;
             }
+        }
+
+        public String GetSalt(String Username)
+        {
+            var command = new sqliteCommand("select * from " + playerTableName + " where name = '" + Username + "'", Database);
+            var reader = command.ExecuteReader();
+            return "true";
         }
 
         public bool GetPlayerLogin(ref Player p, String Username, String password)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using Server;
 
 namespace MessageTypes
 {
@@ -110,7 +111,8 @@ namespace MessageTypes
         public void SetPassword(String p)
         {
             passLength = p.Length;
-            password = p;
+            byte[] bytes = Encoding.ASCII.GetBytes(p);
+            password = Encryption.GenerateHash(bytes);
         }
 
         public void SetName(String n)
@@ -260,7 +262,8 @@ namespace MessageTypes
         public void SetPassword(String p)
         {
             passLength = p.Length;
-            password = p;
+            byte[] bytes = Encoding.ASCII.GetBytes(p);
+            password = Encryption.GenerateHash(bytes);
         }
 
         public void SetName(String n)

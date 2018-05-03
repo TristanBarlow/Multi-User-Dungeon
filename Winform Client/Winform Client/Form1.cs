@@ -9,9 +9,11 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using System.IO;
+using Server;
 
 using MessageTypes;
 using Utilities;
+using System.Text;
 
 namespace Winform_Client
 {
@@ -25,7 +27,7 @@ namespace Winform_Client
         bool TestTheStress = false;
 
         private static String[] IP = { "127.0.0.1", "46.101.88.130", "192.168.1.101" };
-        private static int ipIndex = 1;
+        private static int ipIndex = 0;
 
         List<String> currentClientList = new List<String>();
 

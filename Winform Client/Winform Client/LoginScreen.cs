@@ -95,18 +95,27 @@ namespace Winform_Client
 
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        public void TryCreateCharacter(String name, String password)
         {
-            if (this.NameTextBox.Text.Count() > 0 && this.PasswordTextBox.Text.Count() > 0 && IsConnected && !NameTextBox.Text.Contains(" "))
+            if (name.Count() > 0 && password.Count() > 0 && IsConnected && !name.Contains(" ") && !password.Contains(" "))
             {
 
-                form.SendCreateUserMessage(this.NameTextBox.Text, this.PasswordTextBox.Text);
+                form.SendCreateUserMessage(name, password);
 
             }
             else
             {
-                LoginError.Text = "Error Creating User in";
+                LoginError.Text = "Error Creating User";
+
             }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            CreateCharacter create = new CreateCharacter(this);
+            this.Enabled = false;
+            DialogResult result = create.ShowDialog();
+            this.Enabled = true;
         }
     }
 }

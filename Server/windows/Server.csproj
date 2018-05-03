@@ -63,6 +63,7 @@
   <ItemGroup>
     <Compile Include="ActionResponsecs.cs" />
     <Compile Include="Dungeon.cs" />
+    <Compile Include="Encryption.cs" />
     <Compile Include="GameObjectLoader.cs" />
     <Compile Include="Item.cs" />
     <Compile Include="MessageTypes.cs" />
