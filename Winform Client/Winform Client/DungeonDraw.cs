@@ -11,6 +11,7 @@ namespace Winform_Client
 {
     public class DungeonDraw
     {
+        Random rand = new Random();
         public int Height { get; set; }
         public int Width { get; set; }
         public int YPos { get; set; }
@@ -188,28 +189,28 @@ namespace Winform_Client
                     currentMap.ElementAt(r.North).isDraw = true;
                     currentMap.ElementAt(r.North).XPos = r.XPos;
                     currentMap.ElementAt(r.North).YPos = r.YPos - r.RoomGapY;
-                    MapObjects.Add(new Connector(r, false));
+                    MapObjects.Add(new Connector(r, false,rand));
                 }
                 if (r.East != -1 && !currentMap.ElementAt(r.East).isDraw)
                 {
                     currentMap.ElementAt(r.East).isDraw = true;
                     currentMap.ElementAt(r.East).XPos = r.XPos + r.RoomGapX;
                     currentMap.ElementAt(r.East).YPos = r.YPos;
-                    MapObjects.Add(new Connector(currentMap.ElementAt(r.East), true));
+                    MapObjects.Add(new Connector(currentMap.ElementAt(r.East), true,rand));
                 }
                 if (r.South != -1 && !currentMap.ElementAt(r.South).isDraw)
                 {
                     currentMap.ElementAt(r.South).isDraw = true;
                     currentMap.ElementAt(r.South).XPos = r.XPos;
                     currentMap.ElementAt(r.South).YPos = r.YPos + r.RoomGapY;
-                    MapObjects.Add(new Connector(currentMap.ElementAt(r.South), false));
+                    MapObjects.Add(new Connector(currentMap.ElementAt(r.South), false, rand));
                 }
                 if (r.West != -1 && !currentMap.ElementAt(r.West).isDraw)
                 {
                     currentMap.ElementAt(r.West).isDraw = true;
                     currentMap.ElementAt(r.West).XPos = r.XPos - r.RoomGapX;
                     currentMap.ElementAt(r.West).YPos = r.YPos;
-                    MapObjects.Add(new Connector(r, true));
+                    MapObjects.Add(new Connector(r, true, rand));
                 }
             }
             Draw();
@@ -228,7 +229,7 @@ namespace Winform_Client
             int iter = 0;
             foreach (String room in words)
             {
-                Room r = new Room(iter, Scale);
+                Room r = new Room(iter, Scale, rand);
                 bool GoodRoom = false;
 
                 String[] exits = room.Split(' ');
@@ -298,12 +299,12 @@ namespace Winform_Client
                         User u;
                         if (ClientName == PlayerName)
                         {
-                            u = new User(ClientName, Room, Scale, true);
+                            u = new User(ClientName, Room,rand,  Scale, true);
                             LocalClient = u;
                         }
                         else
                         {
-                            u = new User(ClientName, Room, Scale);
+                            u = new User(ClientName, Room,rand, Scale);
                         }
                         ClientDrawDict.Add(ClientName, u);
                     }
@@ -323,7 +324,14 @@ namespace Winform_Client
  }
 
 
-    public class User: DrawObject
+public abstract class DrawObject
+{
+    public int XPos { get; set; } = 0;
+    public int YPos { get; set; } = 0;
+    public virtual void DrawMe(Graphics G, int XOff, int YOff) { }
+}
+
+public class User: DrawObject
     {
         public int RoomNum { set; get; } = -1;
         public int RoomSlotIndex { set; get; } = -1;
@@ -334,14 +342,18 @@ namespace Winform_Client
         {
             Name = s;
         }
-        public User(String s, int Rn, int scale = 3, bool IsPlayer = false)
+        public User(String s, int Rn, Random r, int scale = 3, bool IsPlayer = false)
         {
             Name = s;
             RoomNum = Rn;
-            if (IsPlayer)
-            {
-                b = new SolidBrush(Color.Green);
-            }
+        if (IsPlayer)
+        {
+            b = new SolidBrush(Color.Green);
+        }
+        else
+        {
+            b.Color = Color.FromArgb(r.Next(30, 255), r.Next(30, 255), r.Next(30, 255));
+        }
              size = scale;
         }
         public void MoveUser(RoomSlot rs, int Scale)
@@ -445,13 +457,15 @@ namespace Winform_Client
             }
         }
 
-        public Room(int rN, int Scale)
+        public Room(int rN, int Scale,Random r)
         {
+
             RoomNum = rN;
             RoomHeight *= Scale;
             RoomWidth *= Scale;
             XEnemySpawn = RoomHeight / 3;
             YEnemySpawn = RoomWidth / 3;
+            PenW.Color = Color.FromArgb(r.Next(30,255), r.Next(30, 255), r.Next(30, 255));
             RoomGapX = (int)(RoomWidth * 1.5);
             RoomGapY = (int)(RoomHeight * 1.5);
             Margin*= Scale;
@@ -497,8 +511,9 @@ namespace Winform_Client
         private int ySize = 0;
         private Pen PenB = new Pen(Color.DarkCyan, 4F);
 
-        public Connector(Room r, bool H)
+        public Connector(Room r, bool H, Random rand)
         {
+            PenB.Color = Color.FromArgb(rand.Next(30, 255), rand.Next(30, 255), rand.Next(30, 255));
             isHorizontal = H;
             XPos = r.XPos;
             YPos = r.YPos;
@@ -528,13 +543,6 @@ namespace Winform_Client
             base.DrawMe(G, XOff,YOff);
 
         }
-    }
-
-    public abstract class DrawObject
-    {
-        public int XPos { get; set; } = 0;
-        public int YPos { get; set; } = 0;
-        public virtual void DrawMe(Graphics G, int XOff, int YOff) { }
     }
 
     public class RoomSlot

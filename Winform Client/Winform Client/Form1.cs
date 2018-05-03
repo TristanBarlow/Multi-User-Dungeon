@@ -25,7 +25,7 @@ namespace Winform_Client
         bool TestTheStress = false;
 
         private static String[] IP = { "127.0.0.1", "46.101.88.130", "192.168.1.101" };
-        private static int ipIndex = 2;
+        private static int ipIndex = 1;
 
         List<String> currentClientList = new List<String>();
 
