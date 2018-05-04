@@ -26,9 +26,7 @@ namespace MessageTypes
 
             switch (id)
             {
-                case RoomMessage.ID:
-                    m = new RoomMessage();
-                    break;
+
                 case LoginMessage.ID:
                     m = new LoginMessage();
                     break;
@@ -55,6 +53,9 @@ namespace MessageTypes
                     m = new UpdateChat();
                     break;
 
+                case SaltMessage.ID:
+                    m = new SaltMessage();
+                    break;
                 default:
                     throw (new Exception());
             }
@@ -69,32 +70,7 @@ namespace MessageTypes
         }
     };
 
-    public class RoomMessage : Msg
-    {
-        public const int ID = 1;
 
-        public String msg;
-
-        public RoomMessage() { mID = ID; }
-
-        public override MemoryStream WriteData()
-        {
-            MemoryStream stream = new MemoryStream();
-            BinaryWriter write = new BinaryWriter(stream);
-
-            write.Write(ID);
-            write.Write(msg);
-
-            write.Close();
-
-            return stream;
-        }
-
-        public override void ReadData(BinaryReader read)
-        {
-            msg = read.ReadString();
-        }
-    };
 
     public class LoginMessage : Msg
     {
@@ -108,11 +84,11 @@ namespace MessageTypes
 
         public LoginMessage() { mID = ID; }
 
-        public void SetPassword(String p)
+        public void SetPassword(String p, String salt)
         {
             passLength = p.Length;
             byte[] bytes = Encoding.ASCII.GetBytes(p);
-            password = Encryption.GenerateHash(bytes);
+            password = Encryption.GenerateSaltedHash(p, salt);
         }
 
         public void SetName(String n)
@@ -257,13 +233,18 @@ namespace MessageTypes
         public String password;
         private int passLength = 0;
 
+        public String salt;
+        private int saltLength = 0;
+
         public CreateUser() { mID = ID; }
 
-        public void SetPassword(String p)
+        public void SetPassword(String p, String s)
         {
             passLength = p.Length;
+            salt = s;
+            saltLength = salt.Length;
             byte[] bytes = Encoding.ASCII.GetBytes(p);
-            password = Encryption.GenerateHash(bytes);
+            password = Encryption.GenerateSaltedHash(p,salt);
         }
 
         public void SetName(String n)
@@ -280,6 +261,8 @@ namespace MessageTypes
             write.Write(name);
             write.Write(passLength);
             write.Write(password);
+            write.Write(saltLength);
+            write.Write(salt);
 
             write.Close();
 
@@ -292,6 +275,8 @@ namespace MessageTypes
             name = read.ReadString();
             passLength = read.ReadInt32();
             password = read.ReadString();
+            saltLength = read.ReadInt32();
+            salt = read.ReadString();
 
         }
     }
@@ -302,6 +287,31 @@ namespace MessageTypes
 
         public String message = "";
         public UpdateChat() { mID = ID; }
+
+        public override MemoryStream WriteData()
+        {
+
+            MemoryStream stream = new MemoryStream();
+            BinaryWriter write = new BinaryWriter(stream);
+            write.Write(ID);
+            write.Write(message);
+
+            write.Close();
+            return stream;
+        }
+
+        public override void ReadData(BinaryReader read)
+        {
+            message = read.ReadString();
+        }
+    }
+
+    public class SaltMessage : Msg
+    {
+        public const int ID = 9;
+
+        public String message = "";
+        public SaltMessage() { mID = ID; }
 
         public override MemoryStream WriteData()
         {

@@ -161,7 +161,7 @@ namespace Server
             return rString;
         }
 
-        public bool AddPlayer(Player tempPlayer, String password)
+        public bool AddPlayer(Player tempPlayer, String password, String salt)
         {
 
             var command = new sqliteCommand(Database);
@@ -178,7 +178,7 @@ namespace Server
 					                            "VALUES ($n, $p, $s, $i) ", Database);
                     command.Parameters.Add("$n", DbType.String).Value = tempPlayer.PlayerName;
                     command.Parameters.Add("$p", DbType.String).Value = password;
-                    command.Parameters.Add("$s", DbType.String).Value = Encryption.GetSalt();
+                    command.Parameters.Add("$s", DbType.String).Value = salt;
                     command.Parameters.Add("$i", DbType.Int32).Value = tempPlayer.roomIndex;
                     command.ExecuteNonQuery();
                     return true;
@@ -199,7 +199,11 @@ namespace Server
         {
             var command = new sqliteCommand("select * from " + playerTableName + " where name = '" + Username + "'", Database);
             var reader = command.ExecuteReader();
-            return "true";
+            if (reader.Read())
+            {
+                return reader["salt"].ToString();
+            }
+            else return null;
         }
 
         public bool GetPlayerLogin(ref Player p, String Username, String password)

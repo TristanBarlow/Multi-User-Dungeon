@@ -29,6 +29,26 @@ namespace Server
             String str = Convert.ToBase64String(algorithm.ComputeHash(plainText));
             return str;
         }
+
+        public static String GenerateSaltedHash(String plainText, String salt)
+        {
+            HashAlgorithm algorithm = new SHA256Managed();
+
+            byte[] plainTextWithSaltBytes =
+              new byte[plainText.Length + salt.Length];
+
+            for (int i = 0; i < plainText.Length; i++)
+            {
+                plainTextWithSaltBytes[i] = Convert.ToByte(plainText[i]);
+            }
+            for (int i = 0; i < salt.Length; i++)
+            {
+                plainTextWithSaltBytes[plainText.Length + i] = Convert.ToByte(salt[i]);
+            }
+
+            return Convert.ToBase64String(algorithm.ComputeHash(plainTextWithSaltBytes));
+        }
+
         public static bool CompareByteArrays(byte[] array1, byte[] array2)
         {
             if (array1.Length != array2.Length)

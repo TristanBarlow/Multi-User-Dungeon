@@ -40,8 +40,14 @@ namespace Winform_Client
         LoginScreen loginScreen;
 
         public String ClientName { set; get; } = " ";
+        //this is always reset after use
+        public String ClientPassword { set; get; } = " ";
+
+        public String Salt { set; get; }
 
         DungeonDraw DGD;
+
+
 
         public Form1()
         {
@@ -171,6 +177,13 @@ namespace Winform_Client
                                         form.AddDungeonText(UC.message, false);
                                     }
                                     break;
+                                case SaltMessage.ID:
+                                    {
+                                        SaltMessage SM = (SaltMessage)m;
+                                        Salt = SM.message;
+                                        SendLoginMessage();
+                                        break;
+                                    }
                                 default:
                                     break;
                             }
@@ -315,26 +328,51 @@ namespace Winform_Client
             catch { }
         }
 
-        public void SendLoginMessage(String name, String password)
+        public void RequestSalt()
+        {
+            SaltMessage sm = new SaltMessage();
+            sm.message = ClientName;
+            MemoryStream outStream = sm.WriteData();
+            try
+            {
+                clientSocket.Send(outStream.GetBuffer());
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine("Error sending message: " + ex);
+            }
+        }
+
+        public void SetUserData(String name, String password)
+        {
+            ClientName = name;
+            ClientPassword = password;
+        }
+
+        public void SendLoginMessage()
         {
             LoginMessage nameMsg = new LoginMessage();
-            ClientName = name;
-            nameMsg.SetName(name);
-            nameMsg.SetPassword(password);
+            nameMsg.SetName(ClientName);
+            nameMsg.SetPassword(ClientPassword, Salt);
             MemoryStream outStream = nameMsg.WriteData();
             try
             {
                 clientSocket.Send(outStream.GetBuffer());
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error sending message: " + ex);
+            }
         }
 
         public void SendCreateUserMessage(String name, String password)
         {
-            CreateUser nameMsg = new CreateUser();
             ClientName = name;
+            Salt = Encryption.GetSalt();
+
+            CreateUser nameMsg = new CreateUser();
             nameMsg.SetName(name);
-            nameMsg.SetPassword(password);
+            nameMsg.SetPassword(password,Salt );
             MemoryStream outStream = nameMsg.WriteData();
             try
             {

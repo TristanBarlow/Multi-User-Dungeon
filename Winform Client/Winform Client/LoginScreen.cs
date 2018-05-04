@@ -36,8 +36,9 @@ namespace Winform_Client
             if (this.NameTextBox.Text.Count() > 0 && this.PasswordTextBox.Text.Count() > 0 && IsConnected && !NameTextBox.Text.Contains(" "))
             {
 
-                form.SendLoginMessage(this.NameTextBox.Text, this.PasswordTextBox.Text);
-
+                form.SetUserData(this.NameTextBox.Text, this.PasswordTextBox.Text);
+                this.Enabled = false;
+                form.RequestSalt();
             }
             else
             {
@@ -56,6 +57,10 @@ namespace Winform_Client
             MethodInvoker methodInvokerDelegate = delegate ()
             {
                 LoginError.Text = s;
+                if (this.Enabled == false)
+                {
+                    this.Enabled = true;
+                }
             };
             if (this.InvokeRequired)
             {
