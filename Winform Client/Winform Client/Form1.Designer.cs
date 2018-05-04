@@ -28,10 +28,13 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.buttonSend = new System.Windows.Forms.Button();
             this.textBox_Input = new System.Windows.Forms.TextBox();
             this.TextboxDungeon = new System.Windows.Forms.TextBox();
             this.DungeonGraphic = new System.Windows.Forms.PictureBox();
+            this.Zoomin = new System.Windows.Forms.Button();
+            this.Zoomout = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.DungeonGraphic)).BeginInit();
             this.SuspendLayout();
             // 
@@ -83,6 +86,30 @@
             this.DungeonGraphic.TabStop = false;
             this.DungeonGraphic.Paint += new System.Windows.Forms.PaintEventHandler(this.DungeonPaint);
             // 
+            // Zoomin
+            // 
+            this.Zoomin.BackColor = System.Drawing.Color.Black;
+            this.Zoomin.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.Zoomin.Image = ((System.Drawing.Image)(resources.GetObject("Zoomin.Image")));
+            this.Zoomin.Location = new System.Drawing.Point(1020, 12);
+            this.Zoomin.Name = "Zoomin";
+            this.Zoomin.Size = new System.Drawing.Size(50, 50);
+            this.Zoomin.TabIndex = 17;
+            this.Zoomin.UseVisualStyleBackColor = false;
+            this.Zoomin.Click += new System.EventHandler(this.Zoomin_Click);
+            // 
+            // Zoomout
+            // 
+            this.Zoomout.BackColor = System.Drawing.Color.Black;
+            this.Zoomout.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.Zoomout.Image = ((System.Drawing.Image)(resources.GetObject("Zoomout.Image")));
+            this.Zoomout.Location = new System.Drawing.Point(1020, 68);
+            this.Zoomout.Name = "Zoomout";
+            this.Zoomout.Size = new System.Drawing.Size(50, 50);
+            this.Zoomout.TabIndex = 18;
+            this.Zoomout.UseVisualStyleBackColor = false;
+            this.Zoomout.Click += new System.EventHandler(this.Zoomout_Click);
+            // 
             // Form1
             // 
             this.AcceptButton = this.buttonSend;
@@ -90,6 +117,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Black;
             this.ClientSize = new System.Drawing.Size(1082, 518);
+            this.Controls.Add(this.Zoomout);
+            this.Controls.Add(this.Zoomin);
             this.Controls.Add(this.DungeonGraphic);
             this.Controls.Add(this.TextboxDungeon);
             this.Controls.Add(this.textBox_Input);
@@ -113,6 +142,8 @@
         private System.Windows.Forms.TextBox textBox_Input;
         private System.Windows.Forms.TextBox TextboxDungeon;
         private System.Windows.Forms.PictureBox DungeonGraphic;
+        private System.Windows.Forms.Button Zoomin;
+        private System.Windows.Forms.Button Zoomout;
     }
 }
 

@@ -39,8 +39,6 @@ namespace Winform_Client
 
         LoginScreen loginScreen;
 
-        int MapMoveSpeed = 10;
-
         public String ClientName { set; get; } = " ";
 
         DungeonDraw DGD;
@@ -354,31 +352,6 @@ namespace Winform_Client
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
-            if (!textBox_Input.ContainsFocus)
-            {
-                switch (e.KeyCode)
-                {
-                    case Keys.Up:
-                        DGD.MoveY(MapMoveSpeed);
-                        break;
-                    case Keys.Left:
-                        DGD.MoveX(MapMoveSpeed);
-                        break;
-                    case Keys.Down:
-                        DGD.MoveY(-MapMoveSpeed);
-                        break;
-                    case Keys.Right:
-                        DGD.MoveX(-MapMoveSpeed);
-                        break;
-                    case Keys.S:
-                        DGD.ChangeScale(-1);
-                        break;
-                    case Keys.W:
-                        DGD.ChangeScale(1);
-                        break;
-
-                }
-            }
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -418,6 +391,16 @@ namespace Winform_Client
         {
             OnExit();
             Application.Exit();
+        }
+
+        private void Zoomin_Click(object sender, EventArgs e)
+        {
+            DGD.ChangeScale(1);
+        }
+
+        private void Zoomout_Click(object sender, EventArgs e)
+        {
+            DGD.ChangeScale(-1);
         }
     }
 }

@@ -40,8 +40,8 @@ namespace Winform_Client
         public void ChangeScale(int Offset)
         {
             Scale += Offset;
-            if (Scale <= 1) Scale = 1;
-            if (Scale >= 15) Scale = 15;
+            if (Scale <= 2) Scale = 2;
+            if (Scale >= 10) Scale = 10;
             UpdateScale();
             
         }
