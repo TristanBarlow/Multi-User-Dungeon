@@ -26,17 +26,23 @@ namespace Server
 
         static private Dungeon Dungeon;
 
+        //The queue where all the function calls are added to
         static private ConcurrentQueue<Action> RequestQueue = new ConcurrentQueue<Action>();
 
+        // class used for all database queries 
         static private SqlWrapper sqlWrapper;
 
+        //List of all objects in the game, including rooms, items and weapons
         static private GameObjectList AllItems;
 
         private static String[] IP = { "127.0.0.1", "46.101.88.130", "192.168.1.101" };
 
         private static int ipIndex = 0;
 
-
+        /**
+         *Creates an sends the map information message type for the dungeon drawer 
+         * @param player the player to get the message
+         */
         static void SendDungeonInfo(Player player)
         {
             MapLayout ML = new MapLayout();
@@ -54,6 +60,11 @@ namespace Server
             }
         }
 
+       /**
+         *Creates an sends the Dungone response message type 
+         * @param player the player to get the message
+         * @param response the String that is the dungeons response
+         */
         static void SendDungeonResponse(Player player, String response)
         {
             DungeonResponse msg = new DungeonResponse();
@@ -70,35 +81,36 @@ namespace Server
             }
         }
 
-        static bool ExisitngName(String s)
+        /**
+         *Removes the client from the client list
+         * @param player the player to be removed
+         */
+        static void RemoveClientByPlayer(Player player)
         {
-            foreach (Player p in clientList)
+            if (player != null && clientList.Contains(player))
             {
-                if (p.PlayerName == s)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        static void RemoveClientByPlayer(Player p)
-        {
-            if (p != null)
-            {
-                sqlWrapper.RemoveActivePlayer(p.PlayerName);
-                clientList.Remove(p);
+                sqlWrapper.RemoveActivePlayer(player.PlayerName);
+                clientList.Remove(player);
             }
         }
 
-        static void SendUpdateMessage(String str, Player p)
+        /**
+         *Creates and sends the map update message type
+         * @param str the string that will be udpdated to players text
+         * @param player the player to send the update message to
+         */
+        static void SendUpdateMessage(String str, Player player)
         {
             UpdateChat UC = new UpdateChat();
             UC.message = str;
-            MemoryStream stream = UC.WriteData(p.Salt);
-            p.socket.Send(stream.GetBuffer());
+            MemoryStream stream = UC.WriteData(player.Salt);
+            player.socket.Send(stream.GetBuffer());
         }
 
+        /**
+        *Inform players in the room that a player enetered
+        * @param player the player that enetered the room
+        */
         static void JoinedPlayers(Player player)
         {
             foreach (Player p in clientList)
@@ -110,21 +122,33 @@ namespace Server
             }
         }
 
+        /**
+        *Called when a player uses the Say command, it will inform all players in the room of what was said
+        * @param player player that spoke
+        * @param message the thing the player said
+        */
         static void PlayerSpoken(Player player, string message)
         {
             String str = player.PlayerName;
+
             foreach (Player p in clientList)
             {
-                if (p == player) str = "You ";
+                //Send YOU said X to the player that spok, otherwise the player name
+                if (p.PlayerName == player.PlayerName) str = "You ";
                 else { str = player.PlayerName; };
 
                 if (p.roomIndex == player.roomIndex)
                 {
-                    SendUpdateMessage(player.PlayerName + " Said:  " + message , p);
+                    SendUpdateMessage(str + " Said:  " + message , p);
                 }
             }
         }
 
+        /**
+        *Sends a message to all players of you leaving the room
+        * @param player that left the room
+        * @int room the room the player left
+        */
         static void LeftPlayers(Player player, int room)
         {
             foreach (Player p in clientList)
@@ -136,25 +160,36 @@ namespace Server
             }
         }
 
+        /**
+        *probably the most called function, It handles all actions to do with the dungeon.
+        * 
+        * @param dungMsg the action to send to the dungeon
+        * @int player the player who is acting upon the dungeon
+        */
         static void DungeonAction(String dungMsg, Player player)
         { 
+            //A custom class to help translate what happened as a result of a players action
             ActionResponse response  = Dungeon.PlayerAction(dungMsg, player, sqlWrapper);
             switch (response.ID)
             {
+                //if the player moved, do requred moved stuff
                 case ActionID.MOVE:
                     JoinedPlayers(player);
                     SendLocations();
                     SendDungeonResponse(player, response.message);
                     break;
 
+                //If they did action that requires an update (pickup, drop item etc.)
                 case ActionID.UPDATE:
                     SendUpdateMessage(response.message, player);
                     break;
 
+                // If they spoke let other people know
                 case ActionID.SAY:
                     PlayerSpoken(player, response.message);
                     break;
 
+                //The standard one, this will clear the clients text and add new text.
                 case ActionID.NORMAL:
                     if (response.message == "") return;
                     SendDungeonResponse(player, response.message);
@@ -162,22 +197,35 @@ namespace Server
             }
         }
 
-        static void AddNewPlayer(Player p)
+        /**
+         * Adds a player to the client list, effectively making them part of the game 
+         * @param player the player to be added
+         */
+        static void AddNewPlayer(Player player)
         {
             Room r;
-            if (p.roomIndex == -1)
+
+            //get random room if they're a new player
+            if (player.roomIndex == -1 || player.roomIndex > Dungeon.GetRoomList().Count )
             {
                 r = Dungeon.GetRandomRoom();
             }
             else
             {
-                r = Dungeon.GetRoomList()[p.roomIndex];
+                r = Dungeon.GetRoomList()[player.roomIndex];
             }
-            p.SetRoom(r);
-            sqlWrapper.UpdatePlayerPos(p);
-            clientList.Add(p);
+
+            //add to the required stuffs
+            player.SetRoom(r);
+            sqlWrapper.UpdatePlayerPos(player);
+            clientList.Add(player);
         }
 
+        /**
+         *If exsisting player, send them the salt to their password
+         * @param s socket to send the salt to
+         * @param salt the salt to send
+         */
         static void SendSalt(Socket s, String salt)
         {
             SaltMessage SM = new SaltMessage();
@@ -186,6 +234,9 @@ namespace Server
             s.Send(stream.GetBuffer());
         }
 
+        /**
+         * 
+         */
         static bool SendLoginResponse(Player p, String msg, bool success)
         {
             LoginResponse response = new LoginResponse();
