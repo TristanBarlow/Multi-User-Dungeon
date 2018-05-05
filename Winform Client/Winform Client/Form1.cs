@@ -43,7 +43,9 @@ namespace Winform_Client
         //this is always reset after use
         public String ClientPassword { set; get; } = " ";
 
-        public String Salt { set; get; }
+        public String Salt { set; get; } = "";
+
+        public bool gotresponse = false;
 
         DungeonDraw DGD;
 
@@ -128,10 +130,8 @@ namespace Winform_Client
 
                     if (result > 0)
                     {
-                        MemoryStream stream = new MemoryStream(buffer);
-                        BinaryReader read = new BinaryReader(stream);
 
-                        Msg m = Msg.DecodeStream(read);
+                        Msg m = Msg.DecodeStream(buffer,Salt);
 
                         if (m != null)
                         {
@@ -152,16 +152,17 @@ namespace Winform_Client
 
                                         break;
                                     }
-                                case LoginMessage.ID:
+                                case LoginResponse.ID:
                                     {
-                                        LoginMessage LM = (LoginMessage)m;
-                                        if (LM.password == "1")
+                                        gotresponse = true;
+                                        LoginResponse LM = (LoginResponse)m;
+                                        if (LM.loggedIn == "1")
                                         {
-                                            loginScreen.LoginResponse(LM.name, true);
+                                            loginScreen.LoginResponse(LM.message, true);
                                         }
                                         else
                                         {
-                                            loginScreen.LoginResponse(LM.name, false);
+                                            loginScreen.LoginResponse(LM.message, false);
                                         }
                                     }
                                     break;
@@ -190,10 +191,10 @@ namespace Winform_Client
                         }
                     }
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     form.bConnected = false;
-                    Console.WriteLine(U.NewLineS("Lost server!"));
+                    Console.WriteLine(U.NewLineS("Lost server!") + ex);
                     Application.Restart();
                     Environment.Exit(0);
                     
@@ -308,7 +309,7 @@ namespace Winform_Client
         {
             DungeonCommand dungMsg = new DungeonCommand();
             dungMsg.command = Message;
-            MemoryStream outStream = dungMsg.WriteData();
+            MemoryStream outStream = dungMsg.WriteData(Salt);
             try
             {
                 clientSocket.Send(outStream.GetBuffer());
@@ -320,7 +321,7 @@ namespace Winform_Client
         {
             MapLayout request = new MapLayout();
             request.mapInfo = Message;
-            MemoryStream outStream = request.WriteData();
+            MemoryStream outStream = request.WriteData(Salt);
             try
             {
                 clientSocket.Send(outStream.GetBuffer());
@@ -332,7 +333,7 @@ namespace Winform_Client
         {
             SaltMessage sm = new SaltMessage();
             sm.message = ClientName;
-            MemoryStream outStream = sm.WriteData();
+            MemoryStream outStream = sm.WriteData("");
             try
             {
                 clientSocket.Send(outStream.GetBuffer());
@@ -354,7 +355,7 @@ namespace Winform_Client
             LoginMessage nameMsg = new LoginMessage();
             nameMsg.SetName(ClientName);
             nameMsg.SetPassword(ClientPassword, Salt);
-            MemoryStream outStream = nameMsg.WriteData();
+            MemoryStream outStream = nameMsg.WriteData(Salt);
             try
             {
                 clientSocket.Send(outStream.GetBuffer());
@@ -370,10 +371,12 @@ namespace Winform_Client
             ClientName = name;
             Salt = Encryption.GetSalt();
 
+            gotresponse = false;
+
             CreateUser nameMsg = new CreateUser();
             nameMsg.SetName(name);
             nameMsg.SetPassword(password,Salt );
-            MemoryStream outStream = nameMsg.WriteData();
+            MemoryStream outStream = nameMsg.WriteData("");
             try
             {
                 clientSocket.Send(outStream.GetBuffer());

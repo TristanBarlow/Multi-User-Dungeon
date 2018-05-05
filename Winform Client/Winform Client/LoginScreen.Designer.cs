@@ -28,25 +28,25 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.button1 = new System.Windows.Forms.Button();
+            this.Login = new System.Windows.Forms.Button();
             this.NameTextBox = new System.Windows.Forms.TextBox();
             this.PasswordTextBox = new System.Windows.Forms.TextBox();
             this.ConnectionStatus = new System.Windows.Forms.TextBox();
             this.LoginError = new System.Windows.Forms.TextBox();
-            this.button2 = new System.Windows.Forms.Button();
+            this.CreateUser = new System.Windows.Forms.Button();
             this.Username = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
-            // button1
+            // Login
             // 
-            this.button1.Location = new System.Drawing.Point(40, 170);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(113, 34);
-            this.button1.TabIndex = 0;
-            this.button1.Text = "Login";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.LoginClick);
+            this.Login.Location = new System.Drawing.Point(40, 170);
+            this.Login.Name = "Login";
+            this.Login.Size = new System.Drawing.Size(113, 34);
+            this.Login.TabIndex = 0;
+            this.Login.Text = "Login";
+            this.Login.UseVisualStyleBackColor = true;
+            this.Login.Click += new System.EventHandler(this.LoginClick);
             // 
             // NameTextBox
             // 
@@ -98,16 +98,16 @@
             this.LoginError.TabStop = false;
             this.LoginError.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
-            // button2
+            // CreateUser
             // 
-            this.button2.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button2.Location = new System.Drawing.Point(58, 210);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(81, 23);
-            this.button2.TabIndex = 7;
-            this.button2.Text = "Create User";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.CreateUser.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.CreateUser.Location = new System.Drawing.Point(58, 210);
+            this.CreateUser.Name = "CreateUser";
+            this.CreateUser.Size = new System.Drawing.Size(81, 23);
+            this.CreateUser.TabIndex = 7;
+            this.CreateUser.Text = "Create User";
+            this.CreateUser.UseVisualStyleBackColor = true;
+            this.CreateUser.Click += new System.EventHandler(this.button2_Click);
             // 
             // Username
             // 
@@ -136,12 +136,12 @@
             this.ClientSize = new System.Drawing.Size(206, 237);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.Username);
-            this.Controls.Add(this.button2);
+            this.Controls.Add(this.CreateUser);
             this.Controls.Add(this.LoginError);
             this.Controls.Add(this.ConnectionStatus);
             this.Controls.Add(this.PasswordTextBox);
             this.Controls.Add(this.NameTextBox);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.Login);
             this.Name = "LoginScreen";
             this.Text = "LoginScreen";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.LoginScreen_FormClosed);
@@ -153,12 +153,12 @@
 
         #endregion
 
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button Login;
         private System.Windows.Forms.TextBox NameTextBox;
         private System.Windows.Forms.TextBox PasswordTextBox;
         private System.Windows.Forms.TextBox ConnectionStatus;
         private System.Windows.Forms.TextBox LoginError;
-        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button CreateUser;
         private System.Windows.Forms.Label Username;
         private System.Windows.Forms.Label label1;
     }

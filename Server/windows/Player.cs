@@ -20,6 +20,8 @@ namespace PlayerN
 
         public bool isDead = false;
 
+        public String Salt { set; get; }
+
         private Room currentRoom;
 
         public int roomIndex = -1;
@@ -54,6 +56,7 @@ namespace PlayerN
         public Player(Socket s)
         {
             socket = s;
+            Salt = "";
         }
 
         public int GetHealth(){ return health;}

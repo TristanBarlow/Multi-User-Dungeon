@@ -13,12 +13,16 @@ namespace MessageTypes
 
         public int mID;
 
-        public abstract MemoryStream WriteData();
+        public abstract MemoryStream WriteData(String salt);
 
         public abstract void ReadData(BinaryReader read);
 
-        public static Msg DecodeStream(BinaryReader read)
+        public static Msg DecodeStream(byte[] buffer, String salt)
         {
+            BinaryReader read = null;
+            MemoryStream stream = new MemoryStream(buffer);
+            read = new BinaryReader(stream);
+
             int id;
             Msg m = null;
 
@@ -26,6 +30,9 @@ namespace MessageTypes
 
             switch (id)
             {
+                case LoginResponse.ID:
+                    m = new LoginResponse();
+                    break;
 
                 case LoginMessage.ID:
                     m = new LoginMessage();
@@ -65,12 +72,45 @@ namespace MessageTypes
                 m.mID = id;
                 m.ReadData(read);
             }
-
+            
             return m;
         }
     };
 
+    public class LoginResponse : Msg
+    {
+        public const int ID = 1;
 
+        private int breakInt = 0;
+
+        public String message;
+
+        public String loggedIn;
+
+        public LoginResponse() { mID = ID; }
+
+        public override MemoryStream WriteData(String salt)
+        {
+            MemoryStream stream = new MemoryStream();
+            BinaryWriter write = new BinaryWriter(stream);
+            write.Write(ID);
+            write.Write(message);
+            write.Write(breakInt);
+            write.Write(loggedIn);
+
+            write.Close();
+
+            return stream;
+        }
+
+        public override void ReadData(BinaryReader read)
+        {
+            message = read.ReadString();
+            breakInt = read.ReadInt32();
+            loggedIn = read.ReadString();
+
+        }
+    };
 
     public class LoginMessage : Msg
     {
@@ -87,7 +127,6 @@ namespace MessageTypes
         public void SetPassword(String p, String salt)
         {
             passLength = p.Length;
-            byte[] bytes = Encoding.ASCII.GetBytes(p);
             password = Encryption.GenerateSaltedHash(p, salt);
         }
 
@@ -96,10 +135,10 @@ namespace MessageTypes
             nameLength = n.Length;
             name = n;
         }
-        public override MemoryStream WriteData()
+        public override MemoryStream WriteData(String salt)
         {
             MemoryStream stream = new MemoryStream();
-            BinaryWriter write = new BinaryWriter(stream);
+            BinaryWriter write = new BinaryWriter(stream );
             write.Write(ID);
             write.Write(nameLength);
             write.Write(name);
@@ -129,10 +168,10 @@ namespace MessageTypes
  
         public DungeonCommand() { mID = ID; }
 
-        public override MemoryStream WriteData()
+        public override MemoryStream WriteData(String salt)
         {
             MemoryStream stream = new MemoryStream();
-            BinaryWriter write = new BinaryWriter(stream);
+            BinaryWriter write = new BinaryWriter(stream );
             write.Write(ID);
             write.Write(command);
 
@@ -155,10 +194,10 @@ namespace MessageTypes
 
         public DungeonResponse() { mID = ID; }
 
-        public override MemoryStream WriteData()
+        public override MemoryStream WriteData(String salt)
         {
             MemoryStream stream = new MemoryStream();
-            BinaryWriter write = new BinaryWriter(stream);
+            BinaryWriter write = new BinaryWriter(stream );
             write.Write(ID);
             write.Write(response);
 
@@ -180,10 +219,10 @@ namespace MessageTypes
 
         public MapLayout() { mID = ID; }
 
-        public override MemoryStream WriteData()
+        public override MemoryStream WriteData(String salt)
         {
             MemoryStream stream = new MemoryStream();
-            BinaryWriter write = new BinaryWriter(stream);
+            BinaryWriter write = new BinaryWriter(stream );
             write.Write(ID);
             write.Write(mapInfo);
 
@@ -205,11 +244,11 @@ namespace MessageTypes
 
         public PlayerLocations() { mID = ID; }
 
-        public override MemoryStream WriteData()
+        public override MemoryStream WriteData(String salt)
         {
 
             MemoryStream stream = new MemoryStream();
-            BinaryWriter write = new BinaryWriter(stream);
+            BinaryWriter write = new BinaryWriter(stream );
             write.Write(ID);
             write.Write(LocationString);
 
@@ -243,7 +282,6 @@ namespace MessageTypes
             passLength = p.Length;
             salt = s;
             saltLength = salt.Length;
-            byte[] bytes = Encoding.ASCII.GetBytes(p);
             password = Encryption.GenerateSaltedHash(p,salt);
         }
 
@@ -252,10 +290,10 @@ namespace MessageTypes
             nameLength = n.Length;
             name = n;
         }
-        public override MemoryStream WriteData()
+        public override MemoryStream WriteData(String s)
         {
             MemoryStream stream = new MemoryStream();
-            BinaryWriter write = new BinaryWriter(stream);
+            BinaryWriter write = new BinaryWriter(stream );
             write.Write(ID);
             write.Write(nameLength);
             write.Write(name);
@@ -288,11 +326,11 @@ namespace MessageTypes
         public String message = "";
         public UpdateChat() { mID = ID; }
 
-        public override MemoryStream WriteData()
+        public override MemoryStream WriteData(String salt)
         {
 
             MemoryStream stream = new MemoryStream();
-            BinaryWriter write = new BinaryWriter(stream);
+            BinaryWriter write = new BinaryWriter(stream );
             write.Write(ID);
             write.Write(message);
 
@@ -313,11 +351,11 @@ namespace MessageTypes
         public String message = "";
         public SaltMessage() { mID = ID; }
 
-        public override MemoryStream WriteData()
+        public override MemoryStream WriteData(String salt)
         {
 
             MemoryStream stream = new MemoryStream();
-            BinaryWriter write = new BinaryWriter(stream);
+            BinaryWriter write = new BinaryWriter(stream );
             write.Write(ID);
             write.Write(message);
 

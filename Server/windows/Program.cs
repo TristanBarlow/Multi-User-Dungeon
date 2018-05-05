@@ -41,7 +41,7 @@ namespace Server
         {
             MapLayout ML = new MapLayout();
             ML.mapInfo = Dungeon.GetDungeonString();
-            MemoryStream outStream = ML.WriteData();
+            MemoryStream outStream = ML.WriteData(player.Salt);
 
             try
             {
@@ -58,7 +58,7 @@ namespace Server
         {
             DungeonResponse msg = new DungeonResponse();
             msg.response = response;
-            MemoryStream outStream = msg.WriteData();
+            MemoryStream outStream = msg.WriteData(player.Salt);
 
             try
             {
@@ -95,7 +95,7 @@ namespace Server
         {
             UpdateChat UC = new UpdateChat();
             UC.message = str;
-            MemoryStream stream = UC.WriteData();
+            MemoryStream stream = UC.WriteData(p.Salt);
             p.socket.Send(stream.GetBuffer());
         }
 
@@ -182,118 +182,27 @@ namespace Server
         {
             SaltMessage SM = new SaltMessage();
             SM.message = salt;
-            MemoryStream stream = SM.WriteData();
+            MemoryStream stream = SM.WriteData("This does not matter as it will not be used");
             s.Send(stream.GetBuffer());
         }
 
-        static bool LoginSequence(Socket chatClient, ref Player player, ref bool bQuit)
+        static bool SendLoginResponse(Player p, String msg, bool success)
         {
-            try
-            {
-                byte[] buffer = new byte[4096];
-                int result;
-
-                result = chatClient.Receive(buffer);
-
-                String salt = "";
-
-                if (result > 0)
-                {
-                    MemoryStream stream = new MemoryStream(buffer);
-                    BinaryReader read = new BinaryReader(stream);
-
-                    Msg m = Msg.DecodeStream(read);
-
-                    switch (m.mID)
-                    {
-                        case SaltMessage.ID:
-                            SaltMessage SM = (SaltMessage)m;
-                            lock (sqlWrapper)
-                            {
-                                salt = sqlWrapper.GetSalt(SM.message);
-                                if (salt != null)
-                                {
-                                    SendSalt(chatClient, salt);
-                                }
-                                else
-                                {
-                                    SendLoginResponse(chatClient, "Failed Bad login", false);
-                                }
-
-                            }
-                            break;
-                        case LoginMessage.ID:
-                        {
-                            LoginMessage LM = (LoginMessage)m;
-                            player = new Player(chatClient);
-                            Console.WriteLine("Login request from: " + LM.name);
-                            lock (sqlWrapper)
-                            {
-                                if (sqlWrapper.GetPlayerLogin(ref player, LM.name, LM.password))
-                                {
-                                    Console.WriteLine("Player: " + LM.name + "Logged in");
-                                    SendLoginResponse(chatClient, "Success", true);
-                                    return true;
-                                }
-                                else
-                                {
-                                    Console.WriteLine("Player: " + LM.name + "Failed Login");
-                                    SendLoginResponse(chatClient, "Failed to login", false);
-                                    return false;
-                                }
-                            }
-
-                        }
-                        case CreateUser.ID:
-                        {
-                            CreateUser CM = (CreateUser)m;
-                            player = new Player(CM.name, chatClient);
-                            Console.WriteLine("Create User recieved: " + CM.name);
-                            lock (sqlWrapper)
-                            {
-                                if (sqlWrapper.AddPlayer(player, CM.password, CM.salt))
-                                {
-                                    Console.Write(" created new player");
-                                    SendLoginResponse(chatClient, "Success", true);
-                                    return true;
-                                }
-                                else
-                                {
-                                    Console.Write("Failed to create player");
-                                    SendLoginResponse(chatClient, "Failed to Create player", false);
-                                    return false;
-                                }
-                            }
-                        }
-                    }
-                }
-                return false;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Error loggin in: " + e);
-                bQuit = true;
-                return false;
-            }
-        }
-
-        static bool SendLoginResponse(Socket socket, String error, bool success)
-        {
-            LoginMessage response = new LoginMessage();
-            response.name = error;
+            LoginResponse response = new LoginResponse();
+            response.message = msg;
             if (success)
             {
-                response.password = "1";
+                response.loggedIn = "1";
             }
             else
             {
-                response.password = "0";
+                response.loggedIn = "0";
             }
-            MemoryStream outStream = response.WriteData();
+            MemoryStream outStream = response.WriteData(p.Salt);
 
             try
             {
-                socket.Send(outStream.GetBuffer());
+                p.socket.Send(outStream.GetBuffer());
                 return true;
             }
             catch (System.Exception)
@@ -310,11 +219,11 @@ namespace Server
 
             bool LoggedIn = false;
 
-            Player player = null;
+            Player player = new Player(chatClient);
 
             while (!LoggedIn && bQuit == false)
             {
-                LoggedIn = LoginSequence(chatClient,ref player, ref bQuit);
+                LoggedIn = LoginSequence(ref player, ref bQuit);
             }
 
             if (bQuit == true) return;
@@ -348,10 +257,8 @@ namespace Server
 
                     if (result > 0 )
                     {
-                        MemoryStream stream = new MemoryStream(buffer);
-                        BinaryReader read = new BinaryReader(stream);
 
-                        Msg m = Msg.DecodeStream(read);
+                        Msg m = Msg.DecodeStream(buffer, player.Salt);
 
                         if (m != null)
                         {
@@ -390,6 +297,92 @@ namespace Server
             }
         }
 
+        static bool LoginSequence(ref Player player, ref bool bQuit)
+        {
+            try
+            {
+                byte[] buffer = new byte[4096];
+                int result;
+
+                result = player.socket.Receive(buffer);
+
+                if (result > 0)
+                {
+                    Msg m = Msg.DecodeStream(buffer, player.Salt);
+
+                    switch (m.mID)
+                    {
+                        case SaltMessage.ID:
+                            SaltMessage SM = (SaltMessage)m;
+                            lock (sqlWrapper)
+                            {
+                                player.Salt = sqlWrapper.GetSalt(SM.message);
+                                if (player.Salt != "")
+                                {
+                                    SendSalt(player.socket, player.Salt);
+                                }
+                                else
+                                {
+                                    SendLoginResponse(player, "Failed Bad login", false);
+                                }
+
+                            }
+                            break;
+                        case LoginMessage.ID:
+                            {
+                                LoginMessage LM = (LoginMessage)m;
+                                Console.WriteLine("Login request from: " + LM.name);
+                                lock (sqlWrapper)
+                                {
+                                    if (sqlWrapper.GetPlayerLogin(ref player, LM.name, LM.password))
+                                    {
+                                        Console.WriteLine("Player: " + LM.name + "Logged in");
+                                        SendLoginResponse(player, "Success", true);
+                                        return true;
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("Player: " + LM.name + "Failed Login");
+                                        SendLoginResponse(player, "Failed to login", false);
+                                        return false;
+                                    }
+                                }
+
+                            }
+                        case CreateUser.ID:
+                            {
+                                CreateUser CM = (CreateUser)m;
+                                player.SetPlayerName(CM.name);
+                                player.Salt = CM.salt;
+                                Console.WriteLine("Create User recieved: " + CM.name);
+                                lock (sqlWrapper)
+                                {
+                                    if (sqlWrapper.AddPlayer(player, CM.password, CM.salt))
+                                    {
+                                        Console.Write(" created new player");
+                                        SendLoginResponse(player, "Success", true);
+                                        return true;
+                                    }
+                                    else
+                                    {
+                                        Console.Write("Failed to create player");
+                                        SendLoginResponse(player, "Failed to Create player", false);
+                                        return false;
+                                    }
+                                }
+                            }
+                    }
+                }
+                return false;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error loggin in: " + e);
+                bQuit = true;
+                return false;
+            }
+        }
+
         static void ProcessRequestQueue()
         {
             while(true)
@@ -416,11 +409,12 @@ namespace Server
                 }
                 PlayerLocations m = new PlayerLocations();
                 m.LocationString = rStr;
-                MemoryStream outStream = m.WriteData();
+
                 foreach (Player p in clientList)
                 {
                     try
                     {
+                        MemoryStream outStream = m.WriteData(p.Salt);
                         p.socket.Send(outStream.GetBuffer());
                     }
                     catch (System.Exception)
@@ -432,6 +426,7 @@ namespace Server
 
         static void Main(string[] args)
         {
+
             Console.WriteLine("Should Create new Map?");
             var response = Console.ReadLine();
 
@@ -457,7 +452,6 @@ namespace Server
                     sqlWrapper.AddItems(50, 20);
                 }
             }
-            int foo = 0;
 
             Socket serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 			serverSocket.Bind(new IPEndPoint(IPAddress.Parse(IP[ipIndex]), 8500));

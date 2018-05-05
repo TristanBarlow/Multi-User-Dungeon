@@ -203,7 +203,7 @@ namespace Server
             {
                 return reader["salt"].ToString();
             }
-            else return null;
+            else return "";
         }
 
         public bool GetPlayerLogin(ref Player p, String Username, String password)

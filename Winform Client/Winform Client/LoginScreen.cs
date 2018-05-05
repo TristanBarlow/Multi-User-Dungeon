@@ -37,7 +37,8 @@ namespace Winform_Client
             {
 
                 form.SetUserData(this.NameTextBox.Text, this.PasswordTextBox.Text);
-                this.Enabled = false;
+                this.Login.Enabled = false;
+                this.CreateUser.Enabled = false;
                 form.RequestSalt();
             }
             else
@@ -57,10 +58,8 @@ namespace Winform_Client
             MethodInvoker methodInvokerDelegate = delegate ()
             {
                 LoginError.Text = s;
-                if (this.Enabled == false)
-                {
-                    this.Enabled = true;
-                }
+                this.Login.Enabled = true;
+                this.CreateUser.Enabled = true;
             };
             if (this.InvokeRequired)
             {
