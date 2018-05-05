@@ -233,6 +233,56 @@ namespace Server
             MemoryStream stream = SM.WriteData("This does not matter as it will not be used");
             s.Send(stream.GetBuffer());
         }
+        /**
+         *Cycles through invoking any actions in the queue if there are any 
+         */
+        static void ProcessRequestQueue()
+        {
+            while (true)
+            {
+                if (!RequestQueue.IsEmpty)
+                {
+                    Action action;
+                    RequestQueue.TryDequeue(out action);
+                    action.Invoke();
+                }
+            }
+        }
+
+        /**
+         *Send the location of all players to all players, so that they can be drawn on the map
+         * This should only be called when a player moves or a new player joins
+         */
+        public static void SendLocations()
+        {
+            //created a string with the player names and their locations
+            String rStr = "&";
+            foreach (Player p in clientList)
+            {
+                if (p.GetRoom() != null)
+                {
+                    rStr += p.PlayerName + " " + p.GetRoom().RoomIndex + "&";
+                }
+
+            }
+
+            PlayerLocations m = new PlayerLocations();
+            m.LocationString = rStr;
+
+            //send that message to all the players
+            foreach (Player p in clientList)
+            {
+                try
+                {
+                    MemoryStream outStream = m.WriteData(p.Salt);
+                    p.socket.Send(outStream.GetBuffer());
+                }
+                catch (System.Exception)
+                {
+                    RemoveClientByPlayer(p);
+                }
+            }
+        }
 
         /**
          * 
@@ -262,45 +312,52 @@ namespace Server
             }
         }
 
+        /**
+         *Main thread for receiving and incoming client buffers. 
+         */
         static void ReceiveClientProcess(Object o)
         {
+            //initialise varliable
             bool bQuit = false;
 
             Socket chatClient = (Socket)o;
 
             bool LoggedIn = false;
 
+            //init a new player, might not be used, just easier to have all the varilables
+            //in one object
             Player player = new Player(chatClient);
 
+            //Stay stuck in the log in squence until the connection drops or they successfuly login
             while (!LoggedIn && bQuit == false)
             {
                 LoggedIn = LoginSequence(ref player, ref bQuit);
             }
 
+            //if they exited the login sequence because they quite, return function
             if (bQuit == true) return;
 
-            player.socket = chatClient;
 
+            //Send the start up stuff  needed small delays to give the client time to catchup
             RequestQueue.Enqueue(() => AddNewPlayer(player));
 
-            Thread.Sleep(100);
+            Thread.Sleep(200);
 
             RequestQueue.Enqueue(() => DungeonAction("look", player));
 
-            Thread.Sleep(100);
+            Thread.Sleep(200);
 
             RequestQueue.Enqueue(() => SendDungeonInfo(player));
 
-            Thread.Sleep(100);
+            Thread.Sleep(200);
 
             RequestQueue.Enqueue(() => SendLocations());
 
-            /// do command
-
+            //main process loop
             while (bQuit == false)
             {
                 try
-                {
+                { 
                     byte[] buffer = new byte[4096];
                     int result;
 
@@ -322,6 +379,9 @@ namespace Server
                                         RequestQueue.Enqueue(() => DungeonAction(dungMsg.command, player));
                                     }
                                     break;
+
+                                    //sometimes the map info does work quite right this is here if that happens
+                                    //the client side will request a new one
                                 case MapLayout.ID:
                                     RequestQueue.Enqueue(()=>SendDungeonInfo(player));
                                     break;
@@ -338,8 +398,8 @@ namespace Server
                 }
                 catch (Exception)
                 {
+                    //lost client, add a remove from queue call print to console
                     bQuit = true;
-
                     String output = "Lost client: " + player.PlayerName;
                     Console.WriteLine(output);
 
@@ -347,7 +407,13 @@ namespace Server
                 }
             }
         }
-
+        
+        /**
+         *The main loop for loging the player in, Some code duplication with recieve client process.
+         * I felt it looked nicer and was easier if the login was kept apart from the other message types.
+         * @param player A refernce to the player state so far, this will become fleshed out when the required details are forthcoming
+         * @param bQuit primitives are passed by boolean by defualt.
+         */
         static bool LoginSequence(ref Player player, ref bool bQuit)
         {
             try
@@ -363,10 +429,12 @@ namespace Server
 
                     switch (m.mID)
                     {
+                        //called when a player sends the username to the server, if the player is existing send back salt
                         case SaltMessage.ID:
                             SaltMessage SM = (SaltMessage)m;
                             lock (sqlWrapper)
                             {
+                                //check to see if the salt value is valid
                                 player.Salt = sqlWrapper.GetSalt(SM.message);
                                 if (player.Salt != "")
                                 {
@@ -379,35 +447,48 @@ namespace Server
 
                             }
                             break;
+
+                            //Called when the log in message arrives.
                         case LoginMessage.ID:
                             {
                                 LoginMessage LM = (LoginMessage)m;
                                 Console.WriteLine("Login request from: " + LM.name);
+
+                                //queueing it with the rest and trapping the result of bool from another thread seem annoying
+                                //Also it would have to have access to something back in this thread, which would also require a lock
+                                //no way around locking something
                                 lock (sqlWrapper)
                                 {
                                     if (sqlWrapper.GetPlayerLogin(ref player, LM.name, LM.password))
                                     {
+                                        //successful log in
                                         Console.WriteLine("Player: " + LM.name + "Logged in");
                                         SendLoginResponse(player, "Success", true);
                                         return true;
                                     }
                                     else
                                     {
+                                        //failed log in 
                                         Console.WriteLine("Player: " + LM.name + "Failed Login");
-                                        SendLoginResponse(player, "Failed to login", false);
+                                        SendLoginResponse(player, "Failed to login, Bad details", false);
                                         return false;
                                     }
                                 }
 
                             }
+
+                            //Triggered if a create user message is sent
                         case CreateUser.ID:
                             {
+                                //set up the new player that was created
                                 CreateUser CM = (CreateUser)m;
                                 player.SetPlayerName(CM.name);
                                 player.Salt = CM.salt;
                                 Console.WriteLine("Create User recieved: " + CM.name);
+
                                 lock (sqlWrapper)
                                 {
+                                    //check to see if the new player is valid
                                     if (sqlWrapper.AddPlayer(player, CM.password, CM.salt))
                                     {
                                         Console.Write(" created new player");
@@ -432,47 +513,6 @@ namespace Server
                 bQuit = true;
                 return false;
             }
-        }
-
-        static void ProcessRequestQueue()
-        {
-            while(true)
-            {
-                if (!RequestQueue.IsEmpty)
-                {
-                    Action action;
-                    RequestQueue.TryDequeue(out action);
-                    action.Invoke();
-                }
-             }
-        }
-
-        public static void SendLocations()
-        {
-                String rStr = "&";
-                foreach (Player p in clientList)
-                {
-                        if (p.GetRoom() != null)
-                        {
-                            rStr += p.PlayerName + " " + p.GetRoom().RoomIndex + "&";
-                        }
-                    
-                }
-                PlayerLocations m = new PlayerLocations();
-                m.LocationString = rStr;
-
-                foreach (Player p in clientList)
-                {
-                    try
-                    {
-                        MemoryStream outStream = m.WriteData(p.Salt);
-                        p.socket.Send(outStream.GetBuffer());
-                    }
-                    catch (System.Exception)
-                    {
-                        RemoveClientByPlayer(p);
-                    }
-                }  
         }
 
         static void Main(string[] args)
