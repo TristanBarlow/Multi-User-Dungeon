@@ -15,18 +15,26 @@ namespace Winform_Client
 
     public partial class LoginScreen : Form
     {
-        Form1 form;
+        //reference to the form used for setting credentials
+        MudClient form;
 
-        private delegate void AddTextDelegate(String s);
-
+        //connection status
         public bool IsConnected = false;
 
-        public LoginScreen(Form1 frm)
+        /**
+         * Defualt constructor
+         * @param frm reference to the mudclient 
+         */
+        public LoginScreen(MudClient frm)
         {
             InitializeComponent();
             form = frm;
         }
 
+        /**
+         *Start the sequence of calls to log a player in
+         * winform Generated
+         */
         private void LoginClick(object sender, EventArgs e)
         {
             if (IsConnected && !U.HasBadChars(this.NameTextBox.Text) && !U.HasBadChars(this.PasswordTextBox.Text))
@@ -43,14 +51,21 @@ namespace Winform_Client
             }
         }
 
+        /**
+         * When a response come from the
+         * @param s the message that came with the response
+         * @param success whether or not we are now logged in
+         */
         public void LoginResponse(String s, bool success)
         {
-
+            //close the diaglo winner winnder
             if (success)
             {
                 DialogResult = DialogResult.OK;
                 return;
             }
+
+            //use the method envoker thing until we get the message to appear
             MethodInvoker methodInvokerDelegate = delegate ()
             {
                 LoginError.Text = s;
@@ -67,14 +82,20 @@ namespace Winform_Client
             }
         }
 
+        /**
+         * To be caalled when a conncetion is made with the server
+         * @param s the message to display if connected
+         */
         public void Connected(String s)
         {
-                
+            
+            //invoker thing to make sure the mesage displays
             MethodInvoker methodInvokerDelegate = delegate ()
             {
                 ConnectionStatus.Text = s;
                 IsConnected = true;
             };
+
             if (this.InvokeRequired)
             {
                 this.Invoke(methodInvokerDelegate);
@@ -85,11 +106,12 @@ namespace Winform_Client
             }
         }
 
-        private void textBox1_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
+        /**
+         *Called from the create character form, this will start the sequence in the main 
+         * form to create a character.
+         * @param name name of the character to be created
+         * @param password the raw password of the new character(will be hashed later)
+         */
         public void TryCreateCharacter(String name, String password)
         {
             if (IsConnected && !U.HasBadChars(name) && !U.HasBadChars(password))
@@ -106,7 +128,10 @@ namespace Winform_Client
             }
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        /**
+         *Opens the create user window. 
+         */
+        private void OpenCreateUser(object sender, EventArgs e)
         {
             CreateCharacter create = new CreateCharacter(this);
             this.Enabled = false;

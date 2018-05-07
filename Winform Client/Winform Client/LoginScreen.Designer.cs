@@ -57,7 +57,6 @@
             this.NameTextBox.Name = "NameTextBox";
             this.NameTextBox.Size = new System.Drawing.Size(167, 20);
             this.NameTextBox.TabIndex = 1;
-            this.NameTextBox.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // PasswordTextBox
             // 
@@ -107,7 +106,7 @@
             this.CreateUser.TabIndex = 7;
             this.CreateUser.Text = "Create User";
             this.CreateUser.UseVisualStyleBackColor = true;
-            this.CreateUser.Click += new System.EventHandler(this.button2_Click);
+            this.CreateUser.Click += new System.EventHandler(this.OpenCreateUser);
             // 
             // Username
             // 

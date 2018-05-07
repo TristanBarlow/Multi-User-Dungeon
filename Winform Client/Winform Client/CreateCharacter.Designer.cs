@@ -44,7 +44,7 @@
             this.PasswordTextBox.Size = new System.Drawing.Size(178, 20);
             this.PasswordTextBox.TabIndex = 9;
             this.PasswordTextBox.UseSystemPasswordChar = true;
-            this.PasswordTextBox.TextChanged += new System.EventHandler(this.NameTextBox_TextChanged);
+            this.PasswordTextBox.TextChanged += new System.EventHandler(this.TextChanged);
             // 
             // NameTextBox
             // 
@@ -52,7 +52,7 @@
             this.NameTextBox.Name = "NameTextBox";
             this.NameTextBox.Size = new System.Drawing.Size(178, 20);
             this.NameTextBox.TabIndex = 7;
-            this.NameTextBox.TextChanged += new System.EventHandler(this.NameTextBox_TextChanged);
+            this.NameTextBox.TextChanged += new System.EventHandler(this.TextChanged);
             // 
             // RetypePassword
             // 
@@ -61,7 +61,7 @@
             this.RetypePassword.Size = new System.Drawing.Size(178, 20);
             this.RetypePassword.TabIndex = 11;
             this.RetypePassword.UseSystemPasswordChar = true;
-            this.RetypePassword.TextChanged += new System.EventHandler(this.NameTextBox_TextChanged);
+            this.RetypePassword.TextChanged += new System.EventHandler(this.TextChanged);
             // 
             // Create
             // 

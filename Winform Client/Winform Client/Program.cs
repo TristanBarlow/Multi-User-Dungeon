@@ -17,7 +17,7 @@ namespace Winform_Client
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Form1 form = new Form1();
+            MudClient form = new MudClient();
        
             Application.Run(form);
 

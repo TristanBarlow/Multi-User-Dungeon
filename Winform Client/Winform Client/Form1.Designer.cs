@@ -1,6 +1,6 @@
 ﻿namespace Winform_Client
 {
-    partial class Form1
+    partial class MudClient
     {
         /// <summary>
         /// Required designer variable.
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MudClient));
             this.buttonSend = new System.Windows.Forms.Button();
             this.textBox_Input = new System.Windows.Forms.TextBox();
             this.TextboxDungeon = new System.Windows.Forms.TextBox();
@@ -110,7 +110,7 @@
             this.Zoomout.UseVisualStyleBackColor = false;
             this.Zoomout.Click += new System.EventHandler(this.Zoomout_Click);
             // 
-            // Form1
+            // MudClient
             // 
             this.AcceptButton = this.buttonSend;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -125,7 +125,7 @@
             this.Controls.Add(this.buttonSend);
             this.ForeColor = System.Drawing.SystemColors.ControlText;
             this.KeyPreview = true;
-            this.Name = "Form1";
+            this.Name = "MudClient";
             this.Text = "Dungeon Madness";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
             this.Load += new System.EventHandler(this.Form1_Load);

@@ -17,7 +17,7 @@ using System.Text;
 
 namespace Winform_Client
 {
-    public partial class Form1 : Form
+    public partial class MudClient : Form
     {
         Socket clientSocket;
         private Thread myThread;
@@ -39,7 +39,7 @@ namespace Winform_Client
         LoginScreen loginScreen;
 
         public String ClientName { set; get; } = " ";
-        //this is always reset after use
+
         public String ClientPassword { set; get; } = " ";
 
         public String Salt { set; get; } = "";
@@ -48,7 +48,7 @@ namespace Winform_Client
 
         DungeonDraw DGD;
 
-        public Form1()
+        public MudClient()
         {
             InitializeComponent();
 
@@ -73,7 +73,7 @@ namespace Winform_Client
         private void ClientProcess(Object o)
 
         {
-            Form1 form = (Form1)o;
+            MudClient form = (MudClient)o;
             Thread receiveThread;
             Thread.Sleep(1000);
             while ((form.bConnected == false) && (form.bQuit == false))
@@ -114,7 +114,7 @@ namespace Winform_Client
 
         private void ClientReceive(Object o)
         {
-            Form1 form = (Form1)o;
+            MudClient form = (MudClient)o;
 
             while (form.bConnected == true)
             {
@@ -334,6 +334,7 @@ namespace Winform_Client
             try
             {
                 clientSocket.Send(outStream.ToArray());
+                ClientPassword = "";
             }
             catch (Exception ex)
             {

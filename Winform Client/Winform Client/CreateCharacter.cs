@@ -12,13 +12,22 @@ namespace Winform_Client
 {
     public partial class CreateCharacter : Form
     {
+        //used to call the create char function
         LoginScreen LS;
+
+        /**
+         *constructor
+         * @param ls Login screen ref
+         */
         public CreateCharacter(LoginScreen ls)
         {
             InitializeComponent();
             LS = ls;
         }
 
+        /**
+         *To be called everytime text changes, if no bad characters , passwords match then enable button  
+         */
         public void CheckForValidLogin()
         {
             if (!U.HasBadChars(NameTextBox.Text) && !U.HasBadChars(PasswordTextBox.Text))
@@ -32,11 +41,18 @@ namespace Winform_Client
             Create.Enabled = false;
         }
 
-        private void NameTextBox_TextChanged(object sender, EventArgs e)
+        /**
+         * Winform generated 
+         */
+        private void TextChanged(object sender, EventArgs e)
         {
             CheckForValidLogin();
         }
 
+
+        /**
+         * Winform generated 
+         */
         private void Create_Click(object sender, EventArgs e)
         {
             LS.TryCreateCharacter(NameTextBox.Text, PasswordTextBox.Text);
