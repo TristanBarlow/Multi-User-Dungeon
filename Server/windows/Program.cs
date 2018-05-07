@@ -525,6 +525,7 @@ namespace Server
 
             sqlWrapper = new SqlWrapper(AllItems);
 
+
             if (response.ToLower() == "yes")
             {
                 Dungeon = new Dungeon();
