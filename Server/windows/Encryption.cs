@@ -30,11 +30,10 @@ namespace Server
             return str;
         }
 
-        public static byte[] Encrypt(String text, string SALT )
+        public static byte[] Encrypt(byte[] plain, string SALT )
         {
             
             byte[] salt = Convert.FromBase64String(SALT);
-            byte[] plain = Encoding.ASCII.GetBytes(text);
 
             var algorithm = new RijndaelManaged { KeySize = 256, BlockSize = 128 };
 
@@ -49,7 +48,7 @@ namespace Server
             return resultArray;
         }
 
-        public static string Decrypt(byte[] cipher, string SALT)
+        public static byte[] Decrypt(byte[] cipher, string SALT)
         {
             byte[] salt = Convert.FromBase64String(SALT);
             var algorithm = new RijndaelManaged { KeySize = 256, BlockSize = 128 };
@@ -62,7 +61,7 @@ namespace Server
 
             byte[] resultArray = cTransform.TransformFinalBlock(cipher, 0, cipher.Length);
 
-            return Encoding.ASCII.GetString(resultArray);
+            return resultArray;
         }
 
         public static String GenerateSaltedHash(String plainText, String salt)

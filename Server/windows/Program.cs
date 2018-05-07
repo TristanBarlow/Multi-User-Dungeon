@@ -51,7 +51,7 @@ namespace Server
 
             try
             {
-                player.socket.Send(outStream.GetBuffer());
+                player.socket.Send(outStream.ToArray());
             }
             catch
             {
@@ -73,7 +73,7 @@ namespace Server
 
             try
             {
-                player.socket.Send(outStream.GetBuffer());
+                player.socket.Send(outStream.ToArray());
             }
             catch (System.Exception)
             {
@@ -104,7 +104,7 @@ namespace Server
             UpdateChat UC = new UpdateChat();
             UC.message = str;
             MemoryStream stream = UC.WriteData(player.Salt);
-            player.socket.Send(stream.GetBuffer());
+            player.socket.Send(stream.ToArray());
         }
 
         /**
@@ -231,7 +231,7 @@ namespace Server
             SaltMessage SM = new SaltMessage();
             SM.message = salt;
             MemoryStream stream = SM.WriteData("This does not matter as it will not be used");
-            s.Send(stream.GetBuffer());
+            s.Send(stream.ToArray());
         }
         /**
          *Cycles through invoking any actions in the queue if there are any 
@@ -275,7 +275,7 @@ namespace Server
                 try
                 {
                     MemoryStream outStream = m.WriteData(p.Salt);
-                    p.socket.Send(outStream.GetBuffer());
+                    p.socket.Send(outStream.ToArray());
                 }
                 catch (System.Exception)
                 {
@@ -303,7 +303,7 @@ namespace Server
 
             try
             {
-                p.socket.Send(outStream.GetBuffer());
+                p.socket.Send(outStream.ToArray());
                 return true;
             }
             catch (System.Exception)
@@ -324,6 +324,8 @@ namespace Server
 
             bool LoggedIn = false;
 
+            bool ShouldEncrypt = false;
+
             //init a new player, might not be used, just easier to have all the varilables
             //in one object
             Player player = new Player(chatClient);
@@ -331,12 +333,11 @@ namespace Server
             //Stay stuck in the log in squence until the connection drops or they successfuly login
             while (!LoggedIn && bQuit == false)
             {
-                LoggedIn = LoginSequence(ref player, ref bQuit);
+                LoggedIn = LoginSequence(ref player, ref bQuit, ref ShouldEncrypt);
             }
 
             //if they exited the login sequence because they quite, return function
             if (bQuit == true) return;
-
 
             //Send the start up stuff  needed small delays to give the client time to catchup
             RequestQueue.Enqueue(() => AddNewPlayer(player));
@@ -366,7 +367,7 @@ namespace Server
                     if (result > 0 )
                     {
 
-                        Msg m = Msg.DecodeStream(buffer, player.Salt);
+                        Msg m = Msg.DecodeStream(buffer, player.Salt, ShouldEncrypt);
 
                         if (m != null)
                         {
@@ -414,7 +415,7 @@ namespace Server
          * @param player A refernce to the player state so far, this will become fleshed out when the required details are forthcoming
          * @param bQuit primitives are passed by boolean by defualt.
          */
-        static bool LoginSequence(ref Player player, ref bool bQuit)
+        static bool LoginSequence(ref Player player, ref bool bQuit, ref bool shouldDecrypt)
         {
             try
             {
@@ -425,7 +426,7 @@ namespace Server
 
                 if (result > 0)
                 {
-                    Msg m = Msg.DecodeStream(buffer, player.Salt);
+                    Msg m = Msg.DecodeStream(buffer, player.Salt, shouldDecrypt);
 
                     switch (m.mID)
                     {
@@ -439,6 +440,7 @@ namespace Server
                                 if (player.Salt != "")
                                 {
                                     SendSalt(player.socket, player.Salt);
+                                    shouldDecrypt = true;
                                 }
                                 else
                                 {
@@ -464,6 +466,8 @@ namespace Server
                                         //successful log in
                                         Console.WriteLine("Player: " + LM.name + "Logged in");
                                         SendLoginResponse(player, "Success", true);
+                                        shouldDecrypt = true;
+
                                         return true;
                                     }
                                     else
@@ -471,6 +475,7 @@ namespace Server
                                         //failed log in 
                                         Console.WriteLine("Player: " + LM.name + "Failed Login");
                                         SendLoginResponse(player, "Failed to login, Bad details", false);
+                                        shouldDecrypt = false;
                                         return false;
                                     }
                                 }
@@ -493,12 +498,14 @@ namespace Server
                                     {
                                         Console.Write(" created new player");
                                         SendLoginResponse(player, "Success", true);
+                                        shouldDecrypt = true;
                                         return true;
                                     }
                                     else
                                     {
                                         Console.Write("Failed to create player");
                                         SendLoginResponse(player, "Failed to Create player", false);
+                                        shouldDecrypt = false;
                                         return false;
                                     }
                                 }
@@ -517,6 +524,22 @@ namespace Server
 
         static void Main(string[] args)
         {
+            //String salt = Encryption.GetSalt();
+            //LoginMessage lm = new LoginMessage();
+            //lm.name = "foobar12345678910";
+            //lm.password = "foobarians";
+            //MemoryStream ms = lm.WriteData(salt);
+
+            //byte[] buffer = ms.ToArray();
+            //byte[] decrypted = Encryption.Decrypt(buffer, salt);
+            //MemoryStream final = new MemoryStream(decrypted);
+            //BinaryReader br = new BinaryReader(final);
+
+            //int foo = br.ReadInt32();
+            //int blah = br.ReadInt32();
+            //String next = br.ReadString();
+
+
 
             Console.WriteLine("Should Create new Map?");
             var response = Console.ReadLine();

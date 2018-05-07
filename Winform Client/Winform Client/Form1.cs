@@ -45,7 +45,7 @@ namespace Winform_Client
 
         public String Salt { set; get; } = "";
 
-        public bool gotresponse = false;
+        public bool ShouldDecrypt = false;
 
         DungeonDraw DGD;
 
@@ -131,7 +131,7 @@ namespace Winform_Client
                     if (result > 0)
                     {
 
-                        Msg m = Msg.DecodeStream(buffer,Salt);
+                        Msg m = Msg.DecodeStream(buffer,Salt, ShouldDecrypt);
 
                         if (m != null)
                         {
@@ -154,15 +154,17 @@ namespace Winform_Client
                                     }
                                 case LoginResponse.ID:
                                     {
-                                        gotresponse = true;
+                                        
                                         LoginResponse LM = (LoginResponse)m;
                                         if (LM.loggedIn == "1")
                                         {
                                             loginScreen.LoginResponse(LM.message, true);
+                                            ShouldDecrypt = true;
                                         }
                                         else
                                         {
                                             loginScreen.LoginResponse(LM.message, false);
+                                            ShouldDecrypt = false;
                                         }
                                     }
                                     break;
@@ -312,7 +314,7 @@ namespace Winform_Client
             MemoryStream outStream = dungMsg.WriteData(Salt);
             try
             {
-                clientSocket.Send(outStream.GetBuffer());
+                clientSocket.Send(outStream.ToArray());
             }
             catch { }
         }
@@ -358,7 +360,7 @@ namespace Winform_Client
             MemoryStream outStream = nameMsg.WriteData(Salt);
             try
             {
-                clientSocket.Send(outStream.GetBuffer());
+                clientSocket.Send(outStream.ToArray());
             }
             catch (Exception ex)
             {
@@ -371,15 +373,13 @@ namespace Winform_Client
             ClientName = name;
             Salt = Encryption.GetSalt();
 
-            gotresponse = false;
-
             CreateUser nameMsg = new CreateUser();
             nameMsg.SetName(name);
             nameMsg.SetPassword(password,Salt );
             MemoryStream outStream = nameMsg.WriteData("");
             try
             {
-                clientSocket.Send(outStream.GetBuffer());
+                clientSocket.Send(outStream.ToArray());
             }
             catch { }
         }
@@ -389,10 +389,6 @@ namespace Winform_Client
             DGD.MapParser(s);
             DGD.IsInUse = true;
             if (DGD.HasUsers) DGD.UpdateClientPositions();
-        }
-
-        private void Form1_KeyDown(object sender, KeyEventArgs e)
-        {
         }
 
         private void Form1_Load(object sender, EventArgs e)

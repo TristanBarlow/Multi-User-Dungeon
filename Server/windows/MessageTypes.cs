@@ -13,16 +13,27 @@ namespace MessageTypes
 
         public int mID;
 
+        public bool shouldEncrypt = false;
+
         public abstract MemoryStream WriteData(String salt);
 
         public abstract void ReadData(BinaryReader read);
 
-        public static Msg DecodeStream(byte[] buffer, String salt)
+        public static Msg DecodeStream(byte[] buffer, String salt, bool IsEncrypted)
         {
             BinaryReader read = null;
-            MemoryStream stream = new MemoryStream(buffer);
-            read = new BinaryReader(stream);
+            MemoryStream stream = null;
 
+            if (IsEncrypted)
+            {
+                stream = new MemoryStream(Encryption.Decrypt(buffer, salt));
+                
+            }
+            else
+            {
+                 stream = new MemoryStream(buffer);
+            }
+            read = new BinaryReader(stream);
             int id;
             Msg m = null;
 
@@ -147,7 +158,9 @@ namespace MessageTypes
 
             write.Close();
 
-            return stream;
+            MemoryStream ms = new MemoryStream(Encryption.Encrypt(stream.ToArray(), salt));
+
+            return ms;
         }
 
         public override void ReadData(BinaryReader read)
@@ -177,7 +190,9 @@ namespace MessageTypes
 
             write.Close();
 
-            return stream;
+            MemoryStream ms = new MemoryStream(Encryption.Encrypt(stream.ToArray(), salt));
+
+            return ms;
         }
 
         public override void ReadData(BinaryReader read)
@@ -202,7 +217,9 @@ namespace MessageTypes
             write.Write(response);
 
             write.Close();
-            return stream;
+            MemoryStream ms = new MemoryStream(Encryption.Encrypt(stream.ToArray(), salt));
+
+            return ms;
         }
 
         public override void ReadData(BinaryReader read)
@@ -227,7 +244,10 @@ namespace MessageTypes
             write.Write(mapInfo);
 
             write.Close();
-            return stream;
+
+            MemoryStream ms = new MemoryStream(Encryption.Encrypt(stream.ToArray(), salt));
+
+            return ms;
         }
 
         public override void ReadData(BinaryReader read)
@@ -253,7 +273,9 @@ namespace MessageTypes
             write.Write(LocationString);
 
             write.Close();
-            return stream;
+            MemoryStream ms = new MemoryStream(Encryption.Encrypt(stream.ToArray(), salt));
+
+            return ms;
         }
 
         public override void ReadData(BinaryReader read)
@@ -335,7 +357,10 @@ namespace MessageTypes
             write.Write(message);
 
             write.Close();
-            return stream;
+
+            MemoryStream ms = new MemoryStream(Encryption.Encrypt(stream.ToArray(), salt));
+
+            return ms;
         }
 
         public override void ReadData(BinaryReader read)
