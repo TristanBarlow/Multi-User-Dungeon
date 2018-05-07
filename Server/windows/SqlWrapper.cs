@@ -25,6 +25,9 @@ namespace Server
 {
     /**
      *This class handles all the database queries and openeing and everything sql 
+     * Could probably write a better wrapper for the actual database queries. But 
+     * with I would probably need to add a new struct. Frankly not worth the hastle.
+     * for a project this size
      */
     public class SqlWrapper
     { 
@@ -88,13 +91,16 @@ namespace Server
             new sqliteCommand(createTable + playerTableName + playerColumns ,  Database).ExecuteNonQuery();
         }
 
-        public void AddItems(int numberOfItems, int numberOfWeapons)
+        /**
+         *This function distributes items randomly amongst the dungeon
+         * @param numberOfItems the number of items to scatter
+         */
+        public void AddItems(int numberOfItems)
         {
             sqliteCommand command;
             Random r = new Random();
 
-
-
+            //populate item table with items
             for (int i = 0; i < numberOfItems; i++)
             {
                 String room = "room";
@@ -112,9 +118,17 @@ namespace Server
             }
         }
 
+        /**
+         * Try and move an item from an oldowner to a new owner
+         * @param oldOwner the owner trying to move the item from
+         * @param newOwner the owner tyring to move the item too. 
+         * @param item the name of the item to be moved.
+         */
         public String MoveItem(String oldOwner, String newOwner, String item)
         {
-            var command = new sqliteCommand("select * from " + itemTableName + " where owner = '" + oldOwner + "' AND name = "+ "'"+ item + "'", Database);
+            var command = new sqliteCommand("select * from " + itemTableName + " where owner =:owner AND name =:item ", Database);
+            command.Parameters.Add("owner", DbType.String).Value = oldOwner;
+            command.Parameters.Add("item", DbType.String).Value = item;
 
             try
             {
@@ -122,7 +136,7 @@ namespace Server
                 if (reader.HasRows)
                 {
                     reader.Read();
-                    if (ChangeItemOwner(reader["uniqueID"].ToString(), itemTableName, newOwner))
+                    if (ChangeItemOwner(reader["uniqueID"].ToString(), newOwner))
                     {
                         return "You ";
                     }
@@ -137,10 +151,15 @@ namespace Server
             return "Failed To ";
         }
 
-        public bool ChangeItemOwner(String itemID, String tableName, String owner)
+        /**
+         *This function actually changes owner of an item.
+         * @param itemID the unique ID of the item in question
+         * @param owner the name of the new owner of the item.
+         */
+        public bool ChangeItemOwner(String itemID, String owner)
         {
             var command = new sqliteCommand(Database);
-            command.CommandText = "update " + tableName + " set owner =:own where uniqueID=:item";
+            command.CommandText = "update " + itemTableName + " set owner =:own where uniqueID=:item";
             command.Parameters.Add("own", DbType.String).Value = owner;
             command.Parameters.Add("item", DbType.String).Value = itemID;
             try
@@ -156,15 +175,22 @@ namespace Server
             
         }
 
+        /**
+         *Get all items with where the owner field is equal to that of the players name
+         * @param owner the entity to whom the items belong.
+         */
         public String GetOwnedItems(String owner)
         {
             String rString = U.NL("");
-            var command = new sqliteCommand("select * from " + itemTableName + " where owner = '" + owner + "'", Database);
+            var command = new sqliteCommand("select * from " + itemTableName + " where owner =:name ", Database);
+            command.Parameters.Add("name", DbType.String).Value = owner;
+
             try
             {
                 var reader = command.ExecuteReader();
                 while(reader.Read())
                 {
+                    //make the description
                     String id = reader["itemID"].ToString();
                     rString += U.NL("Name: " +gameObjectList.GetItem(id).itemName);
                     rString += U.NL("Description: " +gameObjectList.GetItem(id).description);
@@ -179,13 +205,19 @@ namespace Server
             return rString;
         }
 
+        /**
+         *Adds a new player to the player table 
+         * @param tempPlayer the player so far that we will add.
+         * @param password the salted-hashes password the player used to login
+         * @param salt the salt used to hash the password and used for encryption
+         */
         public bool AddPlayer(Player tempPlayer, String password, String salt)
         {
 
-            var command = new sqliteCommand(Database);
-            command.CommandText = ("select * from " + playerTableName + " where name = '" + tempPlayer.PlayerName+ "'");
+            var command = new sqliteCommand("select * from " + playerTableName + " where name =:id", Database);
+            command.Parameters.Add("id", DbType.String).Value = tempPlayer.PlayerName;
             var reader = command.ExecuteReader();
-        
+
             if (reader.HasRows == false && !U.HasBadChars(tempPlayer.PlayerName) && !U.HasBadChars(password))
             {
 
@@ -194,6 +226,7 @@ namespace Server
 					command = new sqliteCommand("INSERT INTO " + playerTableName + 
 					                            " (name, password, salt,  rIndex) "+ 
 					                            "VALUES ($n, $p, $s, $i) ", Database);
+
                     command.Parameters.Add("$n", DbType.String).Value = tempPlayer.PlayerName;
                     command.Parameters.Add("$p", DbType.String).Value = password;
                     command.Parameters.Add("$s", DbType.String).Value = salt;
@@ -215,9 +248,15 @@ namespace Server
             }
         }
 
-        public String GetSalt(String Username)
+        /**
+         * Given a user name this will return the salt for that username
+         * if no user by that name exists it will return blank
+         * @param username the user to check for.
+         */
+        public String GetSalt(String username)
         {
-            var command = new sqliteCommand("select * from " + playerTableName + " where name = '" + Username + "'", Database);
+            var command = new sqliteCommand("select * from " + playerTableName + " where name =:id", Database);
+            command.Parameters.Add("id", DbType.String).Value = username;
             var reader = command.ExecuteReader();
             if (reader.Read())
             {
@@ -226,28 +265,42 @@ namespace Server
             else return "";
         }
 
-        public bool GetPlayerLogin(ref Player p, String Username, String password)
+        /**
+         *Given a players login credientials it will edit the input player with the 
+         * matching table entry IF the credentials all match up.
+         * @param player the player which will be written to.
+         * @param username the name of the player trying to login
+         * @param the password the player is trying to login with
+         */
+        public bool GetPlayerLogin(ref Player player, String username, String password)
         {
-            var command = new sqliteCommand("select * from " + playerTableName + " where name = '" + Username + "'", Database);
+            var command = new sqliteCommand("select * from " + playerTableName + " where name =:id", Database);
+            command.Parameters.Add("id", DbType.String).Value = username;
             var reader = command.ExecuteReader();
 
             while (reader.Read())
             {
+                //check if passwords match
                 if (password != reader["password"].ToString())
                 {
                     return false;
                 }
                 else
                 {
-                    p.PlayerName = reader["name"].ToString();
-                    p.RoomIndex = Int32.Parse(reader["rIndex"].ToString());
-                    ActivePlayers.Add(p.PlayerName);
+                    player.PlayerName = reader["name"].ToString();
+                    player.RoomIndex = Int32.Parse(reader["rIndex"].ToString());
+                    ActivePlayers.Add(player.PlayerName);
                     return true;
                 }
             }
             return false;
         }
 
+        /**
+         *Gets all the name of all the players in room index provided. Filtering 
+         * offline players in that room
+         * @param i the index of the room in question
+         */
         public String GetPlayersInRoom(int i)
         {
             var command = new sqliteCommand("select * from " + playerTableName + " where rIndex = '" + i + "'", Database);
@@ -273,23 +326,32 @@ namespace Server
         
         }
 
-        public string UpdatePlayerPos(Player p)
+        /**
+         *Update the database to players move.
+         * @param player the player that has moved
+         */
+        public string UpdatePlayerPos(Player player)
         {
             var command = new sqliteCommand(Database);
             command.CommandText ="update " + playerTableName + " set rIndex = :i where name=:id";
-            command.Parameters.Add("i", DbType.Int32).Value = p.RoomIndex;
-            command.Parameters.Add("id", DbType.String).Value = p.PlayerName;
+            command.Parameters.Add("i", DbType.Int32).Value = player.RoomIndex;
+            command.Parameters.Add("id", DbType.String).Value = player.PlayerName;
             try
             {
                 command.ExecuteNonQuery();
             }
             catch(Exception ex)
             {
-                Console.WriteLine("failed to write player: " + p.PlayerName + ex);
+                Console.WriteLine("failed to write player: " + player.PlayerName + ex);
             }
-            return GetRoomDescrption(p.RoomIndex);
+            return GetRoomDescrption(player.RoomIndex);
         }
 
+        /**
+         *Looks up the required database entries to form the String that makes up the room description
+         * Really boring function just a bunch of look ups or calls to other functions that do lookups.
+         * @param i the index of the room to get the description for
+         */
         public String GetRoomDescrption(int i)
         {
             String rString = "";
@@ -341,6 +403,11 @@ namespace Server
             return rString;
         }
 
+        /**
+         *Adds grafiti to a room
+         * @param graf the message to write to the wall
+         * @param roomindex the index of the room to write too
+         */
         public void AddGrafiti(String graf, int roomIndex)
         {
             var command = new sqliteCommand(Database);
@@ -357,16 +424,23 @@ namespace Server
             }
         }
 
+        /**
+         *Given a reference of a dungeon. This will write it to the database.
+         * Only used after a new dungeon is created
+         */
         public void AddDungeon(Dungeon d)
         {
 
+            //check to see if there is an exxsisting dungeon table, if so cya!
            new sqliteCommand("drop table if exists " + dungeonTableName, Database).ExecuteNonQuery();
 
+            //create the new table
             new sqliteCommand("create table "+ dungeonTableName + " (name varchar(50), " +
                   "description varchar(300), rIndex int , north int , " +
                   "east int, south int, west int, grafiti varchar(300))", Database).ExecuteNonQuery();
 
 
+            //cycle through the rooms in the dungeon and write them to the table
             List <Room> roomList =  d.GetRoomList();
             DungeonSize = roomList.Count;
             foreach (Room r in roomList)
@@ -396,6 +470,13 @@ namespace Server
             }
         }
 
+        /**
+         *Used if loading from an exsisitng dungeon. It will cycle through the dungeon table 
+         * getting all the rooms and adding them to the new dungeons room list
+         * Having the dungeon as dynamic memory, allows for quicker sanity checks incase
+         * players try and break things. The databse is always written to if the player
+         * actuallty does anything.
+         */
         public Dungeon GetDungeon()
         {
             Dungeon d = new Dungeon();
@@ -427,6 +508,10 @@ namespace Server
             return d;
         }
 
+        /**
+         *When a player disconnects remove them from the active players list
+         *@param name of the player to be removed.
+         */
         public void RemoveActivePlayer(String name)
         {
             if (ActivePlayers.Contains(name))

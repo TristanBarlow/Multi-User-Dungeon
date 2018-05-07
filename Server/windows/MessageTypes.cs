@@ -351,7 +351,7 @@ namespace MessageTypes
 
     /**
      *This class is used by the client to the server to request the creation of a new client
-     * This class is Not encrypted
+     * This class is encrypted
      */
     public class CreateUser : Msg
     {
@@ -463,6 +463,10 @@ namespace MessageTypes
         }
     }
 
+    /**
+     *This class is used to both send and request the salt
+     * This class is encrypted
+     */
     public class SaltSend : Msg
     {
         public const int ID = 10;

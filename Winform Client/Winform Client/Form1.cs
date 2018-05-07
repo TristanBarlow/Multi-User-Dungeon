@@ -48,8 +48,6 @@ namespace Winform_Client
 
         DungeonDraw DGD;
 
-
-
         public Form1()
         {
             InitializeComponent();

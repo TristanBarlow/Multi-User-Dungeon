@@ -46,14 +46,7 @@ namespace DungeonNamespace
             RoomIndex = index;
             Init();
         }
-
-        public Room(String name, String desc)
-        {
-            this.desc = desc;
-            this.name = name;
-            Init();
-        }
-
+ 
         public void Init()
         {
             Position = new Vector2D();

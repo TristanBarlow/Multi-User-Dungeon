@@ -226,11 +226,11 @@ namespace Server
          * @param s socket to send the salt to
          * @param salt the salt to send
          */
-        static void SendSalt(Socket s, String salt)
+        static void SendSalt(Socket s, String aSalt)
         {
-            SaltRequest SM = new SaltRequest();
-            SM.message = salt;
-            MemoryStream stream = SM.WriteData("This does not matter as it will not be used");
+            SaltSend ss = new SaltSend();
+            ss.salt = aSalt;
+            MemoryStream stream = ss.WriteData("This does not matter as it will not be used");
             s.Send(stream.ToArray());
         }
 
@@ -504,7 +504,7 @@ namespace Server
                                     {
                                         //failed log in 
                                         Console.WriteLine("Player: " + LM.name + "Failed Login");
-                                        SendLoginResponse(player, "Failed to login, detailes didnt match", false);
+                                        SendLoginResponse(player, "Failed to login", false);
                                         shouldDecrypt = false;
                                         return false;
                                     }
@@ -567,7 +567,7 @@ namespace Server
                 Dungeon = new Dungeon();
                 Dungeon.Init(100, AllItems);
                 sqlWrapper.AddDungeon(Dungeon);
-                sqlWrapper.AddItems(50, 20);
+                sqlWrapper.AddItems(50);
             }
             else
             {
@@ -577,7 +577,7 @@ namespace Server
                     Dungeon = new Dungeon();
                     Dungeon.Init(100, AllItems);
                     sqlWrapper.AddDungeon(Dungeon);
-                    sqlWrapper.AddItems(50, 20);
+                    sqlWrapper.AddItems(50);
                 }
             }
 
