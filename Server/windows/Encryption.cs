@@ -89,6 +89,11 @@ namespace Server
             return resultArray;
         }
 
+        /**
+         *Takes a salt, takes a password returns a salted hashed password.
+         * @param plainText the plain text password to hash
+         * @param salt the salt to add to make everything better
+         */
         public static String GenerateSaltedHash(String plainText, String salt)
         {
             HashAlgorithm algorithm = new SHA256Managed();
@@ -97,24 +102,5 @@ namespace Server
 
             return Convert.ToBase64String(algorithm.ComputeHash(Encoding.Unicode.GetBytes(salt)));
         }
-
-        public static bool CompareByteArrays(byte[] array1, byte[] array2)
-        {
-            if (array1.Length != array2.Length)
-            {
-                return false;
-            }
-
-            for (int i = 0; i < array1.Length; i++)
-            {
-                if (array1[i] != array2[i])
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
     }
 }

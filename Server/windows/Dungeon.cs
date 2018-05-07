@@ -143,7 +143,7 @@ namespace DungeonNamespace
             }
 
             //Get the currnt room once. 
-           Room currentRoom = RoomList[player.roomIndex];
+           Room currentRoom = RoomList[player.RoomIndex];
 
             switch (input[0].ToLower())
             {
@@ -163,13 +163,13 @@ namespace DungeonNamespace
                     break;
 
                 case "pickup":
-                    String pik = database.MoveItem("room" + player.roomIndex, "player" + player.PlayerName, subject);
+                    String pik = database.MoveItem("room" + player.RoomIndex, "player" + player.PlayerName, subject);
                     pik += "Pick up Item: " + subject;
                     rAction.Set(pik, ActionID.UPDATE);
                     break;
 
                 case "drop":
-                    String drp = database.MoveItem("player" + player.PlayerName, "room" + player.roomIndex, subject);
+                    String drp = database.MoveItem("player" + player.PlayerName, "room" + player.RoomIndex, subject);
                     drp += "Drop Item: " + subject;
                     rAction.Set( drp,ActionID.UPDATE);
                     break;
@@ -189,20 +189,20 @@ namespace DungeonNamespace
 
                     if ((input[1].ToLower() == "north") && (currentRoom.north != -1))
                     {
-                         player.SetRoom(RoomList[currentRoom.north]);
+                         player.SetRoom(RoomList[currentRoom.north].RoomIndex);
                         
                     }
                      else if ((input[1].ToLower() == "east") && (currentRoom.east != -1))
                     {
-                       player.SetRoom(RoomList[currentRoom.east]);
+                       player.SetRoom(RoomList[currentRoom.east].RoomIndex);
                     }
                     else if ((input[1].ToLower() == "south") && (currentRoom.south != -1))
                     {
-                        player.SetRoom(RoomList[currentRoom.south]);
+                        player.SetRoom(RoomList[currentRoom.south].RoomIndex);
                     }
                     else if ((input[1].ToLower() == "west") && (currentRoom.west != -1))
                     {
-                        player.SetRoom(RoomList[currentRoom.west]);           
+                        player.SetRoom(RoomList[currentRoom.west].RoomIndex);           
                     }
                     else
                     {

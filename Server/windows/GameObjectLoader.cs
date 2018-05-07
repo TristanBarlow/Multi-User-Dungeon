@@ -6,17 +6,26 @@ using System.Text;
 
 namespace DungeonNamespace
 {
+    /**
+     *This class is responsible for handling the parsing of the text files that are used for the rooms, items and weapons 
+     * In addition it stores an instance of each class which is used to look up the item/weapons attributes
+     */
     public class GameObjectList
     {
+        //item list contains weapons aswell String is the items ID
         private Dictionary<String, Item> AllAvailableItems = new Dictionary<String, Item>();
+
+        //only contains weapons
         private Dictionary<String, Weapon> AllAvailableWeapons = new Dictionary<String, Weapon>();
 
+        //Room names and descriptions
         private Dictionary<String, String> RoomsAndDescriptions = new Dictionary<String, String>();
 
         private Random rand = new Random();
 
         public GameObjectList()
         {
+            //get and parse itemlist if it exsists
             String itemPath = "ItemList.txt";
 
             if (!File.Exists(itemPath))
@@ -28,6 +37,7 @@ namespace DungeonNamespace
                 ParseItemFile(itemPath);
             }
 
+            //get and parse weaponlist if it exsists
             String weaponPath = "WeaponList.txt";
             if (!File.Exists(weaponPath))
             {
@@ -38,6 +48,7 @@ namespace DungeonNamespace
                 ParseWeaponFile(weaponPath);
             }
 
+            //get and parse roomlist if it exsists
             String roomPath = "RoomList.txt";
             if (!File.Exists(roomPath))
             {
@@ -50,6 +61,8 @@ namespace DungeonNamespace
 
 
         }
+
+        //File Parsing basic stuff
         private void ParseWeaponFile(String path)
         {
             // Open the file to read from.
@@ -87,7 +100,6 @@ namespace DungeonNamespace
                 }
             }
         }
-
         private void ParseRoomFile(String path)
         {
             // Open the file to read from.

@@ -104,9 +104,14 @@ namespace MessageTypes
                     m = new UpdateChat();
                     break;
 
-                case SaltMessage.ID:
-                    m = new SaltMessage();
+                case SaltRequest.ID:
+                    m = new SaltRequest();
                     break;
+
+                case SaltSend.ID:
+                    m = new SaltSend();
+                    break;
+
                 default:
                     throw (new Exception());
             }
@@ -121,6 +126,10 @@ namespace MessageTypes
         }
     };
 
+    /**
+     *This class if used to respond to attempts to create a new player or to login
+     * This class does not use encryption
+     */
     public class LoginResponse : Msg
     {
         public const int ID = 1;
@@ -156,6 +165,11 @@ namespace MessageTypes
         }
     };
 
+
+    /**
+     *This class if used to send to attempts to create a new player or to login
+     * This class uses encryption
+     */
     public class LoginMessage : Msg
     {
         public const int ID = 2;
@@ -207,6 +221,11 @@ namespace MessageTypes
         }
     };
 
+
+    /**
+     *This class if used to send dungeon commands to the server
+     * This class uses encryption
+     */
     public class DungeonCommand : Msg
     {
         public const int ID = 3;
@@ -235,6 +254,10 @@ namespace MessageTypes
         }
     }
 
+    /**
+    *This class if used to send dungeon responses to the client
+    * This class uses encryption
+    */
     public class DungeonResponse : Msg
     {
         public const int ID = 4;
@@ -262,6 +285,10 @@ namespace MessageTypes
         }
     }
 
+    /**
+     *This class if used to send the dungone layout so the client can render it
+     * This class uses encryption
+     */
     public class MapLayout : Msg
     {
         public const int ID = 5;
@@ -290,6 +317,10 @@ namespace MessageTypes
         }
     }
 
+    /**
+     *This class if used to send the location of all the players to the client
+     * This class uses encryption
+     */
     public class PlayerLocations : Msg
     {
         public const int ID = 6;
@@ -318,6 +349,10 @@ namespace MessageTypes
         }
     }
 
+    /**
+     *This class is used by the client to the server to request the creation of a new client
+     * This class is Not encrypted
+     */
     public class CreateUser : Msg
     {
         public const int ID = 7;
@@ -328,17 +363,11 @@ namespace MessageTypes
         public String password;
         private int passLength = 0;
 
-        public String salt;
-        private int saltLength = 0;
-
         public CreateUser() { mID = ID; }
 
         public void SetPassword(String p, String s)
         {
-            passLength = p.Length;
-            salt = s;
-            saltLength = salt.Length;
-            password = Encryption.GenerateSaltedHash(p,salt);
+            password = Encryption.GenerateSaltedHash(p, s);
         }
 
         public void SetName(String n)
@@ -346,7 +375,7 @@ namespace MessageTypes
             nameLength = n.Length;
             name = n;
         }
-        public override MemoryStream WriteData(String s)
+        public override MemoryStream WriteData(String salt)
         {
             MemoryStream stream = new MemoryStream();
             BinaryWriter write = new BinaryWriter(stream );
@@ -355,12 +384,12 @@ namespace MessageTypes
             write.Write(name);
             write.Write(passLength);
             write.Write(password);
-            write.Write(saltLength);
-            write.Write(salt);
 
             write.Close();
 
-            return stream;
+            MemoryStream ms = new MemoryStream(Encryption.Encrypt(stream.ToArray(), salt));
+
+            return ms;
         }
 
         public override void ReadData(BinaryReader read)
@@ -369,12 +398,14 @@ namespace MessageTypes
             name = read.ReadString();
             passLength = read.ReadInt32();
             password = read.ReadString();
-            saltLength = read.ReadInt32();
-            salt = read.ReadString();
 
         }
     }
 
+    /**
+     *This class is sent from the server to the client, It will add any text to the exsisting text on the client
+     * This class is encrypted
+     */
     public class UpdateChat:Msg
     {
         public const int ID = 8;
@@ -403,12 +434,16 @@ namespace MessageTypes
         }
     }
 
-    public class SaltMessage : Msg
+    /**
+     *This class is used to both send and request the salt
+     * This class is not encrypted
+     */
+    public class SaltRequest : Msg
     {
         public const int ID = 9;
 
         public String message = "";
-        public SaltMessage() { mID = ID; }
+        public SaltRequest() { mID = ID; }
 
         public override MemoryStream WriteData(String salt)
         {
@@ -427,5 +462,31 @@ namespace MessageTypes
             message = read.ReadString();
         }
     }
+
+    public class SaltSend : Msg
+    {
+        public const int ID = 10;
+
+        public String salt = "";
+        public SaltSend() { mID = ID; }
+
+        public override MemoryStream WriteData(String s)
+        {
+
+            MemoryStream stream = new MemoryStream();
+            BinaryWriter write = new BinaryWriter(stream);
+            write.Write(ID);
+            write.Write(salt);
+
+            write.Close();
+            return stream;
+        }
+
+        public override void ReadData(BinaryReader read)
+        {
+            salt = read.ReadString();
+        }
+    }
+
 
 }

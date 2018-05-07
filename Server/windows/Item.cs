@@ -8,7 +8,9 @@ using Utilities;
 
 namespace DungeonNamespace
 {
-
+    /**
+     *Base class for all items.  
+     */
     public class Item
     {
         public String itemName = "item";
@@ -16,6 +18,7 @@ namespace DungeonNamespace
         public String ID = "i0";
 
         public String description = "Its an Item, not particularly useful";
+
         public Item(String name, String descr, String id)
         {
             itemName = name;
@@ -35,7 +38,9 @@ namespace DungeonNamespace
 
 
     }
-
+    /**
+     *Base class for all weapons.  
+     */
     public class Weapon : Item
     {
         public int damage = 1;

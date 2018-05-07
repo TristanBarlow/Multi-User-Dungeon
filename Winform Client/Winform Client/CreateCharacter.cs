@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using Utilities;
 
 namespace Winform_Client
 {
@@ -20,9 +21,9 @@ namespace Winform_Client
 
         public void CheckForValidLogin()
         {
-            if (NameTextBox.Text.Count() > 0 && !NameTextBox.Text.Contains(" "))
+            if (!U.HasBadChars(NameTextBox.Text) && !U.HasBadChars(PasswordTextBox.Text))
             {
-                if (PasswordTextBox.Text.Count() > 0 && PasswordTextBox.Text == RetypePassword.Text)
+                if (PasswordTextBox.Text == RetypePassword.Text)
                 {
                     Create.Enabled = true;
                     return;

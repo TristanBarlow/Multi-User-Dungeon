@@ -144,8 +144,6 @@
             this.Controls.Add(this.Login);
             this.Name = "LoginScreen";
             this.Text = "LoginScreen";
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.LoginScreen_FormClosed);
-            this.Load += new System.EventHandler(this.LoginScreen_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

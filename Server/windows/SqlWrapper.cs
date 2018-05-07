@@ -49,13 +49,18 @@ namespace Server
 
         private int DungeonSize = 0;
 
+        /**
+         * Constructor will try and open the database if none exsists it will create one
+         * In addition it will create new tables if non exsist. 
+         */
         public SqlWrapper(GameObjectList objectList)
         {
+
             gameObjectList = objectList;
-            sqliteCommand cmd = new sqliteCommand();
-            String disableRollback = "PRAGMA journal_mode = OFF";
 
 
+
+            //try and open database, if failed make one!
             Database = new sqliteConnection("Data Source=Dungeon" + ";Version=3;FailIfMissing=True");
             try
             {
@@ -68,10 +73,16 @@ namespace Server
                 Database = new sqliteConnection("Data Source=Dungeon" + ";Version=3;FailIfMissing=True");
                 Database.Open();
             }
+
+            //do the disable roll back thingy
+            //Not sure what this does, fixed a problem, found it on stack overflow
+            String disableRollback = "PRAGMA journal_mode = OFF";
+            sqliteCommand cmd = new sqliteCommand();
             cmd.Connection = Database;
             cmd.CommandText = disableRollback;
             cmd.ExecuteNonQuery();
 
+            //create tables
             new sqliteCommand(createTable + itemTableName + itemColumns, Database).ExecuteNonQuery();
 
             new sqliteCommand(createTable + playerTableName + playerColumns ,  Database).ExecuteNonQuery();
@@ -174,8 +185,8 @@ namespace Server
             var command = new sqliteCommand(Database);
             command.CommandText = ("select * from " + playerTableName + " where name = '" + tempPlayer.PlayerName+ "'");
             var reader = command.ExecuteReader();
-
-            if (reader.HasRows == false)
+        
+            if (reader.HasRows == false && !U.HasBadChars(tempPlayer.PlayerName) && !U.HasBadChars(password))
             {
 
                 try
@@ -186,7 +197,7 @@ namespace Server
                     command.Parameters.Add("$n", DbType.String).Value = tempPlayer.PlayerName;
                     command.Parameters.Add("$p", DbType.String).Value = password;
                     command.Parameters.Add("$s", DbType.String).Value = salt;
-                    command.Parameters.Add("$i", DbType.Int32).Value = tempPlayer.roomIndex;
+                    command.Parameters.Add("$i", DbType.Int32).Value = tempPlayer.RoomIndex;
                     command.ExecuteNonQuery();
 
                     ActivePlayers.Add(tempPlayer.PlayerName);
@@ -229,7 +240,7 @@ namespace Server
                 else
                 {
                     p.PlayerName = reader["name"].ToString();
-                    p.roomIndex = Int32.Parse(reader["rIndex"].ToString());
+                    p.RoomIndex = Int32.Parse(reader["rIndex"].ToString());
                     ActivePlayers.Add(p.PlayerName);
                     return true;
                 }
@@ -266,7 +277,7 @@ namespace Server
         {
             var command = new sqliteCommand(Database);
             command.CommandText ="update " + playerTableName + " set rIndex = :i where name=:id";
-            command.Parameters.Add("i", DbType.Int32).Value = p.roomIndex;
+            command.Parameters.Add("i", DbType.Int32).Value = p.RoomIndex;
             command.Parameters.Add("id", DbType.String).Value = p.PlayerName;
             try
             {
@@ -276,7 +287,7 @@ namespace Server
             {
                 Console.WriteLine("failed to write player: " + p.PlayerName + ex);
             }
-            return GetRoomDescrption(p.roomIndex);
+            return GetRoomDescrption(p.RoomIndex);
         }
 
         public String GetRoomDescrption(int i)

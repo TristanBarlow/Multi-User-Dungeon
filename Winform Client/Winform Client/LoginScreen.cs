@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using Utilities;
 
 namespace Winform_Client
 {
@@ -26,14 +27,9 @@ namespace Winform_Client
             form = frm;
         }
 
-        private void LoginScreen_FormClosed(object sender, FormClosedEventArgs e)
-        {
-
-        }
-
         private void LoginClick(object sender, EventArgs e)
         {
-            if (this.NameTextBox.Text.Count() > 0 && this.PasswordTextBox.Text.Count() > 0 && IsConnected && !NameTextBox.Text.Contains(" "))
+            if (IsConnected && !U.HasBadChars(this.NameTextBox.Text) && !U.HasBadChars(this.PasswordTextBox.Text))
             {
 
                 form.SetUserData(this.NameTextBox.Text, this.PasswordTextBox.Text);
@@ -43,7 +39,7 @@ namespace Winform_Client
             }
             else
             {
-                LoginError.Text = "Error logging in";
+                LoginError.Text = "Bad Characters";
             }
         }
 
@@ -89,11 +85,6 @@ namespace Winform_Client
             }
         }
 
-        private void LoginScreen_Load(object sender, EventArgs e)
-        {
-
-        }
-
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
 
@@ -101,10 +92,11 @@ namespace Winform_Client
 
         public void TryCreateCharacter(String name, String password)
         {
-            if (name.Count() > 0 && password.Count() > 0 && IsConnected && !name.Contains(" ") && !password.Contains(" "))
+            if (IsConnected && !U.HasBadChars(name) && !U.HasBadChars(password))
             {
 
-                form.SendCreateUserMessage(name, password);
+                form.SetUserData(name, password);
+                form.SendSalt();
 
             }
             else

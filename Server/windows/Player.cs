@@ -10,72 +10,54 @@ using System.Net.Sockets;
 
 namespace PlayerN
 {
+    /**
+     *This class is only realy used to make it easier to pass around who we're dealing with
+     * The only game stuff it stores is name and the room index the player is in
+     * Also stores the socket. I prefer it in here as it just easier and quicker to access 
+     */
     public class Player
     {
         public String PlayerName { set; get;}
 
-        private String Stance = "attack";
-
-        public bool isInCombat;
-
-        public bool isDead = false;
-
         public String Salt { set; get; }
 
-        private Room currentRoom;
+        public int RoomIndex { set; get; }
 
-        public int roomIndex = -1;
-
-        private int health = 100;
-
-        public String GetStance() { return Stance;}
-
-        public Room GetRoom() { return currentRoom; }
-
-        public void SetRoom(Room r)
+        public void SetRoom(int r)
         {
-            roomIndex = r.RoomIndex;
-            currentRoom = r;
+            RoomIndex = r;
         }
 
-        public Socket socket { set; get; }
+        public Socket Socket { set; get; }
 
-        public void SetStance(String newStance) {Stance = newStance;}
-
+        /**
+         * Constructor used for when a client has logged in successfuly
+         */
         public Player(String clientName, Socket s)
         {
             PlayerName = clientName;
-            socket = s;
+            Socket = s;
+            RoomIndex = -1;
         }
 
+        /**
+         *Players are created but if they exit before loggin in they are not always used. 
+         */
         public Player(String name)
         {
             PlayerName = name;
+            RoomIndex = -1;
         }
 
+        /**
+        *Players are created but if they exit before loggin in they are not always used. 
+        */
         public Player(Socket s)
         {
-            socket = s;
+            Socket = s;
             Salt = "";
+            RoomIndex = -1;
         }
 
-        public int GetHealth(){ return health;}
-
-        public void ChangeHealth(int x)
-        {
-            health = health + x;
-            if (health <= 0) { isDead = true; }
-        }
-
-        public String GetPlayerName() { return PlayerName; }
-
-        public void SetPlayerName(String newName) { PlayerName = newName;}
-
-        public Player CopyPlayer()
-        {
-            Player p = new Player(PlayerName);
-            p.roomIndex = roomIndex;
-            return p;
-        }
     }
 }

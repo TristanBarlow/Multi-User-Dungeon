@@ -51,7 +51,7 @@ namespace Server
 
             try
             {
-                player.socket.Send(outStream.ToArray());
+                player.Socket.Send(outStream.ToArray());
             }
             catch
             {
@@ -73,7 +73,7 @@ namespace Server
 
             try
             {
-                player.socket.Send(outStream.ToArray());
+                player.Socket.Send(outStream.ToArray());
             }
             catch (System.Exception)
             {
@@ -104,7 +104,7 @@ namespace Server
             UpdateChat UC = new UpdateChat();
             UC.message = str;
             MemoryStream stream = UC.WriteData(player.Salt);
-            player.socket.Send(stream.ToArray());
+            player.Socket.Send(stream.ToArray());
         }
 
         /**
@@ -115,7 +115,7 @@ namespace Server
         {
             foreach (Player p in clientList)
             {
-                if (p != player && p.roomIndex == player.roomIndex)
+                if (p != player && p.RoomIndex == player.RoomIndex)
                 {
                     SendUpdateMessage(p.PlayerName + " entered", p);
                 }
@@ -137,7 +137,7 @@ namespace Server
                 if (p.PlayerName == player.PlayerName) str = "You ";
                 else { str = player.PlayerName; };
 
-                if (p.roomIndex == player.roomIndex)
+                if (p.RoomIndex == player.RoomIndex)
                 {
                     SendUpdateMessage(str + " Said:  " + message , p);
                 }
@@ -153,7 +153,7 @@ namespace Server
         {
             foreach (Player p in clientList)
             {
-                if (p != player && p.roomIndex == room)
+                if (p != player && p.RoomIndex == room)
                 {
                     SendUpdateMessage("Player: " + p.PlayerName + " left", p);
                 }
@@ -206,17 +206,17 @@ namespace Server
             Room r;
 
             //get random room if they're a new player
-            if (player.roomIndex == -1 || player.roomIndex > Dungeon.GetRoomList().Count )
+            if (player.RoomIndex == -1 || player.RoomIndex > Dungeon.GetRoomList().Count )
             {
                 r = Dungeon.GetRandomRoom();
             }
             else
             {
-                r = Dungeon.GetRoomList()[player.roomIndex];
+                r = Dungeon.GetRoomList()[player.RoomIndex];
             }
 
             //add to the required stuffs
-            player.SetRoom(r);
+            player.SetRoom(r.RoomIndex);
             sqlWrapper.UpdatePlayerPos(player);
             clientList.Add(player);
         }
@@ -228,11 +228,12 @@ namespace Server
          */
         static void SendSalt(Socket s, String salt)
         {
-            SaltMessage SM = new SaltMessage();
+            SaltRequest SM = new SaltRequest();
             SM.message = salt;
             MemoryStream stream = SM.WriteData("This does not matter as it will not be used");
             s.Send(stream.ToArray());
         }
+
         /**
          *Cycles through invoking any actions in the queue if there are any 
          */
@@ -259,9 +260,9 @@ namespace Server
             String rStr = "&";
             foreach (Player p in clientList)
             {
-                if (p.GetRoom() != null)
+                if (p.RoomIndex != -1)
                 {
-                    rStr += p.PlayerName + " " + p.GetRoom().RoomIndex + "&";
+                    rStr += p.PlayerName + " " + p.RoomIndex + "&";
                 }
 
             }
@@ -275,12 +276,32 @@ namespace Server
                 try
                 {
                     MemoryStream outStream = m.WriteData(p.Salt);
-                    p.socket.Send(outStream.ToArray());
+                    p.Socket.Send(outStream.ToArray());
                 }
                 catch (System.Exception)
                 {
                     RemoveClientByPlayer(p);
                 }
+            }
+        }
+
+        /**
+         *This function Sends a message back to the client to affirm the salt has been recieved.
+         * Now the salt has been receieved the client can now safely send the encrypted create user message.
+         * @param player the player to send the request too
+         */
+        public static void SendSaltRecieved(Player player)
+        {
+            SaltRequest sr = new SaltRequest();
+            sr.message = "Salt recieved send create user now";
+            try
+            {
+                MemoryStream outStream = sr.WriteData(player.Salt);
+                player.Socket.Send(outStream.ToArray());
+            }
+            catch (System.Exception)
+            {
+                RemoveClientByPlayer(player);
             }
         }
 
@@ -303,7 +324,7 @@ namespace Server
 
             try
             {
-                p.socket.Send(outStream.ToArray());
+                p.Socket.Send(outStream.ToArray());
                 return true;
             }
             catch (System.Exception)
@@ -422,7 +443,7 @@ namespace Server
                 byte[] buffer = new byte[4096];
                 int result;
 
-                result = player.socket.Receive(buffer);
+                result = player.Socket.Receive(buffer);
 
                 if (result > 0)
                 {
@@ -431,15 +452,15 @@ namespace Server
                     switch (m.mID)
                     {
                         //called when a player sends the username to the server, if the player is existing send back salt
-                        case SaltMessage.ID:
-                            SaltMessage SM = (SaltMessage)m;
+                        case SaltRequest.ID:
+                            SaltRequest SM = (SaltRequest)m;
                             lock (sqlWrapper)
                             {
                                 //check to see if the salt value is valid
                                 player.Salt = sqlWrapper.GetSalt(SM.message);
                                 if (player.Salt != "")
                                 {
-                                    SendSalt(player.socket, player.Salt);
+                                    SendSalt(player.Socket, player.Salt);
                                     shouldDecrypt = true;
                                 }
                                 else
@@ -449,7 +470,16 @@ namespace Server
 
                             }
                             break;
-
+                        //called at the start of the create user. The client sends the salt at which point
+                        //the server sends back a message saying its receivedd. The the encrypted createsuer can be proccessed.
+                        case SaltSend.ID:
+                            {
+                                SaltSend ss = (SaltSend)m;
+                                player.Salt = ss.salt;
+                                SendSaltRecieved(player);
+                                shouldDecrypt = true;
+                            }
+                            break;
                             //Called when the log in message arrives.
                         case LoginMessage.ID:
                             {
@@ -482,19 +512,18 @@ namespace Server
 
                             }
 
-                            //Triggered if a create user message is sent
+                            //Triggered if a create user message arrives
                         case CreateUser.ID:
                             {
                                 //set up the new player that was created
                                 CreateUser CM = (CreateUser)m;
-                                player.SetPlayerName(CM.name);
-                                player.Salt = CM.salt;
+                                player.PlayerName = CM.name;
                                 Console.WriteLine("Create User recieved: " + CM.name);
 
                                 lock (sqlWrapper)
                                 {
                                     //check to see if the new player is valid
-                                    if (sqlWrapper.AddPlayer(player, CM.password, CM.salt))
+                                    if (sqlWrapper.AddPlayer(player, CM.password, player.Salt))
                                     {
                                         Console.Write(" created new player");
                                         SendLoginResponse(player, "Success", true);

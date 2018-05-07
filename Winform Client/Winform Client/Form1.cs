@@ -24,7 +24,6 @@ namespace Winform_Client
 
         bool bQuit = false;
         public bool bConnected = false;
-        bool TestTheStress = false;
 
         private static String[] IP = { "127.0.0.1", "46.101.88.130", "192.168.1.101" };
         private static int ipIndex = 0;
@@ -180,11 +179,17 @@ namespace Winform_Client
                                         form.AddDungeonText(UC.message, false);
                                     }
                                     break;
-                                case SaltMessage.ID:
+                                case SaltSend.ID:
                                     {
-                                        SaltMessage SM = (SaltMessage)m;
-                                        Salt = SM.message;
+                                        SaltSend SS = (SaltSend)m;
+                                        Salt = SS.salt;
                                         SendLoginMessage();
+                                        break;
+                                    }
+                                case SaltRequest.ID:
+                                    {
+                                        SaltRequest sr = (SaltRequest)m;
+                                        SendCreateUserMessage();
                                         break;
                                     }
                                 default:
@@ -196,7 +201,7 @@ namespace Winform_Client
                 catch (Exception ex)
                 {
                     form.bConnected = false;
-                    Console.WriteLine(Nl.NewLineS("Lost server!") + ex);
+                    Console.WriteLine(U.NL("Lost server!") + ex);
                     Application.Restart();
                     Environment.Exit(0);
                     
@@ -232,56 +237,12 @@ namespace Winform_Client
             else
             {
                 if(newMessage)TextboxDungeon.Clear();
-                TextboxDungeon.AppendText(Nl.NewLineS(s));
-            }
-        }
-
-        private void StressTest()
-        {
-            Random rnd = new Random();
-            
-            while (TestTheStress)
-            {
-                int rndNum = rnd.Next(0, 6);
-                switch (rndNum)
-                {
-                    case 0:
-                        SendDungeonMessage("pickup cheese");
-                        break;
-                    case 1:
-                        SendDungeonMessage("drop cheese");
-                        break;
-                    case 2:
-                        String m = "go north";
-
-                        SendDungeonMessage(m);
-                        break;
-                    case 3:
-                        String b = "go south";
-
-                        SendDungeonMessage(b);
-                        break;
-                    case 4:
-                        String c = "go east";
-                        SendDungeonMessage(c);
-                        break;
-                    case 5:
-                        String d = "go west";
-                        SendDungeonMessage(d);
-                        break;
-                }
-                Thread.Sleep(200);
+                TextboxDungeon.AppendText(U.NL(s));
             }
         }
 
         private void buttonSend_Click(object sender, EventArgs e)
         {
-            if (TestTheStress)
-            {
-                Thread stressThread = new Thread(StressTest);
-                stressThread.IsBackground = true;
-                stressThread.Start();
-            }
             if ( (textBox_Input.Text.Length > 0) && (clientSocket != null))
             {                
                 try
@@ -333,7 +294,7 @@ namespace Winform_Client
 
         public void RequestSalt()
         {
-            SaltMessage sm = new SaltMessage();
+            SaltRequest sm = new SaltRequest();
             sm.message = ClientName;
             MemoryStream outStream = sm.WriteData("");
             try
@@ -344,6 +305,20 @@ namespace Winform_Client
             {
                 Console.WriteLine("Error sending message: " + ex);
             }
+        }
+
+        public void SendSalt()
+        {
+            Salt = Encryption.GetSalt();
+
+            SaltSend ss = new SaltSend();
+            ss.salt = Salt;
+            MemoryStream outStream = ss.WriteData("");
+            try
+            {
+                clientSocket.Send(outStream.ToArray());
+            }
+            catch { }
         }
 
         public void SetUserData(String name, String password)
@@ -368,15 +343,12 @@ namespace Winform_Client
             }
         }
 
-        public void SendCreateUserMessage(String name, String password)
+        public void SendCreateUserMessage()
         {
-            ClientName = name;
-            Salt = Encryption.GetSalt();
-
             CreateUser nameMsg = new CreateUser();
-            nameMsg.SetName(name);
-            nameMsg.SetPassword(password,Salt );
-            MemoryStream outStream = nameMsg.WriteData("");
+            nameMsg.SetName(ClientName);
+            nameMsg.SetPassword(ClientPassword, Salt );
+            MemoryStream outStream = nameMsg.WriteData(Salt);
             try
             {
                 clientSocket.Send(outStream.ToArray());
