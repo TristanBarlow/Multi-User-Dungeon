@@ -7,30 +7,63 @@ using Server;
 
 namespace MessageTypes
 {
+    /**
+     *Abstract class from which all messages sent over the network derive from. 
+     */
     public abstract class Msg
     {
         public Msg() { mID = 0; }
 
+        //ID of the message
         public int mID;
 
-        public bool shouldEncrypt = false;
+        //if you set this to true, I think its similar to how a packet sniffer would work
+        //It will grab the buffer sent over the network and try and read it with a binary reader
+        // I think my encryption works, because if you do try this it will error :).
+        private static bool attemptPacketsniff = false;
 
+        /**
+         *This will write the data to a stream, If the data is of a type that should be encrypted it will use
+         * the salt to encrypt the data.
+         * @param salt the salt to be used IF the message type should be encrypted.
+         */
         public abstract MemoryStream WriteData(String salt);
 
+        /**
+         *This will simply use the binary reader to extract the data from the stream. 
+         */
         public abstract void ReadData(BinaryReader read);
 
+        /**
+         *The main function for convertting the buffer received over the network back into the message types we know
+         * @param buffer the buffer to be converted into a message type
+         * @param salt the unique salt to be used for decrypting
+         * @param IsEncrypted if this is true it will try and decrypt the buffer recieved.
+         */
         public static Msg DecodeStream(byte[] buffer, String salt, bool IsEncrypted)
         {
             BinaryReader read = null;
             MemoryStream stream = null;
 
+
             if (IsEncrypted)
             {
+                //decrypt the buffer
                 stream = new MemoryStream(Encryption.Decrypt(buffer, salt));
-                
+
+                //if you wana try and packet sniff(dont)
+                if (attemptPacketsniff)
+                {
+                    MemoryStream packetSniffer = new MemoryStream(buffer);
+                    BinaryReader packetReader = new BinaryReader(packetSniffer);
+                    int i = packetReader.ReadInt32();
+                    String s = packetReader.ReadString();
+                }
+
             }
             else
             {
+                //normal data, not decryption needed.
                  stream = new MemoryStream(buffer);
             }
             read = new BinaryReader(stream);
@@ -146,6 +179,7 @@ namespace MessageTypes
             nameLength = n.Length;
             name = n;
         }
+
         public override MemoryStream WriteData(String salt)
         {
             MemoryStream stream = new MemoryStream();

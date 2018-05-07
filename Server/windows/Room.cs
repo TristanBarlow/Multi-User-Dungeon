@@ -91,55 +91,5 @@ namespace DungeonNamespace
             return false;
         }
 
-        public void AddGraf(String graff){ graffitiList.Add(graff);}
-        
-        public String GetGrafitii()
-        {
-            String returnString = ("Graffiti: ");
-            if (graffitiList.Count() != 0)
-            {
-                foreach (String iter in graffitiList)
-                {
-                    returnString += U.NewLineS(iter);
-                }
-            }
-            else
-            {
-                returnString += "No Graffiti, Be the first!!";
-            }
-            return returnString;
-        }
-
-        public String GetGraff()
-        {
-            String returnString = "";
-            if (graffitiList.Count() != 0)
-            {
-                foreach (String graff in graffitiList)
-                {
-                    returnString += U.NewLineS(graff);
-                }
-
-                return returnString;
-            }
-            else
-            {
-                return U.NewLineS("no Graffiti");
-            }
-        }
-
-        public Room Copy()
-        {
-            Room r = new Room(name, RoomIndex);
-            r.name = name;
-            r.desc = desc;
-            r.north = north;
-            r.east = east;
-            r.south = south;
-            r.west = west;
-            return r;
-        }
-
-
     }
 }

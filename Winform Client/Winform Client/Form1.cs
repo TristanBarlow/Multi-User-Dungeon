@@ -196,7 +196,7 @@ namespace Winform_Client
                 catch (Exception ex)
                 {
                     form.bConnected = false;
-                    Console.WriteLine(U.NewLineS("Lost server!") + ex);
+                    Console.WriteLine(Nl.NewLineS("Lost server!") + ex);
                     Application.Restart();
                     Environment.Exit(0);
                     
@@ -232,7 +232,7 @@ namespace Winform_Client
             else
             {
                 if(newMessage)TextboxDungeon.Clear();
-                TextboxDungeon.AppendText(U.NewLineS(s));
+                TextboxDungeon.AppendText(Nl.NewLineS(s));
             }
         }
 

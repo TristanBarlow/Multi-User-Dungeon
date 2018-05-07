@@ -394,7 +394,7 @@ namespace Server
                     }
                     else
                     {
-                       // do something
+                       // No messages to see here!
                     }
                 }
                 catch (Exception)
@@ -444,7 +444,7 @@ namespace Server
                                 }
                                 else
                                 {
-                                    SendLoginResponse(player, "Failed Bad login", false);
+                                    SendLoginResponse(player, "Failed No Such login", false);
                                 }
 
                             }
@@ -474,7 +474,7 @@ namespace Server
                                     {
                                         //failed log in 
                                         Console.WriteLine("Player: " + LM.name + "Failed Login");
-                                        SendLoginResponse(player, "Failed to login, Bad details", false);
+                                        SendLoginResponse(player, "Failed to login, detailes didnt match", false);
                                         shouldDecrypt = false;
                                         return false;
                                     }
@@ -504,7 +504,7 @@ namespace Server
                                     else
                                     {
                                         Console.Write("Failed to create player");
-                                        SendLoginResponse(player, "Failed to Create player", false);
+                                        SendLoginResponse(player, "Failed to Create player, username might already exist", false);
                                         shouldDecrypt = false;
                                         return false;
                                     }
@@ -524,22 +524,6 @@ namespace Server
 
         static void Main(string[] args)
         {
-            //String salt = Encryption.GetSalt();
-            //LoginMessage lm = new LoginMessage();
-            //lm.name = "foobar12345678910";
-            //lm.password = "foobarians";
-            //MemoryStream ms = lm.WriteData(salt);
-
-            //byte[] buffer = ms.ToArray();
-            //byte[] decrypted = Encryption.Decrypt(buffer, salt);
-            //MemoryStream final = new MemoryStream(decrypted);
-            //BinaryReader br = new BinaryReader(final);
-
-            //int foo = br.ReadInt32();
-            //int blah = br.ReadInt32();
-            //String next = br.ReadString();
-
-
 
             Console.WriteLine("Should Create new Map?");
             var response = Console.ReadLine();
@@ -548,7 +532,7 @@ namespace Server
 
             sqlWrapper = new SqlWrapper(AllItems);
 
-
+            //Create New dungeon if you want to, or one does not exsist
             if (response.ToLower() == "yes")
             {
                 Dungeon = new Dungeon();
@@ -568,12 +552,14 @@ namespace Server
                 }
             }
 
+            //bind listner socket
             Socket serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 			serverSocket.Bind(new IPEndPoint(IPAddress.Parse(IP[ipIndex]), 8500));
             serverSocket.Listen(32);
 
             bool bQuit = false;
 
+            //start the queue that will process all actions
             Task RequestProcess = new Task(ProcessRequestQueue);
             RequestProcess.Start();
 
@@ -582,13 +568,14 @@ namespace Server
                 Console.WriteLine("Waitting for a client" + clientID);
                 Socket serverClient = serverSocket.Accept();
             
+                //Start a new thread that will receieve incoming messages from client
                 Thread myThread = new Thread(ReceiveClientProcess);
                 myThread.IsBackground = true;
                 myThread.Start(serverClient);
  
                 clientID++;
 
-                Thread.Sleep(500);
+                Thread.Sleep(200);
             }
         }
     }

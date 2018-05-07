@@ -25,12 +25,12 @@ namespace DungeonNamespace
 
         public virtual String Inspect()
         {
-            return U.NewLineS("ItemName: " + itemName) + U.NewLineS("Description: " + description);
+            return U.NL("ItemName: " + itemName) + U.NL("Description: " + description);
         }
 
         public virtual String UseItem()
         {
-            return U.NewLineS("This item has no use");
+            return U.NL("This item has no use");
         }
 
 

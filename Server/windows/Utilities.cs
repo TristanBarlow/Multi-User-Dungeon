@@ -8,7 +8,7 @@ namespace Utilities
 {
     public static class U
     {
-        public static String NewLineS(String s)
+        public static String NL(String s)
         {
             String newline = "\r\n";
             String finalString = s + newline;

@@ -23,21 +23,28 @@ using sqliteDataReader = System.Data.SQLite.SQLiteDataReader;
 
 namespace Server
 {
+    /**
+     *This class handles all the database queries and openeing and everything sql 
+     */
     public class SqlWrapper
-    {
+    { 
         private sqliteConnection Database = null;
 
+        //table names
         private const String dungeonTableName = "DungeonTable";
         private const String playerTableName = "PlayerTable";
         private const String itemTableName = "ItemTable";
 
+        //the create table command
         private const String createTable = "create table if not exists ";
 
         private const String itemColumns = "(name varchar(30), itemID varchar(10), uniqueID varchar(32), owner varchar(36))";
         private const String playerColumns = " (name varchar(30), password varchar(150), salt varchar(64), rIndex int)";
 
+        //Used to look up item IDs to give player the appropriate weapon descriptions etc
         private GameObjectList gameObjectList;
 
+        //A list of all player strings, so that when seeing who is in the room, offline players arent recoreded.
         private List<String> ActivePlayers = new List<string>();
 
         private int DungeonSize = 0;
@@ -54,7 +61,7 @@ namespace Server
             {
                 Database.Open();
             }
-            catch (Exception ex)
+            catch
             {
                 Console.WriteLine("Open existing DB failed: So creating one");
                 sqliteConnection.CreateFile("Dungeon");
@@ -106,17 +113,17 @@ namespace Server
                     reader.Read();
                     if (ChangeItemOwner(reader["uniqueID"].ToString(), itemTableName, newOwner))
                     {
-                        return "Moved Item: " + item;
+                        return "You ";
                     }
 
                 }
             }
             catch (Exception ex)
             {
-                Console.Write("Item Not recognised");
+                Console.Write("Item Not recognised: " + ex);
             }
            
-            return "Failed to move: " + item;
+            return "Failed To ";
         }
 
         public bool ChangeItemOwner(String itemID, String tableName, String owner)
@@ -140,7 +147,7 @@ namespace Server
 
         public String GetOwnedItems(String owner)
         {
-            String rString = U.NewLineS("");
+            String rString = U.NL("");
             var command = new sqliteCommand("select * from " + itemTableName + " where owner = '" + owner + "'", Database);
             try
             {
@@ -148,9 +155,9 @@ namespace Server
                 while(reader.Read())
                 {
                     String id = reader["itemID"].ToString();
-                    rString += U.NewLineS("Name: " +gameObjectList.GetItem(id).itemName);
-                    rString += U.NewLineS("Description: " +gameObjectList.GetItem(id).description);
-                    U.NewLineS("");
+                    rString += U.NL("Name: " +gameObjectList.GetItem(id).itemName);
+                    rString += U.NL("Description: " +gameObjectList.GetItem(id).description);
+                    U.NL("");
                 }
             }
             catch (Exception ex)
@@ -181,6 +188,8 @@ namespace Server
                     command.Parameters.Add("$s", DbType.String).Value = salt;
                     command.Parameters.Add("$i", DbType.Int32).Value = tempPlayer.roomIndex;
                     command.ExecuteNonQuery();
+
+                    ActivePlayers.Add(tempPlayer.PlayerName);
                     return true;
                 }
                 catch (Exception ex)
@@ -234,7 +243,7 @@ namespace Server
             var reader = command.ExecuteReader();
             try
             {
-                String players = U.NewLineS("Players In room:");
+                String players = U.NL("Players In room:");
                 while (reader.Read())
                 {
                     String name = reader["name"].ToString();
@@ -280,10 +289,10 @@ namespace Server
                 if (reader.HasRows)
                 {
                     reader.Read();
-                    rString += U.NewLineS(reader["name"].ToString());
-                    rString += U.NewLineS(reader["description"].ToString());
+                    rString += U.NL(reader["name"].ToString());
+                    rString += U.NL(reader["description"].ToString());
 
-                    rString += U.NewLineS("");
+                    rString += U.NL("");
 
                     int north = Int32.Parse(reader["north"].ToString());
                     int east = Int32.Parse(reader["east"].ToString());
@@ -296,16 +305,22 @@ namespace Server
                     if (south != -1) rString += "|SOUTH| ";
                     if (west != -1) rString += "|WEST| ";
 
-                    rString += U.NewLineS("");
 
-                    rString += U.NewLineS("Items on the floor: ");
+                    rString += U.NL("\r\n");
+
+                    rString += U.NL("Grafiti: ");
+                    rString += U.NL(reader["grafiti"].ToString());
+                    rString += U.NL(" ");
+
+
+                    rString += U.NL("Items on the floor: ");
                     rString += GetOwnedItems("room" + reader["rIndex"]);
 
-                    rString += U.NewLineS("");
+                    rString += U.NL("");
 
-                    rString += U.NewLineS(GetPlayersInRoom(i));
+                    rString += U.NL(GetPlayersInRoom(i));
 
-                    rString += U.NewLineS("");
+                    rString += U.NL("");
                 }
             }
             catch (Exception ex)
@@ -315,6 +330,22 @@ namespace Server
             return rString;
         }
 
+        public void AddGrafiti(String graf, int roomIndex)
+        {
+            var command = new sqliteCommand(Database);
+            command.CommandText = "update " + dungeonTableName + " set grafiti = :graf where rIndex=:id";
+            command.Parameters.Add("graf",DbType.String ).Value = graf;
+            command.Parameters.Add("id", DbType.Int32).Value = roomIndex.ToString();
+            try
+            {
+                command.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("failed to write grafiti: " + graf + ex);
+            }
+        }
+
         public void AddDungeon(Dungeon d)
         {
 
@@ -322,7 +353,7 @@ namespace Server
 
             new sqliteCommand("create table "+ dungeonTableName + " (name varchar(50), " +
                   "description varchar(300), rIndex int , north int , " +
-                  "east int, south int, west int)", Database).ExecuteNonQuery();
+                  "east int, south int, west int, grafiti varchar(300))", Database).ExecuteNonQuery();
 
 
             List <Room> roomList =  d.GetRoomList();
@@ -334,8 +365,8 @@ namespace Server
                 try
                 {
                     command = new sqliteCommand("INSERT INTO " + dungeonTableName +
-                            "  (name, description, rIndex, north, east, south, west) " +
-                            "VALUES (?,?,?,?,?,?,?) ", Database);
+                            "  (name, description, rIndex, north, east, south, west, grafiti) " +
+                            "VALUES (?,?,?,?,?,?,?,?) ", Database);
                     command.Parameters.Add("@name", DbType.String).Value = r.name;
                     command.Parameters.Add("@password", DbType.String).Value = r.desc;
                     command.Parameters.Add("@rIndex", DbType.Int32).Value = r.RoomIndex;
@@ -343,6 +374,7 @@ namespace Server
                     command.Parameters.Add("@east", DbType.Int32).Value = r.east;
                     command.Parameters.Add("@south", DbType.Int32).Value = r.south;
                     command.Parameters.Add("@west", DbType.Int32).Value = r.west;
+                    command.Parameters.Add("@grafiti", DbType.String).Value = "";
                     command.ExecuteNonQuery();
                 }
                 catch (Exception ex)
@@ -379,7 +411,7 @@ namespace Server
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Failed to display DB");
+                Console.WriteLine("Failed to display DB" + ex);
             }
             return d;
         }

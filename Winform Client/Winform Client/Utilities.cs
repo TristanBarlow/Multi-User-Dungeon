@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Utilities
 {
-    public static class U
+    public static class Nl
     {
         public static String NewLineS(String s)
         {

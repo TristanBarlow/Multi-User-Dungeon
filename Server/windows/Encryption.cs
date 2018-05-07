@@ -7,22 +7,34 @@ using System.Text;
 
 namespace Server
 {
+
+    /**
+     *Does what is says on the tin, All things Encrytipn. All functions are static and can be called without initialisation 
+     */
     class Encryption
     {
-        public static String PASSWORD = "123456789";
-        public static byte[] BPASSWORD = new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
+        //Used as the IV for the symetrical algorithm encryption
+        public static byte[] BPASSWORD = new byte[] { 0xf1, 0xa8, 0xc2, 0xe5, 0xa2, 0xd6, 0xe5, 0x12, 0xb3, 0x01, 0xaa, 0xdb, 0xf1, 0x7f, 0x9f, 0x01 };
         public static int BITSINSALT = 256; 
 
         static RNGCryptoServiceProvider random = new RNGCryptoServiceProvider();
+
+        /**
+         * Returns a sudo random salt, constructuted to work with a bas64 conversion.
+         * */
         public static string GetSalt()
         {
 
-            byte[] ivBytes = new byte[BITSINSALT / 8]; // 8 bits per byte
+            byte[] saltBytes = new byte[BITSINSALT / 8];
 
-            new RNGCryptoServiceProvider().GetBytes(ivBytes);
+            new RNGCryptoServiceProvider().GetBytes(saltBytes);
 
-            return Convert.ToBase64String(ivBytes);
+            return Convert.ToBase64String(saltBytes);
         }
+
+        /**
+         *Not currently used as there is one that generates with a hash.
+         */
         public static String GenerateHash(byte[] plainText)
         {
             HashAlgorithm algorithm = new SHA256Managed();
@@ -30,6 +42,12 @@ namespace Server
             return str;
         }
 
+        /**
+         * This function used RijndaelManaged class to encrypt a byte array, using the SALT and this classes BPASSWORD as the
+         * Key and IV respectively.
+         * @param plain the buffer to be encrypted.
+         * @param SALT the salt to be used as the key to the symetrical encryption
+         */
         public static byte[] Encrypt(byte[] plain, string SALT )
         {
             
@@ -37,17 +55,24 @@ namespace Server
 
             var algorithm = new RijndaelManaged { KeySize = 256, BlockSize = 128 };
 
+            //set algorithm key and IV. Also set padding mode. The algorithm needs padding or else it wont work
             algorithm.Key = salt;
             algorithm.IV = BPASSWORD;
             algorithm.Padding = PaddingMode.Zeros;
 
             ICryptoTransform cTransform = algorithm.CreateEncryptor();
 
+            //actually do the encryption
             byte[] resultArray = cTransform.TransformFinalBlock(plain, 0, plain.Length);
 
             return resultArray;
         }
 
+        /**
+         *Decrypts an incoming cipher using the salt and the hardcoded byte password
+         * @param ciper the bytearray that is to be decoded
+         * @param SALT the salt to act as the key to decrypt the message
+         */
         public static byte[] Decrypt(byte[] cipher, string SALT)
         {
             byte[] salt = Convert.FromBase64String(SALT);
