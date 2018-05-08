@@ -9,6 +9,17 @@
 
 &Gold Sword, its a Nice Gold sword, 15, w4 &
 
-&Lizzys Witt, The sharpest thing in exsistance, 200, w5 &
+&Lizzys Witt, The sharpest thing in existance, 200, w5 &
+
+&spoon, Could kill a man with this, 100, w6 &
+
+&Ninja star, Only a weeb would pick this up, 200000, w7 &
+
+&Flip flop, With great power comes great footwear, 200, w8 &
+
+&Mentos and Coke, responsible for ending the second world war hiro... something , 200, w9 &
+
+&Truth bomb, Destroy your enemies with uncomfortable truths, 200, w10 &
+
 
 

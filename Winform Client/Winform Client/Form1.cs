@@ -26,7 +26,7 @@ namespace Winform_Client
         public bool bConnected = false;
 
         private static String[] IP = { "127.0.0.1", "46.101.88.130", "192.168.1.101" };
-        private static int ipIndex = 0;
+        private static int ipIndex = 1;
 
         List<String> currentClientList = new List<String>();
 

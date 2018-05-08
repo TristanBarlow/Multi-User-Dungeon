@@ -58,6 +58,9 @@
     <Compile Include="..\..\windows\Dungeon.cs">
       <Link>Dungeon.cs</Link>
     </Compile>
+    <Compile Include="..\..\windows\Encryption.cs">
+      <Link>Encryption.cs</Link>
+    </Compile>
     <Compile Include="..\..\windows\GameObjectLoader.cs">
       <Link>GameObjectLoader.cs</Link>
     </Compile>
