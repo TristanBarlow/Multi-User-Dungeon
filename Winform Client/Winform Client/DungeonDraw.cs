@@ -9,13 +9,19 @@ using System.Threading;
 
 namespace Winform_Client
 {
+    /**
+     *This handles everything to do with drawing the dungeon. It was fun to make, probably
+     * could be more effecient. 
+     */
     public class DungeonDraw
     {
         Random rand = new Random();
+
+        //Picture box size
         public int Height { get; set; }
         public int Width { get; set; }
-        public int YPos { get; set; }
-        public int XPos { get; set; }
+
+        //Move map, currently not used
         private int XOffset = 0;
         public void MoveX(int x)
         {
@@ -35,60 +41,63 @@ namespace Winform_Client
             Draw();
         }
 
-
+        //zoom
         private int Scale = 7;
-        public void ChangeScale(int Offset)
-        {
-            Scale += Offset;
-            if (Scale <= 2) Scale = 2;
-            if (Scale >= 10) Scale = 10;
-            UpdateScale();
-            
-        }
 
+        //the picture box to draw to
         public PictureBox PB { get; set; }
+
+        //Graphics used for the drawing
         public Graphics G { get; set; }
 
-        public Graphics G2 { get; set; }
-        public Graphics GU { get; set; }
-
-        public int Enemy { get; set; } = 0;
-
+        //The background colour
         public Color FillColor { get; set; } = Color.Black;
 
+        //The user object that is assosiated with the local client
         private User LocalClient = null;
 
         public bool IsInUse = false;
 
-        public bool HasUsers = true;
-
+        //draw objects
         private List<Room> currentMap = new List<Room>();
         private List<DrawObject> MapObjects = new List<DrawObject>();
         private Dictionary<String, User> ClientDrawDict = new Dictionary<String, User>();
+
+        //Current map stringed parsed
         private String CurrentMapString = " ";
-        private String CurrentClientLocations = " ";
-        public List<int> ClientNumberList = new List<int>();
 
-        private SolidBrush b = new SolidBrush(Color.Purple);
-        private SolidBrush g = new SolidBrush(Color.Green);
 
-        public int Rooms()
-        {
-            return currentMap.Count();
-        }
-
+        /**
+         *Default constructor for the dungeon draw class
+         * @param DG the picture box to draw all the lovely graphics too
+         */
         public DungeonDraw(PictureBox DG)
         {
             Width = DG.Width;
             Height = DG.Height;
-            XPos = DG.Location.X;
-            YPos = DG.Location.Y;
             PB = DG;
             G = DG.CreateGraphics();
-            GU = DG.CreateGraphics();
-            G2 = DG.CreateGraphics();
         }
 
+        /**
+         * When called it will add an offset to the current dungeon scale
+         * @param Offset the amount to change the zoom by
+         */
+        public void ChangeScale(int Offset)
+        {
+            Scale += Offset;
+            //clamp
+            if (Scale <= 2) Scale = 2;
+            if (Scale >= 10) Scale = 10;
+
+            //redraw
+            UpdateScale();
+
+        }
+
+        /**
+         * Draws evertyhing on screen
+         */
         public void Draw()
         {
             G.Clear(FillColor);
@@ -102,69 +111,39 @@ namespace Winform_Client
                 }
 
             }
-            //UpdateClientPositions();
         }
 
         private void UpdateScale()
-        { 
+        {
             currentMap.Clear();
             MapObjects.Clear();
-            String temp =CurrentMapString;
+            String temp = CurrentMapString;
             CurrentMapString = "";
             MapParser(temp);
             Draw();
         }
 
-        public void UpdateClientPositions()
-        {
-            lock (currentMap)
-            {
-                foreach (Room r in currentMap)
-                {
-                    r.FreeAllSlots();
-                }
-                lock(ClientNumberList)
-               {
-                    foreach (int i in ClientNumberList)
-                    {
-                        RoomSlot rs = currentMap[i].GetNextRoomSlot(3 * Scale);
-                        if (rs != null)
-                        {
-                            GU.FillEllipse(b, rs.XPos + XOffset, rs.YPos + YOffset, 3 * Scale, 3 * Scale);
-                        }
-                    }
-                }
-            }
-        }
-
         private void DrawClientPositions()
         {
-            lock (currentMap)
+            foreach (Room r in currentMap)
             {
-                foreach (Room r in currentMap)
+                r.FreeAllSlots();
+            }
+            if (LocalClient != null)
+            {
+                RoomSlot prs = currentMap[LocalClient.RoomNum].GetNextRoomSlot(3 * Scale);
+                LocalClient.MoveUser(prs, Scale);
+                XOffset = -LocalClient.XPos + Width / 2;
+                YOffset = -LocalClient.YPos + Height / 2;
+                LocalClient.DrawMe(G, XOffset, YOffset);
+            }
+            foreach (KeyValuePair<String, User> u in ClientDrawDict)
+            {
+                RoomSlot rs = currentMap[u.Value.RoomNum].GetNextRoomSlot(3 * Scale);
+                if (rs != null && u.Key != LocalClient.Name)
                 {
-                    r.FreeAllSlots();
-                }
-                lock (ClientDrawDict)
-                {
-                    if (LocalClient != null)
-                    {
-                        RoomSlot prs = currentMap[LocalClient.RoomNum].GetNextRoomSlot(3 * Scale);
-                        LocalClient.MoveUser(prs, Scale);
-                        XOffset = -LocalClient.XPos + Width/2;
-                        YOffset = -LocalClient.YPos + Height/2;
-                        LocalClient.DrawMe(GU, XOffset, YOffset);
-                    }
-                    foreach (KeyValuePair<String, User> u in ClientDrawDict)
-                    {
-                        RoomSlot rs = currentMap[u.Value.RoomNum].GetNextRoomSlot(3 * Scale);
-                        if (rs != null &&  u.Key != LocalClient.Name)
-                        {
-                            //u.Value.DrawMeExact(GU, rs.XPos + XOffset, rs.YPos+YOffset, Scale * 3);
-                            u.Value.MoveUser(rs, Scale);
-                            u.Value.DrawMe(GU, XOffset, YOffset);
-                        }
-                    }
+                    u.Value.MoveUser(rs, Scale);
+                    u.Value.DrawMe(G, XOffset, YOffset);
                 }
             }
         }
@@ -189,14 +168,14 @@ namespace Winform_Client
                     currentMap.ElementAt(r.North).isDraw = true;
                     currentMap.ElementAt(r.North).XPos = r.XPos;
                     currentMap.ElementAt(r.North).YPos = r.YPos - r.RoomGapY;
-                    MapObjects.Add(new Connector(r, false,rand));
+                    MapObjects.Add(new Connector(r, false, rand));
                 }
                 if (r.East != -1 && !currentMap.ElementAt(r.East).isDraw)
                 {
                     currentMap.ElementAt(r.East).isDraw = true;
                     currentMap.ElementAt(r.East).XPos = r.XPos + r.RoomGapX;
                     currentMap.ElementAt(r.East).YPos = r.YPos;
-                    MapObjects.Add(new Connector(currentMap.ElementAt(r.East), true,rand));
+                    MapObjects.Add(new Connector(currentMap.ElementAt(r.East), true, rand));
                 }
                 if (r.South != -1 && !currentMap.ElementAt(r.South).isDraw)
                 {
@@ -242,7 +221,7 @@ namespace Winform_Client
                             switch (w[i].ToString().ToLower())
                             {
                                 case "n":
-                                    r.North = Int32.Parse(w.Remove(0,1));
+                                    r.North = Int32.Parse(w.Remove(0, 1));
                                     GoodRoom = true;
                                     break;
                                 case "e":
@@ -261,27 +240,18 @@ namespace Winform_Client
                         }
                     }
                 }
-                lock (MapObjects)
+                if (GoodRoom)
                 {
-                    lock (currentMap)
-                    {
-                        if (GoodRoom)
-                        {
-                            currentMap.Add(r);
-                            MapObjects.Add(r);
-                            iter++;
-                        }
-                    }
+                    currentMap.Add(r);
+                    MapObjects.Add(r);
+                    iter++;
                 }
             }
             AddConnectorDraws();
         }
 
-        public void DrawClients(String str, String PlayerName)
+        public void AddClientsDraw(String str, String PlayerName)
         {
-
-            CurrentClientLocations = str;
-
             String[] ClientLocations = str.Split('&');
             foreach (String Client in ClientLocations)
             {
@@ -299,12 +269,12 @@ namespace Winform_Client
                         User u;
                         if (ClientName == PlayerName)
                         {
-                            u = new User(ClientName, Room,rand,  Scale, true);
+                            u = new User(ClientName, Room, rand, Scale, true);
                             LocalClient = u;
                         }
                         else
                         {
-                            u = new User(ClientName, Room,rand, Scale);
+                            u = new User(ClientName, Room, rand, Scale);
                         }
                         ClientDrawDict.Add(ClientName, u);
                     }
@@ -312,26 +282,18 @@ namespace Winform_Client
             }
             Draw();
         }
-
-        public static void DrawHalf(DrawObject[] l, Graphics GD, int x, int y)
-        {
-            foreach (DrawObject d in l)
-            {
-                d.DrawMe(GD, x, y);
-            }
-        }
     }
- }
 
 
-public abstract class DrawObject
-{
-    public int XPos { get; set; } = 0;
-    public int YPos { get; set; } = 0;
-    public virtual void DrawMe(Graphics G, int XOff, int YOff) { }
-}
 
-public class User: DrawObject
+    public abstract class DrawObject
+    {
+        public int XPos { get; set; } = 0;
+        public int YPos { get; set; } = 0;
+        public virtual void DrawMe(Graphics G, int XOff, int YOff) { }
+    }
+
+    public class User : DrawObject
     {
         public int RoomNum { set; get; } = -1;
         public int RoomSlotIndex { set; get; } = -1;
@@ -346,41 +308,42 @@ public class User: DrawObject
         {
             Name = s;
             RoomNum = Rn;
-        if (IsPlayer)
-        {
-            b = new SolidBrush(Color.Green);
-        }
-        else
-        {
-            b.Color = Color.FromArgb(r.Next(30, 255), r.Next(30, 255), r.Next(30, 255));
-        }
-             size = scale;
+            if (IsPlayer)
+            {
+                b = new SolidBrush(Color.Green);
+            }
+            else
+            {
+                b.Color = Color.FromArgb(r.Next(30, 255), r.Next(30, 255), r.Next(30, 255));
+            }
+            size = scale;
         }
         public void MoveUser(RoomSlot rs, int Scale)
         {
             XPos = rs.XPos;
             YPos = rs.YPos;
-            size = Scale *3;
+            size = Scale * 3;
             RoomSlotIndex = rs.IndexNumber;
         }
 
-        public override void DrawMe(Graphics G,int XOff, int YOff)
+
+        public override void DrawMe(Graphics G, int XOff, int YOff)
         {
-            if (XPos + XOff + size > 0 && YPos+YOff + size > 0)
+            if (XPos + XOff + size > 0 && YPos + YOff + size > 0)
             {
                 G.FillEllipse(b, XPos + XOff, YPos + YOff, size, size);
                 base.DrawMe(G, XOff, YOff);
             }
         }
-    public  void DrawMeExact(Graphics G, int XLocation, int YLocation, int Scale)
-    {
-        if (XLocation + size > 0 && YLocation + size > 0)
+        public void DrawMeExact(Graphics G, int XLocation, int YLocation, int Scale)
         {
-            G.FillEllipse(b, XLocation, YLocation, Scale, Scale);
-            base.DrawMe(G, XLocation, YLocation);
+            if (XLocation + size > 0 && YLocation + size > 0)
+            {
+                G.FillEllipse(b, XLocation, YLocation, Scale, Scale);
+                base.DrawMe(G, XLocation, YLocation);
+            }
         }
     }
-}
 
     public class Room : DrawObject
     {
@@ -409,10 +372,10 @@ public class User: DrawObject
             {
                 MakeRoomSpaces(PlayerSize);
             }
-            int index = RoomSlotList.Count/2;
+            int index = RoomSlotList.Count / 2;
             int iter = 0;
             bool flipFlop = true;
-            while(index >= 0 && index < RoomSlotList.Count)
+            while (index >= 0 && index < RoomSlotList.Count)
             {
                 RoomSlot rs = RoomSlotList[index];
                 if (!rs.InUse)
@@ -438,13 +401,15 @@ public class User: DrawObject
             }
             return null;
         }
+
         public void FreeRoomSlot(int IndexNumber)
         {
-            if (RoomSlotList.Count >= IndexNumber&& IndexNumber >=0)
+            if (RoomSlotList.Count >= IndexNumber && IndexNumber >= 0)
             {
                 RoomSlotList[IndexNumber].InUse = false;
             }
         }
+
         public void FreeAllSlots()
         {
             if (HasSlots)
@@ -457,7 +422,7 @@ public class User: DrawObject
             }
         }
 
-        public Room(int rN, int Scale,Random r)
+        public Room(int rN, int Scale, Random r)
         {
 
             RoomNum = rN;
@@ -465,17 +430,18 @@ public class User: DrawObject
             RoomWidth *= Scale;
             XEnemySpawn = RoomHeight / 3;
             YEnemySpawn = RoomWidth / 3;
-            PenW.Color = Color.FromArgb(r.Next(30,255), r.Next(30, 255), r.Next(30, 255));
+            PenW.Color = Color.FromArgb(r.Next(30, 255), r.Next(30, 255), r.Next(30, 255));
             RoomGapX = (int)(RoomWidth * 1.5);
             RoomGapY = (int)(RoomHeight * 1.5);
-            Margin*= Scale;
+            Margin *= Scale;
         }
+
         private void MakeRoomSpaces(int PlayerSize)
         {
-            int xOffset = XPos + Margin - RoomWidth/2;
-            int yOffset = YPos + Margin - RoomHeight/2;
-            int maxXOffset = XPos + RoomWidth/2 - (Margin * 2) ;
-            int maxYOffset = YPos + RoomHeight/2 - (Margin * 2);
+            int xOffset = XPos + Margin - RoomWidth / 2;
+            int yOffset = YPos + Margin - RoomHeight / 2;
+            int maxXOffset = XPos + RoomWidth / 2 - (Margin * 2);
+            int maxYOffset = YPos + RoomHeight / 2 - (Margin * 2);
 
             while (yOffset <= maxYOffset)
             {
@@ -491,7 +457,7 @@ public class User: DrawObject
             HasSlots = true;
         }
 
-        public override void DrawMe(Graphics G,int XOff, int YOff)
+        public override void DrawMe(Graphics G, int XOff, int YOff)
         {
             int tx = this.XPos - RoomWidth / 2;
             int ty = this.YPos - RoomHeight / 2;
@@ -534,13 +500,14 @@ public class User: DrawObject
                 YPos -= ySize;
             }
         }
-        public override void DrawMe(Graphics G,int XOff, int YOff)
+
+        public override void DrawMe(Graphics G, int XOff, int YOff)
         {
-            if (XPos + XOff + xSize > 0 && YPos + YOff + ySize>0)
+            if (XPos + XOff + xSize > 0 && YPos + YOff + ySize > 0)
             {
                 G.DrawRectangle(PenB, XPos + XOff, YPos + YOff, xSize, ySize);
             }
-            base.DrawMe(G, XOff,YOff);
+            base.DrawMe(G, XOff, YOff);
 
         }
     }
@@ -552,8 +519,9 @@ public class User: DrawObject
         public int IndexNumber { get; set; } = 0;
         public bool InUse { get; set; } = false;
         public RoomSlot(int x, int y)
-                {
-                    XPos = x;
-                    YPos = y;
-                }
+        {
+            XPos = x;
+            YPos = y;
+        }
     }
+}

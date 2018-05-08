@@ -217,12 +217,7 @@ namespace Winform_Client
             }
             else
             {
-
-                lock (DGD)
-                {
-                    DGD.HasUsers = true;
-                    DGD.DrawClients(s, ClientName);
-                }
+                DGD.AddClientsDraw(s, ClientName);
             }
         }
 
@@ -239,7 +234,7 @@ namespace Winform_Client
             }
         }
 
-        private void buttonSend_Click(object sender, EventArgs e)
+        private void SendClicked(object sender, EventArgs e)
         {
             if ( (textBox_Input.Text.Length > 0) && (clientSocket != null))
             {                
@@ -359,7 +354,6 @@ namespace Winform_Client
         {
             DGD.MapParser(s);
             DGD.IsInUse = true;
-            if (DGD.HasUsers) DGD.UpdateClientPositions();
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -386,7 +380,6 @@ namespace Winform_Client
 
         private void DrawDungeon()
         {
-            DGD.ClientNumberList = numberOfClients;
             DGD.Draw();
         }
 
