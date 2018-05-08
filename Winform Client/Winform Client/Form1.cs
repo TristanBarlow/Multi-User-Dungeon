@@ -13,35 +13,37 @@ using Server;
 
 using MessageTypes;
 using Utilities;
-using System.Text;
 
 namespace Winform_Client
 {
     public partial class MudClient : Form
     {
+        //socket the server conncection will be bound to
         Socket clientSocket;
-        private Thread myThread;
+
+        //the thread responsable for recieving server response
+        private Thread recieveThread;
 
         bool bQuit = false;
         public bool bConnected = false;
 
+        //Ips that I needed 0 for local, 1 for server, 2 for VB linux(changes though)
         private static String[] IP = { "127.0.0.1", "46.101.88.130", "192.168.1.101" };
-        private static int ipIndex = 1;
+        private static int ipIndex = 0;
 
-        List<String> currentClientList = new List<String>();
-
-        List<int> numberOfClients = new List<int>();
-
+        //The queue responsable for all draw commands
         ConcurrentQueue<Action> DrawQueue = new ConcurrentQueue<Action>();
 
+        //add text delegate believe this was gareths code.
         private delegate void AddTextDelegate(String s, bool newMessage);
 
+        //Loginscreen form.
         LoginScreen loginScreen;
 
+        //client name and password. Used for the inbetween time of sending the salt/ requesting the salt
+        //And waiting for the response
         public String ClientName { set; get; } = " ";
-
         public String ClientPassword { set; get; } = " ";
-
         public String Salt { set; get; } = "";
 
         public bool ShouldDecrypt = false;
@@ -57,6 +59,9 @@ namespace Winform_Client
             Application.ApplicationExit += delegate { OnExit(); };
         }
 
+        /**
+         *Process the draw queue. 
+         */
         private void ProcessDrawQueue()
         {
             while (true)
@@ -70,12 +75,19 @@ namespace Winform_Client
             }
         }
 
+        /**
+         * Thread responsbale for openeing and mainiting the connection to the server
+         * @param o form object.
+         */
         private void ClientProcess(Object o)
 
         {
             MudClient form = (MudClient)o;
             Thread receiveThread;
-            Thread.Sleep(1000);
+
+            //Wait for the server to form to load fully.
+            Thread.Sleep(1500);
+
             while ((form.bConnected == false) && (form.bQuit == false))
             {
                 try
@@ -85,7 +97,11 @@ namespace Winform_Client
                         form.clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                         form.clientSocket.Connect(new IPEndPoint(IPAddress.Parse(IP[ipIndex]), 8500));
                         form.bConnected = true;
+
+                        //send message to login screen that we're connected
                         form.loginScreen.Connected("Connected");
+
+                        //start recieve thread
                         receiveThread = new Thread(ClientReceive);
                         receiveThread.IsBackground = true;
                         receiveThread.Start(o);
@@ -97,21 +113,24 @@ namespace Winform_Client
                         {
                             form.bQuit = true;
                             form.clientSocket.Close();
-                            
                         }
 
                     }
                 }
                 catch (System.Exception)
                 {
-
                 }
                 Thread.Sleep(500);
             }
+            //If Sever is randomly lost, restart.
             Application.Restart();
             Environment.Exit(0);
         }
 
+        /**
+         *Thread responsible for receiving all incoming data from the server
+         * @param o form object reference
+         */
         private void ClientReceive(Object o)
         {
             MudClient form = (MudClient)o;
@@ -123,13 +142,15 @@ namespace Winform_Client
                     byte[] buffer = new byte[4096];
                     int result;
 
+                    //listen for buffer
                     result = form.clientSocket.Receive(buffer);
 
                     if (result > 0)
                     {
-
+                        //decode stream
                         Msg m = Msg.DecodeStream(buffer,Salt, ShouldDecrypt);
 
+                        //Get message type and do approriate actiobn
                         if (m != null)
                         {
                             Console.Write("Got a message: ");
@@ -137,50 +158,52 @@ namespace Winform_Client
                             {
                                 case DungeonResponse.ID:
                                     {
-                                        DungeonResponse dSponse = (DungeonResponse)m;
+                                        DungeonResponse dr = (DungeonResponse)m;
 
-                                        form.AddDungeonText(dSponse.response, true);
+                                        form.AddDungeonText(dr.response, true);
                                     }
                                     break;
                                 case MapLayout.ID:
                                     {
-                                        MapLayout ML = (MapLayout)m;
-                                        DrawQueue.Enqueue(() => ParseMap(ML.mapInfo));
+                                        MapLayout ml = (MapLayout)m;
+                                        DrawQueue.Enqueue(() => ParseMap(ml.mapInfo));
 
                                         break;
                                     }
                                 case LoginResponse.ID:
                                     {
                                         
-                                        LoginResponse LM = (LoginResponse)m;
-                                        if (LM.loggedIn == "1")
+                                        LoginResponse lm = (LoginResponse)m;
+                                        if (lm.loggedIn == "1")
                                         {
-                                            loginScreen.LoginResponse(LM.message, true);
+                                            //Login was successful start decrypting and start main game
+                                            loginScreen.LoginResponse(lm.message, true);
                                             ShouldDecrypt = true;
                                         }
                                         else
                                         {
-                                            loginScreen.LoginResponse(LM.message, false);
+                                            //login failed, show failed message
+                                            loginScreen.LoginResponse(lm.message, false);
                                             ShouldDecrypt = false;
                                         }
                                     }
                                     break;
                                 case PlayerLocations.ID:
                                     {
-                                        PlayerLocations PL = (PlayerLocations)m;
-                                        DrawQueue.Enqueue(() => UpdatePlayerLocations(PL.LocationString));
+                                        PlayerLocations pl = (PlayerLocations)m;
+                                        DrawQueue.Enqueue(() => UpdatePlayerLocations(pl.LocationString));
                                     }
                                     break;
                                 case UpdateChat.ID:
                                     {
-                                        UpdateChat UC = (UpdateChat)m;
-                                        form.AddDungeonText(UC.message, false);
+                                        UpdateChat uc = (UpdateChat)m;
+                                        form.AddDungeonText(uc.message, false);
                                     }
                                     break;
                                 case SaltSend.ID:
                                     {
-                                        SaltSend SS = (SaltSend)m;
-                                        Salt = SS.salt;
+                                        SaltSend ss = (SaltSend)m;
+                                        Salt = ss.salt;
                                         SendLoginMessage();
                                         break;
                                     }
@@ -198,6 +221,7 @@ namespace Winform_Client
                 }
                 catch (Exception ex)
                 {
+                    //If a discconect happens restart the service
                     form.bConnected = false;
                     Console.WriteLine(U.NL("Lost server!") + ex);
                     Application.Restart();
@@ -209,10 +233,15 @@ namespace Winform_Client
 
         }
 
+        /**
+         * Proces an update player locations message
+         * @param s the string which represents the player locations
+         */
         private void UpdatePlayerLocations(String s)
         {
             if (DGD.IsInUse == false)
             {
+                //if no map try and get one, DO NOT DRAW Players
                 RequestMapLayout("r");
             }
             else
@@ -221,6 +250,11 @@ namespace Winform_Client
             }
         }
 
+        /**
+         *Adds text to the dungoen texbox, If its a new message it will clear the old then add
+         * @param s the message to be added to textbox
+         * @param newMessage where or not it is new.
+         */
         private void AddDungeonText(String s, bool newMessage)
         {
             if (TextboxDungeon.InvokeRequired)
@@ -234,6 +268,10 @@ namespace Winform_Client
             }
         }
 
+        /**
+         * Sends the message to the server
+         *Winform Generated 
+         */
         private void SendClicked(object sender, EventArgs e)
         {
             if ( (textBox_Input.Text.Length > 0) && (clientSocket != null))
@@ -251,16 +289,23 @@ namespace Winform_Client
             }
         }
 
+        /**
+         *Exit application function 
+         */
         private void OnExit()
         {
-            if (myThread != null)
+            if (recieveThread != null)
             {
-                myThread.Abort();
+                recieveThread.Abort();
             }
             bQuit = true;
             bConnected = false;
         }
 
+        /**
+         * Send the dungeon message through the socket to the server
+         * @param Message the message to send
+         */
         private void SendDungeonMessage(String Message)
         {
             DungeonCommand dungMsg = new DungeonCommand();
@@ -273,6 +318,10 @@ namespace Winform_Client
             catch { }
         }
 
+        /**
+         * Send the map layout request message through the socket to the server
+         * @param Message the message to send
+         */
         private void RequestMapLayout(String Message)
         {
             MapLayout request = new MapLayout();
@@ -285,6 +334,9 @@ namespace Winform_Client
             catch { }
         }
 
+        /**
+         * Send the salt request message through the socket to the server
+         */
         public void RequestSalt()
         {
             SaltRequest sm = new SaltRequest();
@@ -300,6 +352,9 @@ namespace Winform_Client
             }
         }
 
+        /**
+         * Send the salt through the socket to the server
+         */
         public void SendSalt()
         {
             Salt = Encryption.GetSalt();
@@ -314,12 +369,20 @@ namespace Winform_Client
             catch { }
         }
 
+        /**
+         *Sets the client name and password ready for it to be sent to the server
+         *@param name the name of the client
+         * @param password the password of the client. 
+         */
         public void SetUserData(String name, String password)
         {
             ClientName = name;
             ClientPassword = password;
         }
 
+        /**
+         *Send the login message through the socket to the server 
+         */
         public void SendLoginMessage()
         {
             LoginMessage nameMsg = new LoginMessage();
@@ -337,6 +400,9 @@ namespace Winform_Client
             }
         }
 
+        /**
+         *Send the create user message through the socket to the server 
+         */
         public void SendCreateUserMessage()
         {
             CreateUser nameMsg = new CreateUser();
@@ -350,25 +416,36 @@ namespace Winform_Client
             catch { }
         }
 
+        /**
+         *Adds the map layout into the dungeon draw class
+         * @param s the string holdign the above information
+         */
         private void ParseMap(String s)
         {
             DGD.MapParser(s);
             DGD.IsInUse = true;
         }
 
+        /**
+         *Winform Generated
+         */
         private void Form1_Load(object sender, EventArgs e)
         {
+            //start recieve thread
+            recieveThread = new Thread(ClientProcess);
+            recieveThread.IsBackground = true;
+            recieveThread.Start(this);
 
-            myThread = new Thread(ClientProcess);
-            myThread.IsBackground = true;
-            myThread.Start(this);
+            //show login screen
             DialogResult result;
             loginScreen = new LoginScreen(this);
             result = loginScreen.ShowDialog();
 
+            //start draw processing queue
             Task drawTask = new Task(ProcessDrawQueue);
             drawTask.Start();
-
+            
+            //check for good login result
             if (result != DialogResult.OK)
             {
                 bQuit = true;
@@ -377,12 +454,18 @@ namespace Winform_Client
             }
 
         }
-
+        
+        /**
+         *Draw dungeon call 
+         */
         private void DrawDungeon()
         {
             DGD.Draw();
         }
 
+        /**
+         *Winform Generated. Called when the playe resizes the windows 
+         */
         private void DungeonPaint(object sender, PaintEventArgs e)
         {
             DrawQueue.Enqueue(() => DrawDungeon());
@@ -394,11 +477,19 @@ namespace Winform_Client
             Application.Exit();
         }
 
+        /**
+         * Zoomins in
+         *Winform Generated
+         */
         private void Zoomin_Click(object sender, EventArgs e)
         {
             DGD.ChangeScale(1);
         }
 
+        /**
+         * Zoomins out
+         *Winform Generated
+         */
         private void Zoomout_Click(object sender, EventArgs e)
         {
             DGD.ChangeScale(-1);

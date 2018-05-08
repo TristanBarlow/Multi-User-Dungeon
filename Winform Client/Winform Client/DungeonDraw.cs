@@ -113,6 +113,9 @@ namespace Winform_Client
             }
         }
 
+        /**
+         *Redraws and refereshes all items to make it more zoomed in 
+         */
         private void UpdateScale()
         {
             currentMap.Clear();
@@ -123,12 +126,18 @@ namespace Winform_Client
             Draw();
         }
 
+        /**
+         *Draws the position of the all clients in the client dict 
+         */
         private void DrawClientPositions()
         {
+            //Free all room positions
             foreach (Room r in currentMap)
             {
                 r.FreeAllSlots();
             }
+            //If there is a local client(there should be!) Centre the map on them
+            //And draw them
             if (LocalClient != null)
             {
                 RoomSlot prs = currentMap[LocalClient.RoomNum].GetNextRoomSlot(3 * Scale);
@@ -137,6 +146,7 @@ namespace Winform_Client
                 YOffset = -LocalClient.YPos + Height / 2;
                 LocalClient.DrawMe(G, XOffset, YOffset);
             }
+            //for all other clients draw regularly.
             foreach (KeyValuePair<String, User> u in ClientDrawDict)
             {
                 RoomSlot rs = currentMap[u.Value.RoomNum].GetNextRoomSlot(3 * Scale);
@@ -148,12 +158,19 @@ namespace Winform_Client
             }
         }
 
+        /**
+         *Adds the posistions and scale of the room connections 
+         */
         public void AddConnectorDraws()
         {
+            //order the map by the romm index
             currentMap.OrderBy(o => o.RoomNum).ToList();
             int midX = (PB.Width / 2);
             int midY = (PB.Height / 2);
 
+            //Could probably make this into one function and repeat
+            //When debuggin this help for clarity to. Thout I would leave it like
+            //This is its slighlty easer to read
             foreach (Room r in currentMap)
             {
                 if (r.RoomNum == -1) break;
@@ -161,32 +178,32 @@ namespace Winform_Client
                 {
                     r.XPos = midX;
                     r.YPos = midY;
-                    r.isDraw = true;
+                    r.IsDraw = true;
                 }
-                if (r.North != -1 && !currentMap.ElementAt(r.North).isDraw)
+                if (r.North != -1 && !currentMap.ElementAt(r.North).IsDraw)
                 {
-                    currentMap.ElementAt(r.North).isDraw = true;
+                    currentMap.ElementAt(r.North).IsDraw = true;
                     currentMap.ElementAt(r.North).XPos = r.XPos;
                     currentMap.ElementAt(r.North).YPos = r.YPos - r.RoomGapY;
                     MapObjects.Add(new Connector(r, false, rand));
                 }
-                if (r.East != -1 && !currentMap.ElementAt(r.East).isDraw)
+                if (r.East != -1 && !currentMap.ElementAt(r.East).IsDraw)
                 {
-                    currentMap.ElementAt(r.East).isDraw = true;
+                    currentMap.ElementAt(r.East).IsDraw = true;
                     currentMap.ElementAt(r.East).XPos = r.XPos + r.RoomGapX;
                     currentMap.ElementAt(r.East).YPos = r.YPos;
                     MapObjects.Add(new Connector(currentMap.ElementAt(r.East), true, rand));
                 }
-                if (r.South != -1 && !currentMap.ElementAt(r.South).isDraw)
+                if (r.South != -1 && !currentMap.ElementAt(r.South).IsDraw)
                 {
-                    currentMap.ElementAt(r.South).isDraw = true;
+                    currentMap.ElementAt(r.South).IsDraw = true;
                     currentMap.ElementAt(r.South).XPos = r.XPos;
                     currentMap.ElementAt(r.South).YPos = r.YPos + r.RoomGapY;
                     MapObjects.Add(new Connector(currentMap.ElementAt(r.South), false, rand));
                 }
-                if (r.West != -1 && !currentMap.ElementAt(r.West).isDraw)
+                if (r.West != -1 && !currentMap.ElementAt(r.West).IsDraw)
                 {
-                    currentMap.ElementAt(r.West).isDraw = true;
+                    currentMap.ElementAt(r.West).IsDraw = true;
                     currentMap.ElementAt(r.West).XPos = r.XPos - r.RoomGapX;
                     currentMap.ElementAt(r.West).YPos = r.YPos;
                     MapObjects.Add(new Connector(r, true, rand));
@@ -195,15 +212,24 @@ namespace Winform_Client
             Draw();
         }
 
+        /**
+         *When the map info is recieved or the client has zoomed reparse the map string, creating rooms 
+         *@param str the map string to be parsed
+         */
         public void MapParser(String str)
         {
+            //If its duplicate string quit
             if (str == CurrentMapString)
             {
                 return;
             }
+
+            //reset map incase its a redraw
             CurrentMapString = str;
             currentMap.Clear();
             MapObjects.Clear();
+
+
             String[] words = str.Split('&');
             int iter = 0;
             foreach (String room in words)
@@ -240,6 +266,7 @@ namespace Winform_Client
                         }
                     }
                 }
+                //If the room has at least on connection add it
                 if (GoodRoom)
                 {
                     currentMap.Add(r);
@@ -250,22 +277,31 @@ namespace Winform_Client
             AddConnectorDraws();
         }
 
+        /**
+         *This file parses the incoming player locations and adds them to the client dict.
+         * @param str the string representing the player locations
+         * @param PlayerName the name of the local client
+         */
         public void AddClientsDraw(String str, String PlayerName)
         {
+
             String[] ClientLocations = str.Split('&');
             foreach (String Client in ClientLocations)
             {
+                //Check for bad string
                 if (Client != "")
                 {
                     int Room = Int32.Parse(Client.Split(' ')[1]);
                     String ClientName = Client.Split(' ')[0];
 
+                    //Check to see if its an old client, if so check to see if their room has changed.
                     if (ClientDrawDict.ContainsKey(ClientName))
                     {
                         if (ClientDrawDict[ClientName].RoomNum != Room) ClientDrawDict[ClientName].RoomNum = Room;
                     }
                     else
                     {
+                        //If it gets here it must be a new player joined so add them to the dict
                         User u;
                         if (ClientName == PlayerName)
                         {
@@ -285,25 +321,55 @@ namespace Winform_Client
     }
 
 
-
+    /**
+     *Base class for all objects to be drawn 
+     */
     public abstract class DrawObject
     {
         public int XPos { get; set; } = 0;
         public int YPos { get; set; } = 0;
+
+        /**
+         *Main draw function
+         * @param G the graphics used to draw
+         * @param Xoff the offeset on the x axis
+         * @param Yoff the offset on they y axis
+         */
         public virtual void DrawMe(Graphics G, int XOff, int YOff) { }
     }
 
+    /**
+     *User draw object.
+     */
     public class User : DrawObject
     {
+        //Room and where to draw in room
         public int RoomNum { set; get; } = -1;
         public int RoomSlotIndex { set; get; } = -1;
+
+        //name and size of player
         public String Name { set; get; } = "No Name";
-        public int size { set; get; } = 3;
+        public int Size { set; get; } = 3;
+
+        //colour to draw the player, is randomly changed each draw call.
         private SolidBrush b = new SolidBrush(Color.Purple);
+
+        /**
+         *Just the name constructor 
+         */
         public User(String s)
         {
             Name = s;
         }
+
+        /**
+         *The main constructor, Sets colour, room name and scale.
+         * @param s the name of the player
+         * @param Rn the room number of the player
+         * @param r random 
+         * @param scale the size to draw the player
+         * @param if its player just draw green :)
+         */
         public User(String s, int Rn, Random r, int scale = 3, bool IsPlayer = false)
         {
             Name = s;
@@ -316,56 +382,67 @@ namespace Winform_Client
             {
                 b.Color = Color.FromArgb(r.Next(30, 255), r.Next(30, 255), r.Next(30, 255));
             }
-            size = scale;
+            Size = scale;
         }
         public void MoveUser(RoomSlot rs, int Scale)
         {
             XPos = rs.XPos;
             YPos = rs.YPos;
-            size = Scale * 3;
+            Size = Scale * 3;
             RoomSlotIndex = rs.IndexNumber;
         }
 
 
         public override void DrawMe(Graphics G, int XOff, int YOff)
         {
-            if (XPos + XOff + size > 0 && YPos + YOff + size > 0)
+            if (XPos + XOff + Size > 0 && YPos + YOff + Size > 0)
             {
-                G.FillEllipse(b, XPos + XOff, YPos + YOff, size, size);
+                G.FillEllipse(b, XPos + XOff, YPos + YOff, Size, Size);
                 base.DrawMe(G, XOff, YOff);
-            }
-        }
-        public void DrawMeExact(Graphics G, int XLocation, int YLocation, int Scale)
-        {
-            if (XLocation + size > 0 && YLocation + size > 0)
-            {
-                G.FillEllipse(b, XLocation, YLocation, Scale, Scale);
-                base.DrawMe(G, XLocation, YLocation);
             }
         }
     }
 
+    /**
+     *Possibly the most complicated part of the draw. It handles where to put the players in the room.
+     * As well as the posistions of the room.
+     */
     public class Room : DrawObject
     {
         private Pen PenW = new Pen(Color.White, 4F);
+
+        //list of the roomslots it has avaiblabe
         private List<RoomSlot> RoomSlotList = new List<RoomSlot>();
+
+        //list of the roomslot indexs in use. It works.
         private List<int> InUseSlots = new List<int>();
+
+        //margin of the players to the walls
         private int Margin = 2;
+
+        //If its false it will generate new roomslots else it will get exsisting ones
         private bool HasSlots = false;
+        public bool IsDraw { set; get; } = false;
+
+        public int RoomNum { set; get; } = -1;
+
+        //Changed depending on the scale
         public int RoomWidth { set; get; } = 20;
         public int RoomHeight { set; get; } = 20;
         public int RoomGapX { set; get; } = 20;
         public int RoomGapY { set; get; } = 20;
-        public int XEnemySpawn { set; get; } = 0;
-        public int YEnemySpawn { set; get; } = 0;
-        public int MaxNumClients { get; set; } = 0;
-        public int RoomNum { set; get; } = -1;
+
+        //Used when creating the room list
         public int North { set; get; } = -1;
         public int East { set; get; } = -1;
         public int South { set; get; } = -1;
         public int West { set; get; } = -1;
-        public bool isDraw { set; get; } = false;
 
+        /**
+         *Gets roomslots (basically just positions)
+         * Filling from the middle then out
+         * @param PLayerSize if not roomslots it will use this to generate new ones
+         */
         public RoomSlot GetNextRoomSlot(int PlayerSize)
         {
             if (!HasSlots)
@@ -385,6 +462,8 @@ namespace Winform_Client
                     rs.InUse = true;
                     return rs;
                 }
+
+                //alternate between getting ones to the left and to the right of the middle
                 index = RoomSlotList.Count / 2;
                 if (flipFlop)
                 {
@@ -402,14 +481,9 @@ namespace Winform_Client
             return null;
         }
 
-        public void FreeRoomSlot(int IndexNumber)
-        {
-            if (RoomSlotList.Count >= IndexNumber && IndexNumber >= 0)
-            {
-                RoomSlotList[IndexNumber].InUse = false;
-            }
-        }
-
+        /**
+         *This could be done a lot more efficently but oh well. It frees all room slots 
+         */
         public void FreeAllSlots()
         {
             if (HasSlots)
@@ -422,20 +496,28 @@ namespace Winform_Client
             }
         }
 
+        /**
+         * Constructor for the room
+         * @param rn the room number of the current room
+         * @param Scale the size of the dungeon (zoom)
+         * @param r random for colour
+         */
         public Room(int rN, int Scale, Random r)
         {
 
             RoomNum = rN;
             RoomHeight *= Scale;
             RoomWidth *= Scale;
-            XEnemySpawn = RoomHeight / 3;
-            YEnemySpawn = RoomWidth / 3;
             PenW.Color = Color.FromArgb(r.Next(30, 255), r.Next(30, 255), r.Next(30, 255));
             RoomGapX = (int)(RoomWidth * 1.5);
             RoomGapY = (int)(RoomHeight * 1.5);
             Margin *= Scale;
         }
 
+        /**
+         * Creates the room slots used to position the players
+         * Just a bunch of maths.
+         */
         private void MakeRoomSpaces(int PlayerSize)
         {
             int xOffset = XPos + Margin - RoomWidth / 2;
@@ -453,7 +535,6 @@ namespace Winform_Client
                 }
                 yOffset += PlayerSize + Margin;
             }
-            MaxNumClients++;
             HasSlots = true;
         }
 
@@ -470,6 +551,9 @@ namespace Winform_Client
     }
 
 
+    /**
+     * Conncetor draw object similar to the room just less complicated and different dimensions
+     */
     public class Connector : DrawObject
     {
         private bool isHorizontal = false;
@@ -512,6 +596,9 @@ namespace Winform_Client
         }
     }
 
+    /**
+     *Simple class doesnt really need explaining 
+     */
     public class RoomSlot
     {
         public int XPos { get; set; } = 0;
