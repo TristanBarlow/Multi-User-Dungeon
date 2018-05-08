@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 using System.Net;
 using System.Net.Sockets;
@@ -37,7 +35,7 @@ namespace Server
 
         private static String[] IP = { "127.0.0.1", "46.101.88.130", "192.168.1.101" };
 
-        private static int ipIndex = 0;
+        private static int ipIndex = 1;
 
         /**
          *Creates an sends the map information message type for the dungeon drawer 
@@ -117,7 +115,7 @@ namespace Server
             {
                 if (p != player && p.RoomIndex == player.RoomIndex)
                 {
-                    SendUpdateMessage(p.PlayerName + " entered", p);
+                    SendUpdateMessage(player.PlayerName + " entered", p);
                 }
             }
         }
@@ -559,15 +557,18 @@ namespace Server
 
             AllItems = new GameObjectList();
 
+			int sizeOfDungeon = 100;
+			int numberOfItems = 100;
+
             sqlWrapper = new SqlWrapper(AllItems);
 
             //Create New dungeon if you want to, or one does not exsist
             if (response.ToLower() == "yes")
             {
                 Dungeon = new Dungeon();
-                Dungeon.Init(100, AllItems);
+				Dungeon.Init(sizeOfDungeon, AllItems);
                 sqlWrapper.AddDungeon(Dungeon);
-                sqlWrapper.AddItems(50);
+				sqlWrapper.AddItems(numberOfItems);
             }
             else
             {
@@ -575,9 +576,9 @@ namespace Server
                 if (Dungeon.GetRoomList().Count < 1)
                 {
                     Dungeon = new Dungeon();
-                    Dungeon.Init(100, AllItems);
+					Dungeon.Init(sizeOfDungeon, AllItems);
                     sqlWrapper.AddDungeon(Dungeon);
-                    sqlWrapper.AddItems(50);
+					sqlWrapper.AddItems(numberOfItems);
                 }
             }
 
